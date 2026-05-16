@@ -1,0 +1,12 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /pet-images/{userId}/{petId}/{allPaths=**} {
+      // Public read is acceptable for the MVP because pet images are rendered on public QR pages.
+      allow read: if true;
+
+      // Only the authenticated owner can upload or replace pet images in their own folder.
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

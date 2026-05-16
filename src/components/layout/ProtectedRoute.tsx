@@ -1,0 +1,49 @@
+"use client";
+
+import { useEffect, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import type { UserRole } from "@/types";
+import { ROUTES } from "@/constants/routes";
+import { useAuth } from "@/hooks/useAuth";
+import { Spinner } from "@/components/ui/Spinner";
+
+type ProtectedRouteProps = {
+  children: ReactNode;
+  allowedRoles?: UserRole[];
+};
+
+export function ProtectedRoute({
+  children,
+  allowedRoles,
+}: ProtectedRouteProps) {
+  const router = useRouter();
+  const { appUser, loading, user } = useAuth();
+
+  const isUnauthorized =
+    !!allowedRoles && !!appUser && !allowedRoles.includes(appUser.role);
+
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+
+    if (!user) {
+      router.replace(ROUTES.login);
+      return;
+    }
+
+    if (isUnauthorized) {
+      router.replace(ROUTES.dashboard);
+    }
+  }, [isUnauthorized, loading, router, user]);
+
+  if (loading || !user || (allowedRoles && !appUser) || isUnauthorized) {
+    return (
+      <div className="mx-auto flex min-h-[50vh] w-full max-w-6xl items-center justify-center px-4">
+        <Spinner label="Checking access..." />
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}

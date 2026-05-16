@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isVerifier() {
+      return isSignedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ["vet", "admin"];
+    }
+
+    match /users/{userId} {
+      allow create: if isSelf(userId)
+        && request.resource.data.uid == userId
+        && request.resource.data.role == "owner";
+
+      allow read: if isSelf(userId);
+
+      allow update: if isSelf(userId)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.role == resource.data.role;
+
+      allow delete: if false;
+    }
+
+    match /pets/{petId} {
+      function ownerKeepsVerificationFieldsStable() {
+        return !request.resource.data.diff(resource.data).changedKeys().hasAny([
+          "verificationStatus",
+          "verifiedBy",
+          "verifiedAt",
+        ]);
+      }
+
+      function isPublicPetRead() {
+        // MVP note:
+        // Firestore rules cannot expose only selected fields from a single pet document.
+        // This starter therefore allows public reads for QR and lost-pet flows and relies
+        // on the UI to render only public-safe fields. For production, split public data
+        // into a dedicated public collection.
+        return resource.data.isLost == true || resource.data.publicQrId is string;
+      }
+
+      allow create: if isSignedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.verificationStatus == "unverified";
+
+      allow read: if isSelf(resource.data.ownerId)
+        || isVerifier()
+        || isPublicPetRead();
+
+      allow update: if (
+          isSelf(resource.data.ownerId)
+          && request.resource.data.ownerId == resource.data.ownerId
+          && ownerKeepsVerificationFieldsStable()
+        ) || (
+          isVerifier()
+          && request.resource.data.ownerId == resource.data.ownerId
+          && request.resource.data.diff(resource.data).changedKeys().hasOnly([
+            "verificationStatus",
+            "verifiedBy",
+            "verifiedAt",
+            "updatedAt",
+          ])
+        );
+
+      allow delete: if isSelf(resource.data.ownerId);
+    }
+
+    match /lostReports/{reportId} {
+      allow create: if isSignedIn()
+        && request.resource.data.ownerId == request.auth.uid;
+
+      allow read, update: if isSignedIn()
+        && request.auth.uid == resource.data.ownerId;
+
+      allow delete: if false;
+    }
+  }
+}
