@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Camera, Menu, MessageCircle, Play, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { VERIFICATION_ALLOWED_ROLES } from "@/constants/roles";
 import { ROUTES } from "@/constants/routes";
@@ -21,7 +21,11 @@ const dashboardLinks = [
   { href: ROUTES.pets, label: "My Pets" },
 ];
 
-const socialIcons = [MessageCircle, Camera, Play];
+const socialIcons = [
+  { src: "/icons/facebook.svg", alt: "Facebook" },
+  { src: "/icons/instagram.svg", alt: "Instagram" },
+  { src: "/icons/youtube.svg", alt: "YouTube" },
+];
 
 function isActiveRoute(pathname: string, href: string) {
   if (href === ROUTES.home) {
@@ -45,15 +49,31 @@ function authTextClassName() {
 
 function mobileMenuPrimaryLinkClassName(isActive: boolean) {
   return cn(
-    "font-serif text-[2.05rem] leading-none tracking-[-0.03em] text-white transition hover:text-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
-    isActive ? "underline decoration-1 underline-offset-4" : "no-underline",
+    "relative inline-block pb-1 font-serif text-[1.55rem] leading-none tracking-[-0.03em] !text-white transition hover:!text-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+    "after:absolute after:bottom-0 after:left-0 after:h-px after:bg-white after:transition-all after:content-['']",
+    isActive
+      ? "after:w-full"
+      : "after:w-0",
   );
 }
 
 function mobileMenuSecondaryLinkClassName(isActive: boolean) {
   return cn(
-    "text-sm font-medium uppercase tracking-[0.18em] text-white/85 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
-    isActive ? "text-white" : "",
+    "relative inline-block text-sm font-medium uppercase tracking-[0.18em] !text-white transition hover:!text-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+    "after:absolute after:bottom-0 after:left-0 after:h-px after:bg-white after:transition-all after:content-['']",
+    isActive
+      ? "after:w-full"
+      : "after:w-0",
+  );
+}
+
+function mobileMenuTopLinkClassName(isActive: boolean) {
+  return cn(
+    "relative inline-block pb-1 text-[1.15rem] font-medium transition hover:text-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+    "after:absolute after:bottom-0 after:left-0 after:h-px after:bg-white after:transition-all after:content-['']",
+    isActive
+      ? "after:w-full"
+      : "after:w-0",
   );
 }
 
@@ -99,17 +119,17 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[#ddd0c0] bg-[#f1e9df]/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-40 border-b border-[#ddd0c0] bg-[#fff8f0]/95 backdrop-blur-sm">
       <div className="mx-auto flex w-full max-w-7xl items-center px-4 py-2 sm:px-6 md:gap-8 md:py-1.5 lg:px-8">
         <Link
           href={ROUTES.home}
           className="shrink-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d2a3e]/30"
-          aria-label="AnimalID home"
+          aria-label="PetComUnity home"
           onClick={closeMenu}
         >
           <Image
             src="/images/logo.png"
-            alt="AnimalID"
+            alt="PetComUnity logo"
             width={53}
             height={51}
             priority
@@ -167,7 +187,6 @@ export function Navbar() {
           onClick={() => setMenuOpen((open) => !open)}
         >
           <Menu className="h-8 w-8 stroke-[2.25]" />
-          
         </button>
       </div>
 
@@ -176,38 +195,38 @@ export function Navbar() {
           id="site-navigation"
           className="fixed inset-0 z-50 md:hidden"
         >
-          {/* <Image
-            src="/images/bg.png"
-            alt=""
-            fill
-            sizes="100vw"
-            className="object-cover"
-            aria-hidden="true"
-          />
-          <div
-            className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,156,44,0.14),rgba(230,123,17,0.12))]"
-            aria-hidden="true"
-          /> */}
 
           <div className="relative flex min-h-screen flex-col px-5 pb-8 pt-5 sm:px-6 bg-hero">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex w-full items-center justify-between gap-4 text-white">
               {user ? (
                 <button
                   type="button"
-                  className="text-left text-[1.15rem] font-medium text-[#332012] transition hover:text-[#1d120a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                  className="text-left text-[1.15rem] font-medium text-white transition hover:text-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                   onClick={handleLogout}
                   disabled={loading}
                 >
                   Log out
                 </button>
               ) : (
-                <Link
-                  href={ROUTES.login}
-                  className="text-[1.15rem] font-medium text-[#332012] transition hover:text-[#1d120a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-                  onClick={closeMenu}
-                >
-                  Sign in
-                </Link>
+                <div className="flex items-center gap-4">
+                  <Image
+                    src="/images/logo.png"
+                    alt="PetComUnity logo"
+                    width={53}
+                    height={51}
+                    priority
+                    className="h-[50px] w-auto"
+                  />
+                  <Link
+                    href={ROUTES.login}
+                    className={mobileMenuTopLinkClassName(
+                      isActiveRoute(pathname, ROUTES.login),
+                    )}
+                    onClick={closeMenu}
+                  >
+                    Sign in
+                  </Link>
+                </div>
               )}
 
               <button
@@ -221,7 +240,7 @@ export function Navbar() {
             </div>
 
             <nav
-              className="flex flex-1 flex-col items-center justify-center gap-6 pb-14 pt-10 text-center"
+              className="flex flex-1 flex-col items-center justify-center gap-6 pb-14 pt-10 text-center text-white"
               aria-label="Mobile navigation"
             >
               <div className="flex flex-col items-center gap-5">
@@ -273,12 +292,18 @@ export function Navbar() {
               className="flex items-center justify-center gap-4"
               aria-hidden="true"
             >
-              {socialIcons.map((Icon, index) => (
+              {socialIcons.map((icon) => (
                 <div
-                  key={index}
+                  key={icon.src}
                   className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white/95 shadow-[0_12px_30px_rgba(67,34,8,0.18)] backdrop-blur-sm"
                 >
-                  <Icon className="h-5 w-5" />
+                  <Image
+                    src={icon.src}
+                    alt={icon.alt}
+                    width={20}
+                    height={20}
+                    className="h-5 w-5"
+                  />
                 </div>
               ))}
             </div>
