@@ -5,11 +5,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "AnimalID",
-    template: "%s | AnimalID",
+    default: "PetComUnity",
+    template: "%s | PetComUnity",
   },
   description:
-    "AnimalID is a responsive MVP for digital pet identification, QR lookups, lost and found flows, and vet verification.",
+    "PetComUnity is a responsive MVP for digital pet identification, QR lookups, lost and found flows, and vet verification.",
 };
 
 export default function RootLayout({
