@@ -63,3 +63,16 @@ textarea {
 ::selection {
   background: rgba(15, 118, 110, 0.18);
 }
+
+
+.bg-hero {
+  background-image: url("/images/background.png");
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
