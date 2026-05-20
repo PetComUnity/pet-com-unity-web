@@ -11,7 +11,7 @@
   --accent: #c2410c;
   --success: #15803d;
   --danger: #b91c1c;
-  --font-sans-stack: "Segoe UI", Arial, Helvetica, sans-serif;
+  --font-sans-stack: var(--font-montserrat), "Segoe UI", Arial, Helvetica, sans-serif;
   --font-mono-stack: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
@@ -27,6 +27,7 @@
   --color-success: var(--success);
   --color-danger: var(--danger);
   --font-sans: var(--font-sans-stack);
+  --font-serif: var(--font-sans-stack);
   --font-mono: var(--font-mono-stack);
 }
 
