@@ -9,7 +9,7 @@ export default function AboutUsPage() {
       title="About Pet.com.Unity"
       titleClassName="text-[2.25rem]"
       description={aboutHeroDescription}
-      descriptionClassName="w-full text-center text-[2.5rem] leading-8 tracking-normal text-[#17243b] hidden lg:block lg:text-left"
+      descriptionClassName="w-full max-w-[41rem] text-center text-[1.2rem] leading-8 tracking-normal text-[#17243b] sm:text-[1.35rem] lg:text-left lg:text-[1.55rem]"
     />
   );
 }

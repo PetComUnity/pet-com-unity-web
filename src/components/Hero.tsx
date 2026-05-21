@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { ReactNode } from "react";
 import { AdoptionSearchForm } from "@/components/AdoptionSearchForm";
 import { cn } from "@/lib/utils";
 
@@ -8,6 +9,7 @@ type HeroProps = {
   titleClassName?: string;
   description?: string;
   descriptionClassName?: string;
+  sideContent?: ReactNode;
 };
 
 const defaultTitleClassName =
@@ -21,7 +23,7 @@ export function Hero({
   title,
   titleClassName,
   description,
-  descriptionClassName,
+  descriptionClassName
 }: HeroProps) {
   return (
     <section className="font-display relative isolate overflow-hidden bg-[#ef9322]">
@@ -38,20 +40,26 @@ export function Hero({
       <div className="relative mx-auto grid min-h-[calc(100svh-4.5rem)] w-full max-w-[1440px] gap-8 px-5 py-10 sm:px-8 sm:py-14 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-8 lg:px-16 lg:py-16 xl:grid-cols-[minmax(0,48rem)_22.5rem] xl:justify-center xl:gap-6">
         <div className="text-center sm:mr-auto sm:pt-4 md:text-left lg:pt-0">
           <div className="mt-8 space-y-4 sm:mt-10 sm:space-y-6">
-            <p className="text-[clamp(1.5rem,4vw,3rem)] leading-[0.95] font-semibold text-[#17243b] md:text-[clamp(3rem,6vw,4.5rem)]">
-              {eyebrow}
-            </p>
-            <h1 className={cn(defaultTitleClassName, titleClassName)}>
-              {title}
-            </h1>
-            <div className={cn(defaultDescriptionClassName, descriptionClassName)}>
-              {description}
-            </div>
+            {eyebrow ? (
+              <p className="text-[clamp(1.5rem,4vw,3rem)] leading-[0.95] font-semibold text-[#17243b] md:text-[clamp(3rem,6vw,4.5rem)]">
+                {eyebrow}
+              </p>
+            ) : null}
+            {title ? (
+              <h1 className={cn(defaultTitleClassName, titleClassName)}>
+                {title}
+              </h1>
+            ) : null}
+            {description ? (
+              <div className={cn(defaultDescriptionClassName, descriptionClassName)}>
+                {description}
+              </div>
+            ) : null}
           </div>
         </div>
 
         <div className="flex items-center justify-center lg:justify-end">
-          <AdoptionSearchForm className="max-w-[21.75rem] sm:max-w-[22.5rem] lg:mx-0 lg:w-[22.5rem]" />
+            <AdoptionSearchForm className="max-w-[21.75rem] sm:max-w-[22.5rem] lg:mx-0 lg:w-[22.5rem]" />
         </div>
       </div>
     </section>
