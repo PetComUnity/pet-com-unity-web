@@ -1,7 +1,28 @@
 import Image from "next/image";
 import { AdoptionSearchForm } from "@/components/AdoptionSearchForm";
+import { cn } from "@/lib/utils";
 
-export function Hero() {
+type HeroProps = {
+  eyebrow?: string;
+  title?: string;
+  titleClassName?: string;
+  description?: string;
+  descriptionClassName?: string;
+};
+
+const defaultTitleClassName =
+  "mb-20 text-[clamp(1rem,7.5vw,5.4rem)] leading-[0.88] font-semibold tracking-[-0.07em] text-[#17243b] sm:mb-0 sm:max-w-none md:mb-10";
+
+const defaultDescriptionClassName =
+  "w-full text-center text-[clamp(1.5rem,3.5vw,4rem)] leading-[1.08] tracking-[-0.03em] text-[#17243b] lg:text-left";
+
+export function Hero({
+  eyebrow,
+  title,
+  titleClassName,
+  description,
+  descriptionClassName,
+}: HeroProps) {
   return (
     <section className="font-display relative isolate overflow-hidden bg-[#ef9322]">
       <Image
@@ -18,14 +39,13 @@ export function Hero() {
         <div className="text-center sm:mr-auto sm:pt-4 md:text-left lg:pt-0">
           <div className="mt-8 space-y-4 sm:mt-10 sm:space-y-6">
             <p className="text-[clamp(1.5rem,4vw,3rem)] leading-[0.95] font-semibold text-[#17243b] md:text-[clamp(3rem,6vw,4.5rem)]">
-              Welcome to
+              {eyebrow}
             </p>
-            <h1 className="mb-20 text-[clamp(1rem,7.5vw,5.4rem)] leading-[0.88] font-semibold tracking-[-0.07em] text-[#17243b] sm:mb-0 sm:max-w-none md:mb-10">
-              Pet.com.Unity
+            <h1 className={cn(defaultTitleClassName, titleClassName)}>
+              {title}
             </h1>
-            <div className="text-[clamp(1.5rem,3.5vw,4rem)] w-full text-center leading-[1.08] tracking-[-0.03em] text-[#17243b] lg:max-w-[28ch] lg:text-left">
-              Find your perfect companion from loving shelters across the
-              country
+            <div className={cn(defaultDescriptionClassName, descriptionClassName)}>
+              {description}
             </div>
           </div>
         </div>
