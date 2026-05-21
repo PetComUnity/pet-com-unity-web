@@ -2,10 +2,6 @@ import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const serifButtonStyle = {
-  fontFamily: 'Georgia, "Times New Roman", serif',
-};
-
 const selectFields = [
   {
     id: "animal",
@@ -81,12 +77,12 @@ export function AdoptionSearchForm({ className }: { className?: string }) {
         width={359}
         height={137}
         aria-hidden="true"
-        className="pointer-events-none absolute top-0 left-1/2 z-10 w-[88%] max-w-[19.8rem] -translate-x-1/2"
+        className="pointer-events-none absolute top-[0rem] left-1/2 z-10 w-[88%] max-w-[19.8rem] -translate-x-1/2 sm:top-1"
       />
 
       <div className="rounded-[1.5rem] bg-white px-6 pt-7 pb-6 shadow-[0_20px_45px_rgba(31,29,26,0.18)] ring-1 ring-black/5 sm:px-6 sm:pt-8 sm:pb-6">
         <div className="space-y-4 text-[#010101]">
-          <div className="space-y-3">
+          <div className="space-y-3 font-sans">
             <h2 className="text-[1.15rem] leading-[1.15] font-semibold tracking-[-0.04em] text-[#232d40] sm:text-[1.25rem]">
               Help you make a choice
             </h2>
@@ -95,14 +91,13 @@ export function AdoptionSearchForm({ className }: { className?: string }) {
             </p>
           </div>
 
-          <form className="space-y-3.5 pt-1">
+          <form className="space-y-3.5 pt-1 font-sans">
             {selectFields.map((field) => (
               <HeroSelect key={field.id} {...field} />
             ))}
 
             <button
               type="button"
-              style={serifButtonStyle}
               className="mt-2 inline-flex h-[3.75rem] w-full items-center justify-center rounded-[1rem] border border-[#364153] bg-[#8df86e] text-[1.2rem] font-medium text-[#111111] transition hover:bg-[#6bb556] focus-visible:ring-2 focus-visible:ring-[#364153]/20 focus-visible:outline-none"
             >
               Find

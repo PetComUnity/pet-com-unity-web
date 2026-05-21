@@ -11,7 +11,10 @@
   --accent: #c2410c;
   --success: #15803d;
   --danger: #b91c1c;
-  --font-sans-stack: var(--font-montserrat), "Segoe UI", Arial, Helvetica, sans-serif;
+  --font-sans-stack:
+    var(--font-montserrat), "Segoe UI", Arial, Helvetica, sans-serif;
+  --font-display-stack:
+    var(--font-cormorant-garamond), "Times New Roman", Georgia, serif;
   --font-mono-stack: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
@@ -26,6 +29,7 @@
   --color-accent: var(--accent);
   --color-success: var(--success);
   --color-danger: var(--danger);
+  --font-display: var(--font-display-stack);
   --font-sans: var(--font-sans-stack);
   --font-serif: var(--font-sans-stack);
   --font-mono: var(--font-mono-stack);
@@ -42,8 +46,16 @@ html {
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(15, 118, 110, 0.08), transparent 22%),
-    radial-gradient(circle at top right, rgba(194, 65, 12, 0.08), transparent 18%),
+    radial-gradient(
+      circle at top left,
+      rgba(15, 118, 110, 0.08),
+      transparent 22%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(194, 65, 12, 0.08),
+      transparent 18%
+    ),
     linear-gradient(180deg, #f7fafd 0%, #eff5fb 42%, #f7fafd 100%);
   color: var(--foreground);
   font-family: var(--font-sans-stack);
@@ -64,7 +76,6 @@ textarea {
 ::selection {
   background: rgba(15, 118, 110, 0.18);
 }
-
 
 .bg-hero {
   background-image: url("/images/background.png");

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
+import { Cormorant_Garamond, Montserrat } from "next/font/google";
 import { AuthProvider } from "@/features/auth/AuthProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import "./globals.css";
@@ -8,6 +8,13 @@ const montserrat = Montserrat({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-montserrat",
+});
+
+const cormorantGaramond = Cormorant_Garamond({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-cormorant-garamond",
 });
 
 export const metadata: Metadata = {
@@ -25,8 +32,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${montserrat.variable} h-full antialiased`}>
-      <body className="min-h-full bg-background text-foreground">
+    <html
+      lang="en"
+      className={`${montserrat.variable} ${cormorantGaramond.variable} h-full antialiased`}
+    >
+      <body className="bg-background text-foreground min-h-full">
         <AuthProvider>
           <div className="flex min-h-screen flex-col">
             <Navbar />
