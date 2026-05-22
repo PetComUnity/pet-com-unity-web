@@ -2,17 +2,38 @@ import Image from "next/image";
 import Link from "next/link";
 import { Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { PetVerificationStatus } from "@/types";
 
 export type AdoptionPetCardData = {
+  id: string;
   name: string;
-  location: string;
-  size: string;
-  weightKg: number;
-  ageLabel: string;
-  imageSrc: string;
-  imageAlt: string;
+  species: string;
+  breed?: string;
+  birthDate?: string;
+  imageSrc?: string;
+  imageAlt?: string;
+  location?: string;
+  verificationStatus: PetVerificationStatus;
   detailsHref: string;
 };
+
+const fallbackImageSrc = "/images/mock-img.png";
+
+function formatBirthDate(birthDate?: string) {
+  if (!birthDate) {
+    return "Not specified";
+  }
+
+  const parsedDate = new Date(birthDate);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return birthDate;
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+  }).format(parsedDate);
+}
 
 export function AdoptionPetCard({
   pet,
@@ -30,8 +51,8 @@ export function AdoptionPetCard({
     >
       <div className="relative aspect-[312/336] overflow-hidden rounded-[1rem]">
         <Image
-          src={pet.imageSrc}
-          alt={pet.imageAlt}
+          src={pet.imageSrc ?? fallbackImageSrc}
+          alt={pet.imageAlt ?? `${pet.name} waiting for adoption`}
           fill
           sizes="(max-width: 640px) calc(100vw - 3rem), 320px"
           className="object-cover"
@@ -39,8 +60,8 @@ export function AdoptionPetCard({
       </div>
 
       <div className="space-y-6 px-2 pt-6 pb-2">
-        <div className="flex items-start justify-between gap-4">
-          <h2 className="text-[2.1rem] leading-none font-semibold tracking-[-0.04em] text-[#263043]">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-[1.25rem] leading-none font-bold tracking-[-0.04em] text-[#263043]">
             {pet.name}
           </h2>
           <span
@@ -51,20 +72,22 @@ export function AdoptionPetCard({
           </span>
         </div>
 
-        <dl className="space-y-3.5 text-[1.12rem] leading-[1.4] text-[#263043]">
+        <dl className="space-y-3.5 text-[0.875rem] leading-[1.4] text-[#263043]">
           <div className="flex flex-wrap gap-x-1">
             <dt className="font-semibold">Location:</dt>
-            <dd>{pet.location}</dd>
+            <dd>{pet.location ?? "Not specified"}</dd>
           </div>
           <div className="flex flex-wrap gap-x-1">
-            <dt className="font-semibold">Size:</dt>
-            <dd>
-              {pet.size} ({pet.weightKg} kg)
-            </dd>
+            <dt className="font-semibold">Species:</dt>
+            <dd>{pet.species}</dd>
           </div>
           <div className="flex flex-wrap gap-x-1">
-            <dt className="font-semibold">Age:</dt>
-            <dd>{pet.ageLabel}</dd>
+            <dt className="font-semibold">Breed:</dt>
+            <dd>{pet.breed ?? "Not specified"}</dd>
+          </div>
+          <div className="flex flex-wrap gap-x-1">
+            <dt className="font-semibold">Birth date:</dt>
+            <dd>{formatBirthDate(pet.birthDate)}</dd>
           </div>
         </dl>
 
