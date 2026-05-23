@@ -5,10 +5,14 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ROUTES } from "@/constants/routes";
-import { registerSchema, type RegisterFormValues } from "@/features/auth/auth.types";
+import {
+  registerSchema,
+  type RegisterFormValues,
+} from "@/features/auth/auth.types";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -24,6 +28,7 @@ export function RegisterForm() {
       name: "",
       email: "",
       password: "",
+      role: "owner",
     },
   });
 
@@ -64,8 +69,13 @@ export function RegisterForm() {
         error={errors.password?.message}
         {...register("password")}
       />
+      <Select label="Role" error={errors.role?.message} {...register("role")}>
+        <option value="owner">Owner</option>
+        <option value="vet">Veterinarian</option>
+        <option value="shelter">Shelter</option>
+      </Select>
       {formError ? (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-danger">
+        <p className="text-danger rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm">
           {formError}
         </p>
       ) : null}

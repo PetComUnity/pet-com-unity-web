@@ -17,15 +17,15 @@ import { Spinner } from "@/components/ui/Spinner";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { loading, user } = useAuth();
+  const { loading, appUser } = useAuth();
 
   useEffect(() => {
-    if (user) {
+    if (appUser) {
       router.replace(ROUTES.dashboard);
     }
-  }, [router, user]);
+  }, [router, appUser]);
 
-  if (loading || user) {
+  if (loading || appUser) {
     return (
       <div className="mx-auto flex min-h-[70vh] max-w-6xl items-center justify-center px-4">
         <Spinner label="Preparing your session..." />
@@ -39,14 +39,15 @@ export default function LoginPage() {
         <CardHeader>
           <CardTitle>Log in</CardTitle>
           <CardDescription>
-            Sign in to manage your pets, generate QR pages, and update lost status.
+            Sign in to manage your pets, generate QR pages, and update lost
+            status.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <LoginForm />
-          <p className="text-sm text-muted">
+          <p className="text-muted text-sm">
             New here?{" "}
-            <Link href={ROUTES.register} className="font-medium text-brand">
+            <Link href={ROUTES.register} className="text-brand font-medium">
               Create an account
             </Link>
           </p>

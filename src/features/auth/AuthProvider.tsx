@@ -9,14 +9,14 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { onAuthStateChanged, type User } from "firebase/auth";
 import type { AppUser } from "@/types";
-import { auth, isFirebaseConfigured } from "@/lib/firebase";
 import {
-  getUserProfile,
+  getCurrentUser,
+  getToken,
   loginUser,
   logoutUser,
   registerUser,
+  setToken,
 } from "@/features/auth/auth.service";
 import type {
   LoginFormValues,
@@ -24,7 +24,6 @@ import type {
 } from "@/features/auth/auth.types";
 
 type AuthContextValue = {
-  user: User | null;
   appUser: AppUser | null;
   loading: boolean;
   register: (values: RegisterFormValues) => Promise<void>;
@@ -35,65 +34,51 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [appUser, setAppUser] = useState<AppUser | null>(null);
-  const [loading, setLoading] = useState(isFirebaseConfigured);
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isFirebaseConfigured) {
-      return;
-    }
+    async function initAuth() {
+      const token = getToken();
 
-    const unsubscribe = onAuthStateChanged(auth, async (nextUser) => {
-      setUser(nextUser);
-
-      if (!nextUser) {
-        setAppUser(null);
+      if (!token) {
         setLoading(false);
         return;
       }
 
       try {
-        const profile = await getUserProfile(nextUser.uid);
-        setAppUser(profile);
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
+      } catch {
+        setUser(null);
       } finally {
         setLoading(false);
       }
-    });
+    }
 
-    return unsubscribe;
+    void initAuth();
   }, []);
 
   const register = useCallback(async (values: RegisterFormValues) => {
-    const nextUser = await registerUser(values);
-    const profile = await getUserProfile(nextUser.uid);
-    setUser(nextUser);
-    setAppUser(profile);
+    const { user: newUser, token } = await registerUser(values);
+    setToken(token);
+    setUser(newUser);
   }, []);
 
   const login = useCallback(async (values: LoginFormValues) => {
-    const credential = await loginUser(values);
-    const profile = await getUserProfile(credential.user.uid);
-    setUser(credential.user);
-    setAppUser(profile);
+    const { user: newUser, token } = await loginUser(values);
+    setToken(token);
+    setUser(newUser);
   }, []);
 
   const logout = useCallback(async () => {
     await logoutUser();
     setUser(null);
-    setAppUser(null);
   }, []);
 
   const value = useMemo<AuthContextValue>(
-    () => ({
-      user,
-      appUser,
-      loading,
-      register,
-      login,
-      logout,
-    }),
-    [appUser, loading, login, logout, register, user],
+    () => ({ appUser: user, loading, register, login, logout }),
+    [user, loading, register, login, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -17,15 +17,15 @@ import { Spinner } from "@/components/ui/Spinner";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { loading, user } = useAuth();
+  const { loading, appUser } = useAuth();
 
   useEffect(() => {
-    if (user) {
+    if (appUser) {
       router.replace(ROUTES.dashboard);
     }
-  }, [router, user]);
+  }, [router, appUser]);
 
-  if (loading || user) {
+  if (loading || appUser) {
     return (
       <div className="mx-auto flex min-h-[70vh] max-w-6xl items-center justify-center px-4">
         <Spinner label="Preparing registration..." />
@@ -39,14 +39,15 @@ export default function RegisterPage() {
         <CardHeader>
           <CardTitle>Create your account</CardTitle>
           <CardDescription>
-            Start as a pet owner and grow from this scaffold into the full AnimalID platform.
+            Start as a pet owner and grow from this scaffold into the full
+            AnimalID platform.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <RegisterForm />
-          <p className="text-sm text-muted">
+          <p className="text-muted text-sm">
             Already have an account?{" "}
-            <Link href={ROUTES.login} className="font-medium text-brand">
+            <Link href={ROUTES.login} className="text-brand font-medium">
               Log in
             </Link>
           </p>

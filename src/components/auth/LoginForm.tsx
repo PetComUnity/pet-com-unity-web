@@ -34,7 +34,9 @@ export function LoginForm() {
       router.replace(ROUTES.dashboard);
     } catch (error) {
       setFormError(
-        error instanceof Error ? error.message : "We could not sign you in right now.",
+        error instanceof Error
+          ? error.message
+          : "We could not sign you in right now.",
       );
     }
   }
@@ -56,7 +58,7 @@ export function LoginForm() {
         {...register("password")}
       />
       {formError ? (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-danger">
+        <p className="text-danger rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm">
           {formError}
         </p>
       ) : null}
