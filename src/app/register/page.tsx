@@ -1,18 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/hooks/useAuth";
 import { RegisterForm } from "@/components/auth/RegisterForm";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/Card";
+import { SocialLinks } from "@/components/ui/SocialLinks";
 import { Spinner } from "@/components/ui/Spinner";
 
 export default function RegisterPage() {
@@ -20,39 +15,65 @@ export default function RegisterPage() {
   const { loading, appUser } = useAuth();
 
   useEffect(() => {
-    if (appUser) {
-      router.replace(ROUTES.dashboard);
-    }
+    if (appUser) router.replace(ROUTES.dashboard);
   }, [router, appUser]);
 
   if (loading || appUser) {
     return (
-      <div className="mx-auto flex min-h-[70vh] max-w-6xl items-center justify-center px-4">
+      <div className="flex min-h-screen items-center justify-center">
         <Spinner label="Preparing registration..." />
       </div>
     );
   }
 
   return (
-    <section className="mx-auto flex min-h-[70vh] w-full max-w-6xl items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Create your account</CardTitle>
-          <CardDescription>
-            Start as a pet owner and grow from this scaffold into the full
-            AnimalID platform.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <RegisterForm />
-          <p className="text-muted text-sm">
-            Already have an account?{" "}
-            <Link href={ROUTES.login} className="text-brand font-medium">
-              Log in
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
+    <section className="relative flex min-h-screen flex-col items-center overflow-hidden bg-[#ef9322]">
+      <Image
+        src="/images/background.png"
+        alt=""
+        fill
+        priority
+        aria-hidden="true"
+        sizes="100vw"
+        className="object-cover"
+      />
+
+      <div className="relative z-10 flex w-full flex-1 flex-col items-center justify-center px-4 py-16">
+        <div className="w-full max-w-[320px] sm:max-w-[360px]">
+          <div className="relative rounded-2xl bg-white shadow-xl">
+            <div className="absolute -top-12 left-1/2 w-[260px] -translate-x-1/2">
+              <Image
+                src="/images/animals.png"
+                alt="Pets"
+                width={260}
+                height={96}
+                priority
+                className="w-full"
+              />
+            </div>
+
+            <div className="flex items-center px-6 pt-16 pb-6">
+              <span className="font-display flex-1 text-left text-base font-bold text-[#010101] sm:text-xl">
+                Registration
+              </span>
+              <Link
+                href={ROUTES.login}
+                className="font-display flex-1 text-right text-base font-bold text-[#7A7878] opacity-50 transition hover:opacity-100 sm:text-xl"
+              >
+                SignIn
+              </Link>
+            </div>
+
+            <div className="px-6 pb-6">
+              <RegisterForm />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="relative z-10 w-full pb-8 sm:hidden">
+        <SocialLinks />
+      </div>
     </section>
   );
 }

@@ -77,7 +77,9 @@ export default function PetDetailsPage() {
     }
 
     const path = getPublicPetRoute(pet.publicQrId);
-    return typeof window === "undefined" ? path : `${window.location.origin}${path}`;
+    return typeof window === "undefined"
+      ? path
+      : `${window.location.origin}${path}`;
   }, [pet]);
 
   return (
@@ -139,7 +141,8 @@ export default function PetDetailsPage() {
           <Card>
             <CardContent className="pt-6">
               <p className="text-sm text-amber-700">
-                The pet was created, but the image upload did not finish. You can retry from Edit pet.
+                The pet was created, but the image upload did not finish. You
+                can retry from Edit pet.
               </p>
             </CardContent>
           </Card>
@@ -148,7 +151,7 @@ export default function PetDetailsPage() {
         {actionError ? (
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-danger">{actionError}</p>
+              <p className="text-danger text-sm">{actionError}</p>
             </CardContent>
           </Card>
         ) : null}
@@ -160,19 +163,19 @@ export default function PetDetailsPage() {
         ) : loadError ? (
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-danger">{loadError}</p>
+              <p className="text-danger text-sm">{loadError}</p>
             </CardContent>
           </Card>
         ) : !pet ? (
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-muted">We could not find this pet.</p>
+              <p className="text-muted text-sm">We could not find this pet.</p>
             </CardContent>
           </Card>
-        ) : appUser && pet.ownerId !== appUser.uid ? (
+        ) : appUser && pet.ownerId !== appUser.id ? (
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-danger">
+              <p className="text-danger text-sm">
                 This pet profile belongs to another account.
               </p>
             </CardContent>
@@ -184,7 +187,8 @@ export default function PetDetailsPage() {
                 <CardHeader>
                   <CardTitle>Identity</CardTitle>
                   <CardDescription>
-                    Core profile data kept ready for owners, admins, and public scans.
+                    Core profile data kept ready for owners, admins, and public
+                    scans.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-5">
@@ -193,44 +197,52 @@ export default function PetDetailsPage() {
                     verificationStatus={pet.verificationStatus}
                   />
 
-                  <dl className="grid gap-4 text-sm text-muted sm:grid-cols-2">
+                  <dl className="text-muted grid gap-4 text-sm sm:grid-cols-2">
                     <div>
-                      <dt className="font-medium text-foreground">Species</dt>
+                      <dt className="text-foreground font-medium">Species</dt>
                       <dd>{pet.species}</dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-foreground">Breed</dt>
+                      <dt className="text-foreground font-medium">Breed</dt>
                       <dd>{pet.breed || "Not added"}</dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-foreground">Birth date</dt>
+                      <dt className="text-foreground font-medium">
+                        Birth date
+                      </dt>
                       <dd>{pet.birthDate || "Not added"}</dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-foreground">Color</dt>
+                      <dt className="text-foreground font-medium">Color</dt>
                       <dd>{pet.color || "Not added"}</dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-foreground">Microchip ID</dt>
+                      <dt className="text-foreground font-medium">
+                        Microchip ID
+                      </dt>
                       <dd>{pet.microchipId || "Not added"}</dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-foreground">Adoptable</dt>
+                      <dt className="text-foreground font-medium">Adoptable</dt>
                       <dd>{pet.isAdoptable ? "Yes" : "No"}</dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-foreground">Created</dt>
+                      <dt className="text-foreground font-medium">Created</dt>
                       <dd>{formatDate(pet.createdAt)}</dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-foreground">Last updated</dt>
+                      <dt className="text-foreground font-medium">
+                        Last updated
+                      </dt>
                       <dd>{formatDateTime(pet.updatedAt)}</dd>
                     </div>
                   </dl>
 
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-foreground">Description</p>
-                    <p className="text-sm leading-6 text-muted">
+                    <p className="text-foreground text-sm font-medium">
+                      Description
+                    </p>
+                    <p className="text-muted text-sm leading-6">
                       {pet.description || "No description added yet."}
                     </p>
                   </div>
@@ -253,7 +265,7 @@ export default function PetDetailsPage() {
                       className="h-72 w-full rounded-lg object-cover"
                     />
                   ) : (
-                    <div className="flex h-72 items-center justify-center rounded-lg border border-dashed border-border bg-slate-50 text-sm text-muted">
+                    <div className="border-border text-muted flex h-72 items-center justify-center rounded-lg border border-dashed bg-slate-50 text-sm">
                       No photo uploaded yet
                     </div>
                   )}
