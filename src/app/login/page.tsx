@@ -41,18 +41,18 @@ export default function LoginPage() {
       <div className="relative z-10 flex w-full flex-1 flex-col items-center justify-center px-4 py-16">
         <div className="w-full max-w-[320px] sm:max-w-[360px]">
           <div className="relative rounded-2xl bg-white shadow-xl">
-            <div className="absolute -top-12 left-1/2 w-[260px] -translate-x-1/2">
+            <div className="absolute -top-[70px] left-1/2 z-20 w-full -translate-x-1/2 min-[375px]:-top-[78px] md:-top-[88px]">
               <Image
                 src="/images/animals.png"
                 alt="Pets"
-                width={260}
-                height={96}
+                width={360}
+                height={137}
                 priority
-                className="w-full"
+                className="block h-auto w-full object-contain"
               />
             </div>
 
-            <div className="flex items-center px-6 pt-16 pb-6">
+            <div className="flex items-center px-6 pt-10 pb-6 min-[375px]:pt-12">
               <Link
                 href={ROUTES.register}
                 className="font-display flex-1 text-left text-base font-bold text-[#7A7878] opacity-50 transition hover:opacity-100 sm:text-xl"

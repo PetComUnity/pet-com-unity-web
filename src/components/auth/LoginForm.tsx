@@ -84,7 +84,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isSubmitting || !isDirty || !isValid}
-        className="font-display mt-6 inline-flex h-14 w-full items-center justify-center rounded-[1rem] border border-[var(--input-border)] bg-[#8df86e] text-2xl font-bold text-[var(--primary-text)] transition hover:bg-[#6bb556] focus-visible:ring-2 focus-visible:ring-[var(--input-border)]/20 focus-visible:outline-none disabled:border-[#7A7878]/50 disabled:bg-[#7A7878]/50 disabled:text-white"
+        className="font-display mt-6 inline-flex h-14 w-full items-center justify-center rounded-[1rem] border border-[var(--input-border)] bg-[#8df86e] text-2xl font-bold text-[var(--primary-text)] transition hover:bg-[#6bb556] focus-visible:ring-2 focus-visible:ring-[var(--input-border)]/20 focus-visible:outline-none disabled:bg-[#7A7878]/50 disabled:text-white"
       >
         {isSubmitting ? "Signing in..." : "Sign in"}
       </button>
