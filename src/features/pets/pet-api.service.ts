@@ -1,15 +1,30 @@
 import type { Pet } from "@/types";
 
-type ApiResponse<T> = {
+type ApiResponse<T, M = undefined> = {
   success: boolean;
   message: string;
   data?: T;
+  meta?: M;
 };
 
 type ApiPet = Omit<Pet, "verifiedAt" | "createdAt" | "updatedAt"> & {
   verifiedAt?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
+};
+
+export type PaginationMeta = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+};
+
+export type PaginatedPetsResult = {
+  pets: Pet[];
+  meta: PaginationMeta;
 };
 
 const DEFAULT_API_BASE_URL = "http://localhost:5000/api";
@@ -36,7 +51,7 @@ function mapPet(pet: ApiPet): Pet {
   };
 }
 
-async function fetchPets<T>(path: string): Promise<T> {
+async function fetchApi<T, M = undefined>(path: string): Promise<ApiResponse<T, M>> {
   const response = await fetch(`${getApiBaseUrl()}${path}`, {
     cache: "no-store",
   });
@@ -45,13 +60,32 @@ async function fetchPets<T>(path: string): Promise<T> {
     throw new Error("We could not load adoptable pets right now.");
   }
 
-  const payload = (await response.json()) as ApiResponse<T>;
-  return payload.data as T;
+  return (await response.json()) as ApiResponse<T, M>;
 }
 
-export async function getAdoptablePets(): Promise<Pet[]> {
-  const pets = await fetchPets<ApiPet[]>("/pets?isAdoptable=true");
-  return Array.isArray(pets) ? pets.map(mapPet) : [];
+export async function getAdoptablePets(
+  page: number,
+  limit: number,
+): Promise<PaginatedPetsResult> {
+  const query = new URLSearchParams({
+    isAdoptable: "true",
+    page: String(page),
+    limit: String(limit),
+  });
+  const payload = await fetchApi<ApiPet[], PaginationMeta>(`/pets?${query.toString()}`);
+  const pets = Array.isArray(payload.data) ? payload.data.map(mapPet) : [];
+
+  return {
+    pets,
+    meta: payload.meta ?? {
+      page,
+      limit,
+      total: pets.length,
+      totalPages: pets.length > 0 ? 1 : 0,
+      hasNextPage: false,
+      hasPreviousPage: page > 1,
+    },
+  };
 }
 
 export async function getPetById(petId: string): Promise<Pet | null> {
