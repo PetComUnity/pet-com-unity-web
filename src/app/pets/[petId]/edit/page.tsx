@@ -67,7 +67,7 @@ export default function EditPetPage() {
         {saveError ? (
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-danger">{saveError}</p>
+              <p className="text-danger text-sm">{saveError}</p>
             </CardContent>
           </Card>
         ) : null}
@@ -79,19 +79,19 @@ export default function EditPetPage() {
         ) : loadError ? (
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-danger">{loadError}</p>
+              <p className="text-danger text-sm">{loadError}</p>
             </CardContent>
           </Card>
         ) : !pet ? (
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-muted">We could not find this pet.</p>
+              <p className="text-muted text-sm">We could not find this pet.</p>
             </CardContent>
           </Card>
-        ) : appUser && pet.ownerId !== appUser.uid ? (
+        ) : appUser && pet.ownerId !== appUser.id ? (
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-danger">
+              <p className="text-danger text-sm">
                 This pet profile belongs to another account.
               </p>
             </CardContent>
@@ -113,7 +113,9 @@ export default function EditPetPage() {
             busy={saving}
             onSubmit={async (values, imageFile) => {
               if (!appUser) {
-                throw new Error("Your account profile is not ready yet. Refresh and try again.");
+                throw new Error(
+                  "Your account profile is not ready yet. Refresh and try again.",
+                );
               }
 
               setSaveError(null);
@@ -124,7 +126,11 @@ export default function EditPetPage() {
 
                 if (imageFile) {
                   try {
-                    const imageUrl = await uploadPetImage(imageFile, appUser.uid, pet.id);
+                    const imageUrl = await uploadPetImage(
+                      imageFile,
+                      appUser.id,
+                      pet.id,
+                    );
                     await updatePet(pet.id, { imageUrl });
                   } catch {
                     setSaveError(
