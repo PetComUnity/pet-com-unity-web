@@ -51,9 +51,7 @@ function mobileMenuPrimaryLinkClassName(isActive: boolean) {
   return cn(
     "relative inline-block pb-1 font-serif text-[1.55rem] leading-none tracking-[-0.03em] !text-white transition hover:!text-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
     "after:absolute after:bottom-0 after:left-0 after:h-px after:bg-white after:transition-all after:content-['']",
-    isActive
-      ? "after:w-full"
-      : "after:w-0",
+    isActive ? "after:w-full" : "after:w-0",
   );
 }
 
@@ -61,9 +59,7 @@ function mobileMenuSecondaryLinkClassName(isActive: boolean) {
   return cn(
     "relative inline-block text-sm font-medium uppercase tracking-[0.18em] !text-white transition hover:!text-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
     "after:absolute after:bottom-0 after:left-0 after:h-px after:bg-white after:transition-all after:content-['']",
-    isActive
-      ? "after:w-full"
-      : "after:w-0",
+    isActive ? "after:w-full" : "after:w-0",
   );
 }
 
@@ -71,16 +67,14 @@ function mobileMenuTopLinkClassName(isActive: boolean) {
   return cn(
     "relative inline-block pb-1 text-[1.15rem] font-medium transition hover:text-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
     "after:absolute after:bottom-0 after:left-0 after:h-px after:bg-white after:transition-all after:content-['']",
-    isActive
-      ? "after:w-full"
-      : "after:w-0",
+    isActive ? "after:w-full" : "after:w-0",
   );
 }
 
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { appUser, loading, logout, user } = useAuth();
+  const { appUser, loading, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const showVerificationLink =
@@ -123,7 +117,7 @@ export function Navbar() {
       <div className="mx-auto flex w-full max-w-7xl items-center px-4 py-2 sm:px-6 md:gap-8 md:py-1.5 lg:px-8">
         <Link
           href={ROUTES.home}
-          className="shrink-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d2a3e]/30"
+          className="shrink-0 rounded-2xl focus-visible:ring-2 focus-visible:ring-[#1d2a3e]/30 focus-visible:outline-none"
           aria-label="PetComUnity home"
           onClick={closeMenu}
         >
@@ -156,7 +150,7 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center gap-4 lg:gap-6">
-            {user ? (
+            {appUser ? (
               <>
                 <Link href={ROUTES.dashboard} className={authTextClassName()}>
                   Dashboard
@@ -180,10 +174,12 @@ export function Navbar() {
 
         <button
           type="button"
-          className="ml-auto flex h-12 w-12 items-center justify-center rounded-2xl text-[#1d2a3e] transition hover:bg-[#e7dccf] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d2a3e]/30 md:hidden"
+          className="ml-auto flex h-12 w-12 items-center justify-center rounded-2xl text-[#1d2a3e] transition hover:bg-[#e7dccf] focus-visible:ring-2 focus-visible:ring-[#1d2a3e]/30 focus-visible:outline-none md:hidden"
           aria-expanded={menuOpen}
           aria-controls="site-navigation"
-          aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-label={
+            menuOpen ? "Close navigation menu" : "Open navigation menu"
+          }
           onClick={() => setMenuOpen((open) => !open)}
         >
           <Menu className="h-8 w-8 stroke-[2.25]" />
@@ -191,17 +187,13 @@ export function Navbar() {
       </div>
 
       {menuOpen ? (
-        <div
-          id="site-navigation"
-          className="fixed inset-0 z-50 md:hidden"
-        >
-
-          <div className="relative flex min-h-screen flex-col px-5 pb-8 pt-5 sm:px-6 bg-hero">
+        <div id="site-navigation" className="fixed inset-0 z-50 md:hidden">
+          <div className="bg-hero relative flex min-h-screen flex-col px-5 pt-5 pb-8 sm:px-6">
             <div className="flex w-full items-center justify-between gap-4 text-white">
-              {user ? (
+              {appUser ? (
                 <button
                   type="button"
-                  className="text-left text-[1.15rem] font-medium text-white transition hover:text-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                  className="text-left text-[1.15rem] font-medium text-white transition hover:text-white/85 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
                   onClick={handleLogout}
                   disabled={loading}
                 >
@@ -231,7 +223,7 @@ export function Navbar() {
 
               <button
                 type="button"
-                className="flex h-11 w-11 items-center justify-center rounded-full text-white transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-white transition hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
                 aria-label="Close navigation menu"
                 onClick={closeMenu}
               >
@@ -240,7 +232,7 @@ export function Navbar() {
             </div>
 
             <nav
-              className="flex flex-1 flex-col items-center justify-center gap-6 pb-14 pt-10 text-center text-white"
+              className="flex flex-1 flex-col items-center justify-center gap-6 pt-10 pb-14 text-center text-white"
               aria-label="Mobile navigation"
             >
               <div className="flex flex-col items-center gap-5">
@@ -258,7 +250,7 @@ export function Navbar() {
                 ))}
               </div>
 
-              {user ? (
+              {appUser ? (
                 <div className="mt-3 flex flex-col items-center gap-3">
                   {dashboardLinks.map((link) => (
                     <Link

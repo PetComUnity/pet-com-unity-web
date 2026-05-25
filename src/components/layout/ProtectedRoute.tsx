@@ -17,7 +17,7 @@ export function ProtectedRoute({
   allowedRoles,
 }: ProtectedRouteProps) {
   const router = useRouter();
-  const { appUser, loading, user } = useAuth();
+  const { appUser, loading } = useAuth();
 
   const isUnauthorized =
     !!allowedRoles && !!appUser && !allowedRoles.includes(appUser.role);
@@ -27,7 +27,7 @@ export function ProtectedRoute({
       return;
     }
 
-    if (!user) {
+    if (!appUser) {
       router.replace(ROUTES.login);
       return;
     }
@@ -35,9 +35,9 @@ export function ProtectedRoute({
     if (isUnauthorized) {
       router.replace(ROUTES.dashboard);
     }
-  }, [isUnauthorized, loading, router, user]);
+  }, [isUnauthorized, loading, router, appUser]);
 
-  if (loading || !user || (allowedRoles && !appUser) || isUnauthorized) {
+  if (loading || !appUser || (allowedRoles && !appUser) || isUnauthorized) {
     return (
       <div className="mx-auto flex min-h-[50vh] w-full max-w-6xl items-center justify-center px-4">
         <Spinner label="Checking access..." />

@@ -11,6 +11,9 @@
   --accent: #c2410c;
   --success: #15803d;
   --danger: #b91c1c;
+  --primary-text: #010101;
+  --input-border: #010101;
+  --placeholder: rgba(122, 120, 120, 0.5);
   --font-sans-stack:
     var(--font-montserrat), "Segoe UI", Arial, Helvetica, sans-serif;
   --font-display-stack:
@@ -29,6 +32,9 @@
   --color-accent: var(--accent);
   --color-success: var(--success);
   --color-danger: var(--danger);
+  --color-primary-text: var(--primary-text);
+  --color-input-border: var(--input-border);
+  --color-placeholder: var(--placeholder);
   --font-display: var(--font-display-stack);
   --font-sans: var(--font-sans-stack);
   --font-serif: var(--font-sans-stack);

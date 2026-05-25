@@ -27,7 +27,7 @@ export default function NewPetPage() {
         {pageError ? (
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-danger">{pageError}</p>
+              <p className="text-danger text-sm">{pageError}</p>
             </CardContent>
           </Card>
         ) : null}
@@ -37,7 +37,9 @@ export default function NewPetPage() {
           busy={saving}
           onSubmit={async (values, imageFile) => {
             if (!appUser) {
-              throw new Error("Your account profile is not ready yet. Refresh and try again.");
+              throw new Error(
+                "Your account profile is not ready yet. Refresh and try again.",
+              );
             }
 
             setPageError(null);
@@ -46,7 +48,7 @@ export default function NewPetPage() {
             try {
               const publicQrId = createPublicQrId(values.name);
               const petId = await createPet({
-                ownerId: appUser.uid,
+                ownerId: appUser.id,
                 publicQrId,
                 isLost: false,
                 ...toPetPayload(values),
@@ -54,10 +56,16 @@ export default function NewPetPage() {
 
               if (imageFile) {
                 try {
-                  const imageUrl = await uploadPetImage(imageFile, appUser.uid, petId);
+                  const imageUrl = await uploadPetImage(
+                    imageFile,
+                    appUser.id,
+                    petId,
+                  );
                   await updatePet(petId, { imageUrl });
                 } catch {
-                  router.replace(`${getPetDetailsRoute(petId)}?notice=image-upload-failed`);
+                  router.replace(
+                    `${getPetDetailsRoute(petId)}?notice=image-upload-failed`,
+                  );
                   return;
                 }
               }
@@ -65,7 +73,9 @@ export default function NewPetPage() {
               router.replace(getPetDetailsRoute(petId));
             } catch (error) {
               setPageError(
-                error instanceof Error ? error.message : "We could not create this pet.",
+                error instanceof Error
+                  ? error.message
+                  : "We could not create this pet.",
               );
             } finally {
               setSaving(false);

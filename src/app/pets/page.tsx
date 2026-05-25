@@ -10,7 +10,13 @@ import { AppShell } from "@/components/layout/AppShell";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { PetCard } from "@/components/pet/PetCard";
 import { buttonVariants } from "@/components/ui/Button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 
 export default function PetsPage() {
@@ -30,7 +36,7 @@ export default function PetsPage() {
 
       try {
         setError(null);
-        const result = await getPetsByOwnerId(appUser.uid);
+        const result = await getPetsByOwnerId(appUser.id);
         if (isMounted) {
           setPets(result);
         }
@@ -77,7 +83,7 @@ export default function PetsPage() {
         ) : error ? (
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-danger">{error}</p>
+              <p className="text-danger text-sm">{error}</p>
             </CardContent>
           </Card>
         ) : pets.length === 0 ? (
@@ -85,7 +91,8 @@ export default function PetsPage() {
             <CardHeader>
               <CardTitle>No pets yet</CardTitle>
               <CardDescription>
-                Create your first profile to test the QR, public page, and lost or found flow.
+                Create your first profile to test the QR, public page, and lost
+                or found flow.
               </CardDescription>
             </CardHeader>
             <CardContent>
