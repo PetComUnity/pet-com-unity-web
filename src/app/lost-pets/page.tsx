@@ -14,7 +14,6 @@ import {
   CardTitle,
 } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { PetStatusBadge } from "@/components/pet/PetStatusBadge";
 import { Select } from "@/components/ui/Select";
 import { Spinner } from "@/components/ui/Spinner";
 
@@ -140,10 +139,6 @@ export default function LostPetsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <PetStatusBadge
-                  isLost={pet.isLost}
-                  verificationStatus={pet.verificationStatus}
-                />
                 <p className="text-sm leading-6 text-muted">
                   {pet.description || "No public rescue notes have been added yet."}
                 </p>

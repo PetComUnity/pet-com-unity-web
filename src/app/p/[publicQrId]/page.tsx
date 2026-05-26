@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import type { Pet } from "@/types";
 import { getPetByPublicQrId } from "@/features/pets/pet.service";
 import { formatDate } from "@/lib/utils";
-import { PetStatusBadge } from "@/components/pet/PetStatusBadge";
 import {
   Card,
   CardContent,
@@ -88,10 +87,6 @@ export default function PublicPetPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
-              <PetStatusBadge
-                isLost={pet.isLost}
-                verificationStatus={pet.verificationStatus}
-              />
               <dl className="grid gap-4 text-sm text-muted sm:grid-cols-2">
                 <div>
                   <dt className="font-medium text-foreground">Species</dt>
