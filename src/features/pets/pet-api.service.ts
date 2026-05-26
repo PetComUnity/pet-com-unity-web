@@ -1,4 +1,9 @@
 import type { Pet } from "@/types";
+import {
+  ADOPTION_ANIMAL_OPTIONS,
+  getWeightRangeForPetSize,
+  type AdoptionSearchFilters,
+} from "@/features/pets/adoption-search";
 
 type ApiResponse<T, M = undefined> = {
   success: boolean;
@@ -86,9 +91,11 @@ function mapPet(pet: ApiPet): Pet {
 
 async function fetchApi<T, M = undefined>(
   path: string,
+  signal?: AbortSignal,
 ): Promise<ApiResponse<T, M>> {
   const response = await fetch(`${getApiBaseUrl()}${path}`, {
     cache: "no-store",
+    signal,
   });
 
   if (!response.ok) {
@@ -98,17 +105,58 @@ async function fetchApi<T, M = undefined>(
   return (await response.json()) as ApiResponse<T, M>;
 }
 
-export async function getAdoptablePets(
+function buildAdoptablePetsQuery(
   page: number,
   limit: number,
-): Promise<PaginatedPetsResult> {
+  filters: AdoptionSearchFilters,
+) {
   const query = new URLSearchParams({
     isAdoptable: "true",
     page: String(page),
     limit: String(limit),
   });
+
+  if (filters.animal !== "") {
+    const selectedAnimal = ADOPTION_ANIMAL_OPTIONS.find(
+      (option) => option.value === filters.animal,
+    );
+
+    query.set("species", selectedAnimal?.label ?? filters.animal);
+    query.set("animal", filters.animal);
+  }
+
+  const normalizedLocation = filters.location.trim();
+  if (normalizedLocation !== "") {
+    query.set("location", normalizedLocation);
+    query.set("city", normalizedLocation);
+  }
+
+  if (filters.size !== "") {
+    const weightRange = getWeightRangeForPetSize(filters.size);
+    query.set("size", filters.size);
+
+    if (typeof weightRange.minWeight === "number") {
+      query.set("minWeight", String(weightRange.minWeight));
+    }
+
+    if (typeof weightRange.maxWeight === "number") {
+      query.set("maxWeight", String(weightRange.maxWeight));
+    }
+  }
+
+  return query;
+}
+
+export async function getAdoptablePets(
+  page: number,
+  limit: number,
+  filters: AdoptionSearchFilters,
+  signal?: AbortSignal,
+): Promise<PaginatedPetsResult> {
+  const query = buildAdoptablePetsQuery(page, limit, filters);
   const payload = await fetchApi<ApiPet[], PaginationMeta>(
     `/pets?${query.toString()}`,
+    signal,
   );
   const pets = Array.isArray(payload.data) ? payload.data.map(mapPet) : [];
 
@@ -125,8 +173,12 @@ export async function getAdoptablePets(
   };
 }
 
-export async function getAllAdoptablePets(limit = 50) {
-  const firstPage = await getAdoptablePets(1, limit);
+export async function getAllAdoptablePets(
+  filters: AdoptionSearchFilters,
+  limit = 50,
+  signal?: AbortSignal,
+) {
+  const firstPage = await getAdoptablePets(1, limit, filters, signal);
 
   if (firstPage.meta.totalPages <= 1) {
     return firstPage.pets;
@@ -134,7 +186,7 @@ export async function getAllAdoptablePets(limit = 50) {
 
   const remainingPages = await Promise.all(
     Array.from({ length: firstPage.meta.totalPages - 1 }, (_, index) =>
-      getAdoptablePets(index + 2, limit),
+      getAdoptablePets(index + 2, limit, filters, signal),
     ),
   );
 

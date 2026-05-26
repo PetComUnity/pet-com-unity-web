@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { getPetDetailsRoute } from "@/constants/routes";
 import { getAllAdoptablePets } from "@/features/pets/pet-api.service";
@@ -59,34 +59,46 @@ function getVisiblePageNumbers(currentPage: number, totalPages: number) {
 
 export function AvailablePetsList({
   filters,
+  searchToken,
+  sectionId,
+  onSearchSettled,
 }: {
   filters: AdoptionSearchFilters;
+  searchToken?: number;
+  sectionId?: string;
+  onSearchSettled?: (searchToken: number) => void;
 }) {
-  const activeFilterKey = `${filters.animal}:${filters.size}:${filters.location}`;
+  const activeSearchKey = `${searchToken ?? 0}:${filters.animal}:${filters.size}:${filters.location}`;
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const latestFiltersRef = useRef(filters);
+  const settledSearchTokenRef = useRef(0);
   const [paginationState, setPaginationState] = useState(() => ({
-    activeFilterKey,
+    activeSearchKey,
     page: 1,
   }));
 
   useEffect(() => {
-    let isActive = true;
+    latestFiltersRef.current = filters;
+  }, [filters]);
+
+  useEffect(() => {
+    const abortController = new AbortController();
 
     async function loadAdoptablePets() {
       try {
         setLoading(true);
         setErrorMessage(null);
-        const result = await getAllAdoptablePets();
-
-        if (!isActive) {
-          return;
-        }
+        const result = await getAllAdoptablePets(
+          latestFiltersRef.current,
+          50,
+          abortController.signal,
+        );
 
         setPets(result);
       } catch (error) {
-        if (!isActive) {
+        if (abortController.signal.aborted) {
           return;
         }
 
@@ -96,7 +108,7 @@ export function AvailablePetsList({
             : "We could not load adoptable pets right now.",
         );
       } finally {
-        if (isActive) {
+        if (!abortController.signal.aborted) {
           setLoading(false);
         }
       }
@@ -105,9 +117,23 @@ export function AvailablePetsList({
     void loadAdoptablePets();
 
     return () => {
-      isActive = false;
+      abortController.abort();
     };
-  }, []);
+  }, [activeSearchKey]);
+
+  useEffect(() => {
+    if (
+      loading ||
+      typeof searchToken !== "number" ||
+      searchToken < 1 ||
+      settledSearchTokenRef.current === searchToken
+    ) {
+      return;
+    }
+
+    settledSearchTokenRef.current = searchToken;
+    onSearchSettled?.(searchToken);
+  }, [loading, onSearchSettled, searchToken]);
 
   const normalizedLocationFilter = filters.location.trim().toLowerCase();
 
@@ -127,7 +153,7 @@ export function AvailablePetsList({
 
   const totalPages = Math.ceil(filteredPets.length / PETS_PER_PAGE);
   const currentPage =
-    paginationState.activeFilterKey === activeFilterKey
+    paginationState.activeSearchKey === activeSearchKey
       ? paginationState.page
       : 1;
   const safeCurrentPage =
@@ -147,16 +173,19 @@ export function AvailablePetsList({
 
   function setPage(page: number) {
     setPaginationState({
-      activeFilterKey,
+      activeSearchKey,
       page,
     });
   }
 
   return (
-    <section className="bg-[#fff8f0] px-5 py-14 sm:px-8 lg:px-16 lg:py-20">
+    <section
+      id={sectionId}
+      className="scroll-mt-24 bg-[#fff8f0] px-5 py-14 sm:px-8 lg:px-16 lg:py-20"
+    >
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-10">
-        <div className="max-w-[42rem] p-5 space-y-3 text-[#17243b]">
-          <p className="font-display text-[3rem] text-semibold leading-none tracking-[-0.04em] text-[#1a202c]">
+        <div className="max-w-[42rem] space-y-3 p-5 text-[#17243b]">
+          <p className="font-display text-semibold text-[3rem] leading-none tracking-[-0.04em] text-[#1a202c]">
             Available Pets
           </p>
           <p className="max-w-[34rem] text-base leading-7 text-[#7A7878] sm:text-[1.1rem]">

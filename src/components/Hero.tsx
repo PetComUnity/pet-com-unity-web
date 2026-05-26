@@ -14,6 +14,7 @@ type HeroProps = {
   descriptionClassName?: string;
   sideContent?: ReactNode;
   searchFilters?: AdoptionSearchFilters;
+  isSearching?: boolean;
   onSearch?: (filters: AdoptionSearchFilters) => void;
 };
 
@@ -30,6 +31,7 @@ export function Hero({
   description,
   descriptionClassName,
   searchFilters,
+  isSearching,
   onSearch,
 }: HeroProps) {
   return (
@@ -74,6 +76,7 @@ export function Hero({
           <AdoptionSearchForm
             className="max-w-[21.75rem] sm:max-w-[22.5rem] lg:mx-0 lg:w-[22.5rem]"
             filters={searchFilters}
+            isSearching={isSearching}
             onSearch={onSearch}
           />
         </div>

@@ -105,10 +105,12 @@ function HeroSelect({
 export function AdoptionSearchForm({
   className,
   filters = DEFAULT_ADOPTION_SEARCH_FILTERS,
+  isSearching = false,
   onSearch,
 }: {
   className?: string;
   filters?: AdoptionSearchFilters;
+  isSearching?: boolean;
   onSearch?: (filters: AdoptionSearchFilters) => void;
 }) {
   const filterKey = `${filters.animal}:${filters.size}:${filters.location}`;
@@ -165,7 +167,11 @@ export function AdoptionSearchForm({
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-3.5 pt-1 font-sans">
+          <form
+            onSubmit={handleSubmit}
+            aria-busy={isSearching}
+            className="space-y-3.5 pt-1 font-sans"
+          >
             {selectFields.map((field) => (
               <HeroSelect
                 key={field.id}
@@ -184,9 +190,23 @@ export function AdoptionSearchForm({
 
             <button
               type="submit"
-              className="mt-2 inline-flex h-[3.75rem] w-full items-center justify-center rounded-[1rem] border border-[#364153] bg-[#8df86e] text-[1.2rem] font-medium text-[#111111] transition hover:bg-[#6bb556] focus-visible:ring-2 focus-visible:ring-[#364153]/20 focus-visible:outline-none"
+              disabled={isSearching}
+              className={cn(
+                "mt-2 inline-flex h-[3.75rem] w-full items-center justify-center rounded-[1rem] border border-[#364153] bg-[#8df86e] text-[1.2rem] font-medium text-[#111111] transition focus-visible:ring-2 focus-visible:ring-[#364153]/20 focus-visible:outline-none",
+                isSearching ? "cursor-wait opacity-80" : "hover:bg-[#6bb556]",
+              )}
             >
-              Find pets
+              {isSearching ? (
+                <span className="inline-flex items-center gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="h-5 w-5 animate-spin rounded-full border-2 border-[#17243b]/30 border-t-[#17243b]"
+                  />
+                  Filtering...
+                </span>
+              ) : (
+                "Find"
+              )}
             </button>
           </form>
         </div>
