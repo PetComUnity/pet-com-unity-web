@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { AdoptionSearchForm } from "@/components/AdoptionSearchForm";
+import type { AdoptionSearchFilters } from "@/features/pets/adoption-search";
 import { cn } from "@/lib/utils";
 
 type HeroProps = {
@@ -10,6 +13,8 @@ type HeroProps = {
   description?: string;
   descriptionClassName?: string;
   sideContent?: ReactNode;
+  searchFilters?: AdoptionSearchFilters;
+  onSearch?: (filters: AdoptionSearchFilters) => void;
 };
 
 const defaultTitleClassName =
@@ -23,7 +28,9 @@ export function Hero({
   title,
   titleClassName,
   description,
-  descriptionClassName
+  descriptionClassName,
+  searchFilters,
+  onSearch,
 }: HeroProps) {
   return (
     <section className="font-display relative isolate overflow-hidden bg-[#ef9322]">
@@ -51,7 +58,12 @@ export function Hero({
               </h1>
             ) : null}
             {description ? (
-              <div className={cn(defaultDescriptionClassName, descriptionClassName)}>
+              <div
+                className={cn(
+                  defaultDescriptionClassName,
+                  descriptionClassName,
+                )}
+              >
                 {description}
               </div>
             ) : null}
@@ -59,7 +71,11 @@ export function Hero({
         </div>
 
         <div className="flex items-center justify-center lg:justify-end">
-            <AdoptionSearchForm className="max-w-[21.75rem] sm:max-w-[22.5rem] lg:mx-0 lg:w-[22.5rem]" />
+          <AdoptionSearchForm
+            className="max-w-[21.75rem] sm:max-w-[22.5rem] lg:mx-0 lg:w-[22.5rem]"
+            filters={searchFilters}
+            onSearch={onSearch}
+          />
         </div>
       </div>
     </section>

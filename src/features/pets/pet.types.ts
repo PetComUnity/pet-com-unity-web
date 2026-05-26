@@ -6,6 +6,8 @@ export type CreatePetInput = {
   species: string;
   breed?: string;
   birthDate?: string;
+  location?: string;
+  weight?: number;
   color?: string;
   description?: string;
   imageUrl?: string;
