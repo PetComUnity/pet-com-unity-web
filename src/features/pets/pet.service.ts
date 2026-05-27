@@ -12,14 +12,43 @@ import {
   type DocumentSnapshot,
 } from "firebase/firestore";
 import type { Pet } from "@/types";
-import { COLLECTIONS, createServerTimestamp, removeUndefined, toDate } from "@/lib/firestore";
+import {
+  COLLECTIONS,
+  createServerTimestamp,
+  removeUndefined,
+  toDate,
+} from "@/lib/firestore";
 import { db, isFirebaseConfigured } from "@/lib/firebase";
 import type { CreatePetInput, UpdatePetInput } from "@/features/pets/pet.types";
 
 function assertFirebaseConfigured() {
   if (!isFirebaseConfigured) {
-    throw new Error("Firebase environment variables are missing. Add them before using pets.");
+    throw new Error(
+      "Firebase environment variables are missing. Add them before using pets.",
+    );
   }
+}
+
+function toOptionalWeight(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const parsedValue = Number(value);
+    return Number.isFinite(parsedValue) ? parsedValue : undefined;
+  }
+
+  return undefined;
+}
+
+function toOptionalText(value: unknown) {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return trimmed === "" ? undefined : trimmed;
 }
 
 function mapPet(snapshot: DocumentSnapshot<DocumentData>): Pet | null {
@@ -36,13 +65,16 @@ function mapPet(snapshot: DocumentSnapshot<DocumentData>): Pet | null {
     species: data.species ?? "",
     breed: data.breed ?? undefined,
     birthDate: data.birthDate ?? undefined,
+    location: toOptionalText(data.location ?? data.city),
+    weight: toOptionalWeight(data.weight),
     color: data.color ?? undefined,
     description: data.description ?? undefined,
     imageUrl: data.imageUrl ?? undefined,
     microchipId: data.microchipId ?? undefined,
     isLost: Boolean(data.isLost),
     isAdoptable: Boolean(data.isAdoptable),
-    verificationStatus: data.verificationStatus === "verified" ? "verified" : "unverified",
+    verificationStatus:
+      data.verificationStatus === "verified" ? "verified" : "unverified",
     verifiedBy: data.verifiedBy ?? undefined,
     verifiedAt: toDate(data.verifiedAt),
     publicQrId: data.publicQrId ?? snapshot.id,
@@ -54,9 +86,13 @@ function mapPet(snapshot: DocumentSnapshot<DocumentData>): Pet | null {
 function sortPetsDescending(pets: Pet[]) {
   return pets.sort((left, right) => {
     const leftTime =
-      left.updatedAt?.getTime() ?? left.createdAt?.getTime() ?? Number.MIN_SAFE_INTEGER;
+      left.updatedAt?.getTime() ??
+      left.createdAt?.getTime() ??
+      Number.MIN_SAFE_INTEGER;
     const rightTime =
-      right.updatedAt?.getTime() ?? right.createdAt?.getTime() ?? Number.MIN_SAFE_INTEGER;
+      right.updatedAt?.getTime() ??
+      right.createdAt?.getTime() ??
+      Number.MIN_SAFE_INTEGER;
 
     return rightTime - leftTime;
   });
@@ -75,6 +111,8 @@ export async function createPet(input: CreatePetInput) {
       species: input.species,
       breed: input.breed,
       birthDate: input.birthDate,
+      location: input.location,
+      weight: input.weight,
       color: input.color,
       description: input.description,
       imageUrl: input.imageUrl,
@@ -132,7 +170,10 @@ export async function getPetByPublicQrId(publicQrId: string) {
   assertFirebaseConfigured();
 
   const snapshot = await getDocs(
-    query(collection(db, COLLECTIONS.pets), where("publicQrId", "==", publicQrId)),
+    query(
+      collection(db, COLLECTIONS.pets),
+      where("publicQrId", "==", publicQrId),
+    ),
   );
 
   const match = snapshot.docs[0];
