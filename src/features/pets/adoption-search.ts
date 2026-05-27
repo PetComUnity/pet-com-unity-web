@@ -1,4 +1,5 @@
 export type PetSize = "small" | "medium" | "large";
+export type ApiPetSize = "S" | "M" | "L";
 export type PetWeightRange = {
   minWeight?: number;
   maxWeight?: number;
@@ -66,4 +67,16 @@ export function getWeightRangeForPetSize(size: PetSize): PetWeightRange {
   return {
     minWeight: MEDIUM_PET_MAX_WEIGHT + SIZE_WEIGHT_STEP,
   };
+}
+
+export function getApiPetSize(size: PetSize): ApiPetSize {
+  if (size === "small") {
+    return "S";
+  }
+
+  if (size === "medium") {
+    return "M";
+  }
+
+  return "L";
 }

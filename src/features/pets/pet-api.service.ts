@@ -1,6 +1,7 @@
 import type { Pet } from "@/types";
 import {
   ADOPTION_ANIMAL_OPTIONS,
+  getApiPetSize,
   getWeightRangeForPetSize,
   type AdoptionSearchFilters,
 } from "@/features/pets/adoption-search";
@@ -133,7 +134,7 @@ function buildAdoptablePetsQuery(
 
   if (filters.size !== "") {
     const weightRange = getWeightRangeForPetSize(filters.size);
-    query.set("size", filters.size);
+    query.set("size", getApiPetSize(filters.size));
 
     if (typeof weightRange.minWeight === "number") {
       query.set("minWeight", String(weightRange.minWeight));
