@@ -34,7 +34,7 @@ export function RegisterForm() {
     setFormError(null);
     try {
       await registerAccount(values);
-      router.replace(ROUTES.dashboard);
+      router.replace(ROUTES.pets);
     } catch (error) {
       setFormError(
         error instanceof Error

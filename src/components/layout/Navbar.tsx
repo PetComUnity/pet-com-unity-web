@@ -16,9 +16,9 @@ const marketingLinks = [
   { href: ROUTES.news, label: "News" },
 ];
 
-const dashboardLinks = [
-  { href: ROUTES.dashboard, label: "Dashboard" },
+const appLinks = [
   { href: ROUTES.pets, label: "My Pets" },
+  { href: ROUTES.newPet, label: "Add Pet" },
 ];
 
 const socialIcons = [
@@ -152,8 +152,8 @@ export function Navbar() {
           <div className="flex items-center gap-4 lg:gap-6">
             {appUser ? (
               <>
-                <Link href={ROUTES.dashboard} className={authTextClassName()}>
-                  Dashboard
+                <Link href={ROUTES.pets} className={authTextClassName()}>
+                  My Pets
                 </Link>
                 <button
                   type="button"
@@ -252,7 +252,7 @@ export function Navbar() {
 
               {appUser ? (
                 <div className="mt-3 flex flex-col items-center gap-3">
-                  {dashboardLinks.map((link) => (
+                  {appLinks.map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}
