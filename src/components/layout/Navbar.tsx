@@ -131,16 +131,16 @@ export function Navbar() {
           />
         </Link>
 
-        <div className="hidden min-w-0 flex-col justify-center md:flex">
-          <span className="font-serif text-lg font-semibold tracking-[-0.03em] text-[#1d2a3e]">
-            Pet.com.Unity
-          </span>
-          {appUser?.name ? (
+        {appUser?.name ? (
+          <div className="hidden min-w-0 flex-col justify-center md:flex">
+            <span className="font-serif text-lg font-semibold tracking-[-0.03em] text-[#1d2a3e]">
+              Pet.com.Unity
+            </span>
             <span className="text-xs font-medium text-[#6b5b4d]">
               Welcome {appUser.name}
             </span>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
 
         <div className="hidden min-w-0 flex-1 items-center justify-between md:flex">
           <nav
