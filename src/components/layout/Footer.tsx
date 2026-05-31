@@ -13,7 +13,7 @@ const socialLinks = [
     image: "/icons/facebook.svg",
   },
   {
-    label: "LinkedIn",
+    label: "YouTube",
     href: "https://youtube.com",
     image: "/icons/youtube.svg",
   },
@@ -21,10 +21,10 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-[#f7941d] px-4 py-8">
-      <div className="absolute inset-0 bg-[url('/images/footer_desktop.png')] bg-cover bg-center opacity-40" />
+    <footer className="relative h-[140px] overflow-hidden bg-[#f7941d]">
+      <div className="absolute inset-0 bg-[url('/images/footer_desktop.png')] bg-cover bg-center" />
 
-      <div className="relative z-10 mx-auto flex max-w-6xl flex-col items-center gap-5">
+      <div className="relative z-10 flex h-full flex-col items-center justify-center gap-3">
         <div className="flex items-center gap-4">
           {socialLinks.map(({ label, href, image }) => (
             <Link key={label} href={href} target="_blank" aria-label={label}>
@@ -39,7 +39,7 @@ export function Footer() {
           ))}
         </div>
 
-        <p className="text-center text-sm text-[#17243b]">
+        <p className="font-sans text-[12px] leading-[16px] font-normal text-white">
           © 2025 Pet.com.Unity. All rights reserved.
         </p>
       </div>
