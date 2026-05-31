@@ -1,38 +1,79 @@
+"use client";
+
 import Image from "next/image";
+import { useState, type FormEvent } from "react";
 import { ChevronDown } from "lucide-react";
+import {
+  ADOPTION_ANIMAL_OPTIONS,
+  ADOPTION_SIZE_OPTIONS,
+  DEFAULT_ADOPTION_SEARCH_FILTERS,
+  type AdoptionSearchFilters,
+} from "@/features/pets/adoption-search";
 import { cn } from "@/lib/utils";
 
 const selectFields = [
   {
     id: "animal",
     label: "Animal",
-    placeholder: "animal",
-    options: ["Dog", "Cat", "Rabbit", "Bird"],
+    emptyOptionLabel: "All animals",
+    options: ADOPTION_ANIMAL_OPTIONS,
   },
   {
     id: "size",
     label: "Size",
-    placeholder: "size",
-    options: ["Small", "Medium", "Large"],
-  },
-  {
-    id: "location",
-    label: "Location",
-    placeholder: "location",
-    options: ["Skopje", "Bitola", "Ohrid", "Tetovo"],
+    emptyOptionLabel: "All sizes",
+    options: ADOPTION_SIZE_OPTIONS,
   },
 ] as const;
+
+function HeroTextInput({
+  id,
+  label,
+  value,
+  placeholder,
+  onChange,
+}: {
+  id: "location";
+  label: string;
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="relative">
+      <label htmlFor={id} className="sr-only">
+        {label}
+      </label>
+      <input
+        id={id}
+        name={id}
+        type="text"
+        value={value}
+        placeholder={placeholder}
+        onChange={(event) => onChange(event.target.value)}
+        className={cn(
+          "h-12 w-full rounded-[1rem] border border-[#364153] bg-white px-4 text-[0.98rem] text-[#263043] transition outline-none sm:h-[3.15rem]",
+          "placeholder:text-[#b8bec8] focus:border-[#364153] focus:ring-2 focus:ring-[#364153]/10",
+        )}
+      />
+    </div>
+  );
+}
 
 function HeroSelect({
   id,
   label,
   options,
-  placeholder,
+  value,
+  emptyOptionLabel,
+  onChange,
 }: {
-  id: string;
+  id: keyof AdoptionSearchFilters;
   label: string;
-  options: readonly string[];
-  placeholder: string;
+  options: ReadonlyArray<Readonly<{ label: string; value: string }>>;
+  value: string;
+  emptyOptionLabel: string;
+  onChange: (value: string) => void;
 }) {
   return (
     <div className="relative">
@@ -42,19 +83,17 @@ function HeroSelect({
       <select
         id={id}
         name={id}
-        defaultValue=""
-        required
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
         className={cn(
           "h-12 w-full appearance-none rounded-[1rem] border border-[#364153] bg-white px-4 pr-12 text-[0.98rem] text-[#263043] transition outline-none sm:h-[3.15rem]",
-          "invalid:text-[#b8bec8] focus:border-[#364153] focus:ring-2 focus:ring-[#364153]/10",
+          "focus:border-[#364153] focus:ring-2 focus:ring-[#364153]/10",
         )}
       >
-        <option value="" disabled>
-          {placeholder}
-        </option>
+        <option value="">{emptyOptionLabel}</option>
         {options.map((option) => (
-          <option key={option} value={option.toLowerCase()}>
-            {option}
+          <option key={option.value} value={option.value}>
+            {option.label}
           </option>
         ))}
       </select>
@@ -63,7 +102,44 @@ function HeroSelect({
   );
 }
 
-export function AdoptionSearchForm({ className }: { className?: string }) {
+export function AdoptionSearchForm({
+  className,
+  filters = DEFAULT_ADOPTION_SEARCH_FILTERS,
+  isSearching = false,
+  onSearch,
+}: {
+  className?: string;
+  filters?: AdoptionSearchFilters;
+  isSearching?: boolean;
+  onSearch?: (filters: AdoptionSearchFilters) => void;
+}) {
+  const filterKey = `${filters.animal}:${filters.size}:${filters.location}`;
+  const [draftState, setDraftState] = useState(() => ({
+    filterKey,
+    filters,
+  }));
+  const draftFilters =
+    draftState.filterKey === filterKey ? draftState.filters : filters;
+
+  function updateFilter(field: keyof AdoptionSearchFilters, value: string) {
+    const nextFilters =
+      field === "animal"
+        ? { ...draftFilters, animal: value }
+        : field === "size"
+          ? { ...draftFilters, size: value as AdoptionSearchFilters["size"] }
+          : { ...draftFilters, location: value };
+
+    setDraftState({
+      filterKey,
+      filters: nextFilters,
+    });
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    onSearch?.(draftFilters);
+  }
+
   return (
     <div
       className={cn(
@@ -91,16 +167,46 @@ export function AdoptionSearchForm({ className }: { className?: string }) {
             </p>
           </div>
 
-          <form className="space-y-3.5 pt-1 font-sans">
+          <form
+            onSubmit={handleSubmit}
+            aria-busy={isSearching}
+            className="space-y-3.5 pt-1 font-sans"
+          >
             {selectFields.map((field) => (
-              <HeroSelect key={field.id} {...field} />
+              <HeroSelect
+                key={field.id}
+                {...field}
+                value={draftFilters[field.id]}
+                onChange={(value) => updateFilter(field.id, value)}
+              />
             ))}
+            <HeroTextInput
+              id="location"
+              label="Location"
+              value={draftFilters.location}
+              placeholder="Any location"
+              onChange={(value) => updateFilter("location", value)}
+            />
 
             <button
-              type="button"
-              className="mt-2 inline-flex h-[3.75rem] w-full items-center justify-center rounded-[1rem] border border-[#364153] bg-[#8df86e] text-[1.2rem] font-medium text-[#111111] transition hover:bg-[#6bb556] focus-visible:ring-2 focus-visible:ring-[#364153]/20 focus-visible:outline-none"
+              type="submit"
+              disabled={isSearching}
+              className={cn(
+                "mt-2 inline-flex h-[3.75rem] w-full items-center justify-center rounded-[1rem] border border-[#364153] bg-[#8df86e] text-[1.2rem] font-medium text-[#111111] transition focus-visible:ring-2 focus-visible:ring-[#364153]/20 focus-visible:outline-none",
+                isSearching ? "cursor-wait opacity-80" : "hover:bg-[#6bb556]",
+              )}
             >
-              Find
+              {isSearching ? (
+                <span className="inline-flex items-center gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="h-5 w-5 animate-spin rounded-full border-2 border-[#17243b]/30 border-t-[#17243b]"
+                  />
+                  Filtering...
+                </span>
+              ) : (
+                "Find"
+              )}
             </button>
           </form>
         </div>

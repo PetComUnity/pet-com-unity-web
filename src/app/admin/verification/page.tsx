@@ -70,7 +70,7 @@ export default function VerificationPage() {
         {actionError ? (
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-danger">{actionError}</p>
+              <p className="text-danger text-sm">{actionError}</p>
             </CardContent>
           </Card>
         ) : null}
@@ -82,7 +82,7 @@ export default function VerificationPage() {
         ) : loadError ? (
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-danger">{loadError}</p>
+              <p className="text-danger text-sm">{loadError}</p>
             </CardContent>
           </Card>
         ) : pets.length === 0 ? (
@@ -90,7 +90,8 @@ export default function VerificationPage() {
             <CardHeader>
               <CardTitle>Nothing waiting for review</CardTitle>
               <CardDescription>
-                All current pet profiles are verified, or the queue is still empty.
+                All current pet profiles are verified, or the queue is still
+                empty.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -102,21 +103,24 @@ export default function VerificationPage() {
                   <CardTitle>{pet.name}</CardTitle>
                   <CardDescription>
                     {pet.species}
-                    {pet.breed ? ` - ${pet.breed}` : ""} - Owner ID: {pet.ownerId}
+                    {pet.breed ? ` - ${pet.breed}` : ""} - Owner ID:{" "}
+                    {pet.ownerId}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                  <dl className="grid gap-3 text-sm text-muted sm:grid-cols-3">
+                  <dl className="text-muted grid gap-3 text-sm sm:grid-cols-3">
                     <div>
-                      <dt className="font-medium text-foreground">Microchip</dt>
+                      <dt className="text-foreground font-medium">Microchip</dt>
                       <dd>{pet.microchipId || "Not added"}</dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-foreground">Created</dt>
+                      <dt className="text-foreground font-medium">Created</dt>
                       <dd>{formatDate(pet.createdAt)}</dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-foreground">Lost status</dt>
+                      <dt className="text-foreground font-medium">
+                        Lost status
+                      </dt>
                       <dd>{pet.isLost ? "Lost" : "Safe"}</dd>
                     </div>
                   </dl>
@@ -132,7 +136,7 @@ export default function VerificationPage() {
                       setActionError(null);
 
                       try {
-                        await approvePetVerification(pet.id, appUser.uid);
+                        await approvePetVerification(pet.id, appUser.id);
                         setPets((currentPets) =>
                           currentPets.filter((item) => item.id !== pet.id),
                         );

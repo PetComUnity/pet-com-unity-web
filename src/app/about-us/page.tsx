@@ -37,5 +37,4 @@ export default function AboutUsPage() {
 
       <Footer />
     </>
-  );
-}
+

@@ -1,11 +1,11 @@
-export const USER_ROLES = ["owner", "vet", "admin"] as const;
+export const USER_ROLES = ["owner", "vet", "shelter", "admin"] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
 export type PetVerificationStatus = "unverified" | "verified";
 export type LostReportStatus = "active" | "resolved";
 
 export interface AppUser {
-  uid: string;
+  id: string;
   email: string;
   role: UserRole;
   name: string;
@@ -21,6 +21,8 @@ export interface Pet {
   species: string;
   breed?: string;
   birthDate?: string;
+  location?: string;
+  weight?: number;
   color?: string;
   description?: string;
   imageUrl?: string;
