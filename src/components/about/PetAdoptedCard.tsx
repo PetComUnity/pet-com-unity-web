@@ -10,19 +10,19 @@ type PetAdoptedCardProps = {
 
 export function PetAdoptedCard({ name, image }: PetAdoptedCardProps) {
   return (
-    <Card className="w-[220px] overflow-hidden rounded-2xl border-none bg-white shadow-md">
-      {/* Image */}
-      <div className="relative h-[220px] w-full">
+    <Card className="w-full max-w-[312px] overflow-hidden rounded-2xl border border-[#010101] bg-white shadow-sm">
+      <div className="relative m-4 h-56 overflow-hidden rounded-2xl">
         <Image src={image} alt={name} fill className="object-cover" />
       </div>
 
-      {/* Content */}
-      <CardContent className="flex flex-col items-center gap-3 p-4">
-        <h3 className="text-lg font-semibold text-[#17243b]">{name}</h3>
+      <CardContent className="px-4 pt-0 pb-4">
+        <h3 className="font-display text-[24px] leading-6 font-bold text-[#010101]">
+          {name}
+        </h3>
 
         <Button
-          size="sm"
-          className="rounded-full bg-[#f7941d] px-4 text-sm text-[#17243b] hover:bg-[#e68612]"
+          fullWidth
+          className="font-display mt-4 h-[61px] rounded-2xl border border-[#010101] bg-[#ef9322] text-[24px] leading-6 font-bold text-[#010101] hover:bg-[#e68612]"
         >
           Happy with my family
         </Button>

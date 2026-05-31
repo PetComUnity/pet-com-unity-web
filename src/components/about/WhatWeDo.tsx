@@ -8,10 +8,12 @@ const items = [
 
 export function WhatWeDo() {
   return (
-    <section className="mx-auto w-full max-w-[1200px] px-20 pt-8">
-      <h2 className="font-serif text-2xl text-[#17243b]">What We Do</h2>
+    <section className="mx-auto w-full max-w-[1300px] px-4 py-8 md:px-8 lg:px-20">
+      <h2 className="font-display text-[24px] font-bold text-[#1A202C] md:text-[32px]">
+        What We Do
+      </h2>
 
-      <ul className="mt-2 list-disc pl-8 text-xl leading-7 text-[#17243b]">
+      <ul className="font-display mt-3 list-disc pl-8 text-[24px] leading-[120%] text-[#1A202C] md:text-[32px]">
         {items.map((item) => (
           <li key={item}>{item}</li>
         ))}
