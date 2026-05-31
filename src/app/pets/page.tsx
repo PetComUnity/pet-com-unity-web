@@ -32,7 +32,7 @@ function tabClassName(isActive: boolean) {
 
 function MyPetCard({ pet }: { pet: Pet }) {
   return (
-    <article className="w-full max-w-[360px] rounded-[18px] border border-[#1a202c] bg-white p-6 shadow-[0_4px_4px_rgba(0,0,0,0.25)]">
+    <article className="relative w-full max-w-[360px] rounded-[18px] border border-[#1a202c] bg-white p-6 shadow-[0_4px_4px_rgba(0,0,0,0.25)]">
       <div className="aspect-[312/364] overflow-hidden rounded-[14px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -41,6 +41,17 @@ function MyPetCard({ pet }: { pet: Pet }) {
           className="h-full w-full object-cover"
         />
       </div>
+
+      {pet.verificationStatus === "verified" ? (
+        <Image
+          src="/images/VerifyedMark.png"
+          alt=""
+          width={128}
+          height={128}
+          aria-hidden="true"
+          className="pointer-events-none absolute top-[58%] right-2 z-10 w-[104px] select-none sm:right-1 sm:w-[118px]"
+        />
+      ) : null}
 
       <div className="space-y-7 pt-7">
         <h2 className="text-[1.25rem] leading-none font-bold tracking-[-0.03em] text-[#010101]">
