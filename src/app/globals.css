@@ -72,13 +72,6 @@ a {
   text-decoration: none;
 }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
-
 ::selection {
   background: rgba(15, 118, 110, 0.18);
 }
