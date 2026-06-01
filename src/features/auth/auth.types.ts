@@ -24,5 +24,16 @@ export const loginSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters."),
 });
 
+export const profileUpdateFieldSchemas = {
+  name: requiredText("Name", 2, 50),
+  email: z.string().trim().email("Enter a valid email address."),
+  phone: z.string().trim().max(30, "Phone must be 30 characters or fewer."),
+  city: z.string().trim().max(80, "City must be 80 characters or fewer."),
+};
+
+export const profileUpdateSchema = z.object(profileUpdateFieldSchemas);
+
 export type RegisterFormValues = z.infer<typeof registerSchema>;
 export type LoginFormValues = z.infer<typeof loginSchema>;
+export type UpdateProfileValues = z.infer<typeof profileUpdateSchema>;
+export type UpdateProfilePayload = Partial<UpdateProfileValues>;

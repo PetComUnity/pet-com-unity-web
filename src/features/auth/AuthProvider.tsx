@@ -17,10 +17,12 @@ import {
   logoutUser,
   registerUser,
   setToken,
+  updateCurrentUserProfile,
 } from "@/features/auth/auth.service";
 import type {
   LoginFormValues,
   RegisterFormValues,
+  UpdateProfilePayload,
 } from "@/features/auth/auth.types";
 
 type AuthContextValue = {
@@ -29,6 +31,7 @@ type AuthContextValue = {
   register: (values: RegisterFormValues) => Promise<void>;
   login: (values: LoginFormValues) => Promise<void>;
   logout: () => Promise<void>;
+  updateProfile: (values: UpdateProfilePayload) => Promise<AppUser>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -76,9 +79,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const updateProfile = useCallback(async (values: UpdateProfilePayload) => {
+    const updatedUser = await updateCurrentUserProfile(values);
+    setUser(updatedUser);
+    return updatedUser;
+  }, []);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ appUser: user, loading, register, login, logout }),
-    [user, loading, register, login, logout],
+    () => ({ appUser: user, loading, register, login, logout, updateProfile }),
+    [user, loading, register, login, logout, updateProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

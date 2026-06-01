@@ -17,6 +17,7 @@ const marketingLinks = [
 ];
 
 const appLinks = [
+  { href: ROUTES.profile, label: "Profile" },
   { href: ROUTES.pets, label: "My Pets" },
   { href: ROUTES.newPet, label: "Add Pet" },
 ];
@@ -163,6 +164,9 @@ export function Navbar() {
           <div className="flex items-center gap-4 lg:gap-6">
             {appUser ? (
               <>
+                <Link href={ROUTES.profile} className={authTextClassName()}>
+                  Profile
+                </Link>
                 <Link href={ROUTES.pets} className={authTextClassName()}>
                   My Pets
                 </Link>

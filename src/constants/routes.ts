@@ -4,6 +4,7 @@ export const ROUTES = {
   news: "/news",
   login: "/login",
   register: "/register",
+  profile: "/profile",
   dashboard: "/dashboard",
   pets: "/pets",
   newPet: "/pets/new",
