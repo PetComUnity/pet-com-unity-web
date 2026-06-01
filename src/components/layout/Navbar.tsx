@@ -16,9 +16,9 @@ const marketingLinks = [
   { href: ROUTES.news, label: "News" },
 ];
 
-const dashboardLinks = [
-  { href: ROUTES.dashboard, label: "Dashboard" },
+const appLinks = [
   { href: ROUTES.pets, label: "My Pets" },
+  { href: ROUTES.newPet, label: "Add Pet" },
 ];
 
 const socialIcons = [
@@ -131,6 +131,17 @@ export function Navbar() {
           />
         </Link>
 
+        {appUser?.name ? (
+          <div className="hidden min-w-0 flex-col justify-center md:flex">
+            <span className="font-serif text-lg font-semibold tracking-[-0.03em] text-[#1d2a3e]">
+              Pet.com.Unity
+            </span>
+            <span className="text-xs font-medium text-[#6b5b4d]">
+              Welcome {appUser.name}
+            </span>
+          </div>
+        ) : null}
+
         <div className="hidden min-w-0 flex-1 items-center justify-between md:flex">
           <nav
             className="flex min-w-0 items-center gap-5 lg:gap-8"
@@ -152,8 +163,8 @@ export function Navbar() {
           <div className="flex items-center gap-4 lg:gap-6">
             {appUser ? (
               <>
-                <Link href={ROUTES.dashboard} className={authTextClassName()}>
-                  Dashboard
+                <Link href={ROUTES.pets} className={authTextClassName()}>
+                  My Pets
                 </Link>
                 <button
                   type="button"
@@ -252,7 +263,7 @@ export function Navbar() {
 
               {appUser ? (
                 <div className="mt-3 flex flex-col items-center gap-3">
-                  {dashboardLinks.map((link) => (
+                  {appLinks.map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}

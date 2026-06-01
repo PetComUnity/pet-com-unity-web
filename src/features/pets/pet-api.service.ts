@@ -1,4 +1,5 @@
 import type { Pet } from "@/types";
+import { getToken } from "@/features/auth/auth.service";
 import {
   ADOPTION_ANIMAL_OPTIONS,
   getApiPetSize,
@@ -39,13 +40,25 @@ export type PaginatedPetsResult = {
   meta: PaginationMeta;
 };
 
+export type CreatePetApiInput = {
+  name: string;
+  species: string;
+  breed?: string;
+  birthDate?: string;
+  microchipId?: string;
+  gender?: string;
+  weight?: number;
+  colorTheme?: string;
+};
+
 const DEFAULT_API_BASE_URL = "http://localhost:5000/api";
 
 function getApiBaseUrl() {
-  return (process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE_URL).replace(
-    /\/$/,
-    "",
-  );
+  return (
+    process.env.NEXT_PUBLIC_API_BASE_URL ??
+    process.env.NEXT_PUBLIC_API_URL ??
+    DEFAULT_API_BASE_URL
+  ).replace(/\/$/, "");
 }
 
 function toOptionalDate(value?: string | null) {
@@ -90,20 +103,49 @@ function mapPet(pet: ApiPet): Pet {
   };
 }
 
+type FetchApiOptions = {
+  errorMessage?: string;
+  method?: "GET" | "POST";
+  body?: unknown;
+  signal?: AbortSignal;
+  token?: string;
+};
+
 async function fetchApi<T, M = undefined>(
   path: string,
-  signal?: AbortSignal,
+  options: FetchApiOptions = {},
 ): Promise<ApiResponse<T, M>> {
+  const { body, errorMessage, method = "GET", signal, token } = options;
+  const headers: Record<string, string> = {};
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  if (body !== undefined) {
+    headers["Content-Type"] = "application/json";
+  }
+
   const response = await fetch(`${getApiBaseUrl()}${path}`, {
     cache: "no-store",
+    method,
+    headers,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
     signal,
   });
 
+  const payload = (await response.json().catch(() => ({}))) as ApiResponse<
+    T,
+    M
+  >;
+
   if (!response.ok) {
-    throw new Error("We could not load adoptable pets right now.");
+    throw new Error(
+      payload.message ?? errorMessage ?? "We could not load pets right now.",
+    );
   }
 
-  return (await response.json()) as ApiResponse<T, M>;
+  return payload;
 }
 
 function buildAdoptablePetsQuery(
@@ -157,7 +199,10 @@ export async function getAdoptablePets(
   const query = buildAdoptablePetsQuery(page, limit, filters);
   const payload = await fetchApi<ApiPet[], PaginationMeta>(
     `/pets?${query.toString()}`,
-    signal,
+    {
+      errorMessage: "We could not load adoptable pets right now.",
+      signal,
+    },
   );
   const pets = Array.isArray(payload.data) ? payload.data.map(mapPet) : [];
 
@@ -212,4 +257,55 @@ export async function getPetById(petId: string): Promise<Pet | null> {
 
   const payload = (await response.json()) as ApiResponse<ApiPet>;
   return payload.data ? mapPet(payload.data) : null;
+}
+
+type MyPetsPayload = ApiPet[] | { pets?: ApiPet[] };
+type CreatedPetPayload = ApiPet | { pet?: ApiPet };
+
+function hasWrappedPet(
+  payload: CreatedPetPayload,
+): payload is { pet?: ApiPet } {
+  return "pet" in payload;
+}
+
+export async function createPet(input: CreatePetApiInput): Promise<Pet | null> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("Please sign in to add a pet.");
+  }
+
+  const payload = await fetchApi<CreatedPetPayload>("/pets", {
+    body: input,
+    errorMessage: "We could not add your pet right now.",
+    method: "POST",
+    token,
+  });
+
+  if (!payload.data) {
+    return null;
+  }
+
+  const createdPet: ApiPet | undefined =
+    hasWrappedPet(payload.data) ? payload.data.pet : payload.data;
+
+  return createdPet ? mapPet(createdPet) : null;
+}
+
+export async function getMyPets(signal?: AbortSignal): Promise<Pet[]> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("Please sign in to view your pets.");
+  }
+
+  const payload = await fetchApi<MyPetsPayload>("/me/pets", {
+    errorMessage: "We could not load your pets right now.",
+    signal,
+    token,
+  });
+
+  const pets = Array.isArray(payload.data) ? payload.data : payload.data?.pets;
+
+  return Array.isArray(pets) ? pets.map(mapPet) : [];
 }

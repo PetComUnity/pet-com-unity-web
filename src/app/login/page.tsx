@@ -15,7 +15,7 @@ export default function LoginPage() {
   const { loading, appUser } = useAuth();
 
   useEffect(() => {
-    if (appUser) router.replace(ROUTES.dashboard);
+    if (appUser) router.replace(ROUTES.pets);
   }, [router, appUser]);
 
   if (loading || appUser) {

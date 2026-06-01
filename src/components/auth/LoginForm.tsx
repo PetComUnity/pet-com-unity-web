@@ -31,7 +31,7 @@ export function LoginForm() {
     setFormError(null);
     try {
       await login(values);
-      router.replace(ROUTES.dashboard);
+      router.replace(ROUTES.pets);
     } catch (error) {
       setFormError(
         error instanceof Error

@@ -33,7 +33,7 @@ export function ProtectedRoute({
     }
 
     if (isUnauthorized) {
-      router.replace(ROUTES.dashboard);
+      router.replace(ROUTES.pets);
     }
   }, [isUnauthorized, loading, router, appUser]);
 
