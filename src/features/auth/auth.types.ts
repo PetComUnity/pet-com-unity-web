@@ -33,7 +33,26 @@ export const profileUpdateFieldSchemas = {
 
 export const profileUpdateSchema = z.object(profileUpdateFieldSchemas);
 
+export const passwordChangeSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Enter your current password."),
+    newPassword: z
+      .string()
+      .min(6, "New password must be at least 6 characters.")
+      .max(100, "New password must be 100 characters or fewer."),
+    confirmPassword: z.string().min(1, "Confirm your new password."),
+  })
+  .refine((values) => values.newPassword === values.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
+
 export type RegisterFormValues = z.infer<typeof registerSchema>;
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type UpdateProfileValues = z.infer<typeof profileUpdateSchema>;
 export type UpdateProfilePayload = Partial<UpdateProfileValues>;
+export type ChangePasswordValues = z.infer<typeof passwordChangeSchema>;
+export type ChangePasswordPayload = Pick<
+  ChangePasswordValues,
+  "currentPassword" | "newPassword"
+>;

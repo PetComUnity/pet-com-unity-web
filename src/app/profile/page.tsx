@@ -5,6 +5,10 @@ import { useState, type FormEvent } from "react";
 import {
   Calendar,
   Edit3,
+  Eye,
+  EyeOff,
+  KeyRound,
+  LockKeyhole,
   Mail,
   MapPin,
   PawPrint,
@@ -20,10 +24,13 @@ import { ROLE_LABELS, VERIFICATION_ALLOWED_ROLES } from "@/constants/roles";
 import { ROUTES } from "@/constants/routes";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import {
+  passwordChangeSchema,
   profileUpdateFieldSchemas,
+  type ChangePasswordValues,
   type UpdateProfilePayload,
   type UpdateProfileValues,
 } from "@/features/auth/auth.types";
+import { changeCurrentUserPassword } from "@/features/auth/auth.service";
 import { useAuth } from "@/hooks/useAuth";
 import { cn, formatDate } from "@/lib/utils";
 import type { AppUser } from "@/types";
@@ -36,6 +43,7 @@ type DetailItemProps = {
 };
 
 type EditableProfileField = keyof UpdateProfileValues;
+type PasswordField = keyof ChangePasswordValues;
 
 type EditableDetailItemProps = DetailItemProps & {
   field: EditableProfileField;
@@ -56,6 +64,12 @@ type QuickAction = {
   label: string;
   description: string;
   icon: LucideIcon;
+};
+
+const emptyPasswordValues: ChangePasswordValues = {
+  currentPassword: "",
+  newPassword: "",
+  confirmPassword: "",
 };
 
 function getMemberSince(value: AppUser["createdAt"]) {
@@ -201,6 +215,241 @@ function EditableDetailItem({
         )}
       </dd>
     </div>
+  );
+}
+
+type PasswordInputProps = {
+  field: PasswordField;
+  label: string;
+  value: string;
+  error?: string;
+  visible: boolean;
+  disabled: boolean;
+  autoComplete: string;
+  onChange: (field: PasswordField, value: string) => void;
+  onToggleVisibility: (field: PasswordField) => void;
+};
+
+function PasswordInput({
+  field,
+  label,
+  value,
+  error,
+  visible,
+  disabled,
+  autoComplete,
+  onChange,
+  onToggleVisibility,
+}: PasswordInputProps) {
+  const inputId = `profile-${field}`;
+
+  return (
+    <div className="space-y-2">
+      <label
+        htmlFor={inputId}
+        className="block text-sm font-bold text-[#1a202c]"
+      >
+        {label}
+      </label>
+      <span className="relative block">
+        <input
+          id={inputId}
+          type={visible ? "text" : "password"}
+          value={value}
+          autoComplete={autoComplete}
+          className="h-12 w-full rounded-[12px] border border-[#1a202c] bg-white px-4 pr-12 text-sm font-semibold text-[#1a202c] transition outline-none placeholder:text-[#7a695b]/60 focus:ring-2 focus:ring-[#ef9322]/30 disabled:cursor-not-allowed disabled:bg-[#f3eee7]"
+          disabled={disabled}
+          onChange={(event) => onChange(field, event.target.value)}
+        />
+        <button
+          type="button"
+          className="absolute top-1/2 right-3 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[10px] text-[#7a695b] transition hover:bg-[#fff3e4] hover:text-[#1a202c] focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+          aria-label={visible ? `Hide ${label}` : `Show ${label}`}
+          title={visible ? `Hide ${label}` : `Show ${label}`}
+          disabled={disabled}
+          onClick={() => onToggleVisibility(field)}
+        >
+          {visible ? (
+            <EyeOff className="h-4 w-4" strokeWidth={2.4} />
+          ) : (
+            <Eye className="h-4 w-4" strokeWidth={2.4} />
+          )}
+        </button>
+      </span>
+      {error ? (
+        <span className="text-xs font-medium text-[#b91c1c]">{error}</span>
+      ) : null}
+    </div>
+  );
+}
+
+function ChangePasswordSection() {
+  const [passwordValues, setPasswordValues] =
+    useState<ChangePasswordValues>(emptyPasswordValues);
+  const [passwordErrors, setPasswordErrors] = useState<
+    Partial<Record<PasswordField, string>>
+  >({});
+  const [visiblePasswordFields, setVisiblePasswordFields] = useState<
+    Partial<Record<PasswordField, boolean>>
+  >({});
+  const [submittingPassword, setSubmittingPassword] = useState(false);
+  const [passwordFormError, setPasswordFormError] = useState<string | null>(
+    null,
+  );
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+
+  function clearPasswordError(field: PasswordField) {
+    setPasswordErrors((currentErrors) => {
+      const nextErrors = { ...currentErrors };
+      delete nextErrors[field];
+      return nextErrors;
+    });
+  }
+
+  function handlePasswordChange(field: PasswordField, value: string) {
+    setPasswordValues((currentValues) => ({
+      ...currentValues,
+      [field]: value,
+    }));
+    clearPasswordError(field);
+    setPasswordFormError(null);
+    setPasswordSuccess(null);
+  }
+
+  function togglePasswordVisibility(field: PasswordField) {
+    setVisiblePasswordFields((currentFields) => ({
+      ...currentFields,
+      [field]: !currentFields[field],
+    }));
+  }
+
+  async function handlePasswordSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const parsedValues = passwordChangeSchema.safeParse(passwordValues);
+
+    if (!parsedValues.success) {
+      const nextErrors: Partial<Record<PasswordField, string>> = {};
+
+      parsedValues.error.issues.forEach((issue) => {
+        const field = issue.path[0];
+
+        if (
+          typeof field === "string" &&
+          field in passwordValues &&
+          !nextErrors[field as PasswordField]
+        ) {
+          nextErrors[field as PasswordField] = issue.message;
+        }
+      });
+
+      setPasswordErrors(nextErrors);
+      setPasswordFormError(null);
+      setPasswordSuccess(null);
+      return;
+    }
+
+    setSubmittingPassword(true);
+    setPasswordErrors({});
+    setPasswordFormError(null);
+    setPasswordSuccess(null);
+
+    try {
+      await changeCurrentUserPassword({
+        currentPassword: parsedValues.data.currentPassword,
+        newPassword: parsedValues.data.newPassword,
+      });
+      setPasswordValues(emptyPasswordValues);
+      setVisiblePasswordFields({});
+      setPasswordSuccess("Password updated successfully.");
+    } catch (error) {
+      setPasswordFormError(
+        error instanceof Error
+          ? error.message
+          : "We could not update your password right now.",
+      );
+    } finally {
+      setSubmittingPassword(false);
+    }
+  }
+
+  return (
+    <section className="rounded-[18px] border border-[#1a202c] bg-white p-5 shadow-[0_4px_4px_rgba(0,0,0,0.16)] sm:p-6">
+      <div className="mb-5 flex items-center gap-3">
+        <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#97ff7b] text-[#1a202c]">
+          <LockKeyhole className="h-5 w-5" strokeWidth={2.3} />
+        </span>
+        <div>
+          <h2 className="font-display text-[1.75rem] leading-none font-bold text-[#1a202c]">
+            Change password
+          </h2>
+          <p className="mt-1 text-sm font-medium text-[#7a695b]">
+            Update the password used to sign in
+          </p>
+        </div>
+      </div>
+
+      <form
+        className="grid gap-4 lg:grid-cols-[repeat(3,minmax(0,1fr))]"
+        onSubmit={handlePasswordSubmit}
+      >
+        <PasswordInput
+          field="currentPassword"
+          label="Current password"
+          value={passwordValues.currentPassword}
+          error={passwordErrors.currentPassword}
+          visible={Boolean(visiblePasswordFields.currentPassword)}
+          disabled={submittingPassword}
+          autoComplete="current-password"
+          onChange={handlePasswordChange}
+          onToggleVisibility={togglePasswordVisibility}
+        />
+        <PasswordInput
+          field="newPassword"
+          label="New password"
+          value={passwordValues.newPassword}
+          error={passwordErrors.newPassword}
+          visible={Boolean(visiblePasswordFields.newPassword)}
+          disabled={submittingPassword}
+          autoComplete="new-password"
+          onChange={handlePasswordChange}
+          onToggleVisibility={togglePasswordVisibility}
+        />
+        <PasswordInput
+          field="confirmPassword"
+          label="Confirm password"
+          value={passwordValues.confirmPassword}
+          error={passwordErrors.confirmPassword}
+          visible={Boolean(visiblePasswordFields.confirmPassword)}
+          disabled={submittingPassword}
+          autoComplete="new-password"
+          onChange={handlePasswordChange}
+          onToggleVisibility={togglePasswordVisibility}
+        />
+
+        <div className="flex flex-col gap-3 lg:col-span-3">
+          {passwordFormError ? (
+            <p className="text-sm font-medium text-[#b91c1c]">
+              {passwordFormError}
+            </p>
+          ) : null}
+          {passwordSuccess ? (
+            <p className="text-sm font-semibold text-[#166534]">
+              {passwordSuccess}
+            </p>
+          ) : null}
+
+          <button
+            type="submit"
+            className="font-display inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[14px] border border-[#1a202c] bg-[#97ff7b] px-5 text-[1.25rem] leading-none font-bold text-[#1a202c] transition hover:-translate-y-0.5 hover:bg-[#8df86e] focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-4 focus-visible:ring-offset-white focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+            disabled={submittingPassword}
+          >
+            <KeyRound className="h-5 w-5" strokeWidth={2.4} />
+            {submittingPassword ? "Updating..." : "Update password"}
+          </button>
+        </div>
+      </form>
+    </section>
   );
 }
 
@@ -433,6 +682,8 @@ function ProfileContent() {
             </dl>
           </section>
         </div>
+
+        <ChangePasswordSection />
 
         <section className="space-y-4">
           <div>

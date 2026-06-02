@@ -1,6 +1,7 @@
 import type { AppUser } from "@/types";
 import { apiRequest } from "@/lib/api";
 import type {
+  ChangePasswordPayload,
   LoginFormValues,
   RegisterFormValues,
   UpdateProfilePayload,
@@ -90,4 +91,20 @@ export async function updateCurrentUserProfile(
   });
 
   return hasWrappedUser(response) ? response.user : response;
+}
+
+export async function changeCurrentUserPassword(
+  values: ChangePasswordPayload,
+): Promise<void> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("Please sign in to change your password.");
+  }
+
+  await apiRequest<void>("/me/password", {
+    method: "PUT",
+    body: values,
+    token,
+  });
 }
