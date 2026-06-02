@@ -11,8 +11,9 @@
   --accent: #c2410c;
   --success: #15803d;
   --danger: #b91c1c;
-  --primary-text: #010101;
-  --input-border: #010101;
+  --primary-text: #1a202c;
+  --input-border: #1a202c;
+  --greenaccent: #97ff7b;
   --placeholder: rgba(122, 120, 120, 0.5);
   --font-sans-stack:
     var(--font-montserrat), "Segoe UI", Arial, Helvetica, sans-serif;
