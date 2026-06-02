@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { getMyPets } from "@/features/pets/pet-api.service";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
@@ -30,6 +31,7 @@ function tabClassName(isActive: boolean) {
 }
 
 export default function MyPetsPage() {
+  const router = useRouter();
   const { appUser, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<PetTabId>("my-pets");
   const [pets, setPets] = useState<Pet[]>([]);
@@ -80,6 +82,16 @@ export default function MyPetsPage() {
 
   const hasPets = !loadingPets && !petsError && pets.length > 0;
 
+  function handleTabClick(tabId: PetTabId) {
+    if (tabId === "calendar") {
+      router.push("/pets/calendar");
+    } else if (tabId === "adoption-list") {
+      router.push("/pets/adoption-list");
+    } else {
+      setActiveTab(tabId);
+    }
+  }
+
   return (
     <ProtectedRoute>
       <section className="min-h-[calc(100vh-72px)] bg-[#fcf5eb]">
@@ -116,7 +128,7 @@ export default function MyPetsPage() {
                     aria-selected={isActive}
                     aria-controls={`panel-${tab.id}`}
                     className={tabClassName(isActive)}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => handleTabClick(tab.id)}
                   >
                     {tab.label}
                     <span

@@ -7,6 +7,8 @@ export const ROUTES = {
   dashboard: "/dashboard",
   pets: "/pets",
   newPet: "/pets/new",
+  calendar: "/pets/calendar",
+  adoptionList: "/pets/adoption-list",
   lostPets: "/lost-pets",
   adminVerification: "/admin/verification",
 } as const;
