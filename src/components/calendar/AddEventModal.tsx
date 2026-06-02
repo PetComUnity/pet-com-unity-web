@@ -120,7 +120,6 @@ export function AddEventModal({
   const abortRef = useRef<AbortController | null>(null);
   const locationWrapRef = useRef<HTMLDivElement>(null);
 
-  // Close suggestions when clicking outside
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (
@@ -134,14 +133,13 @@ export function AddEventModal({
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // Debounced address search via Nominatim
   useEffect(() => {
-    if (location.trim().length < 3) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
     const timer = setTimeout(async () => {
+      if (location.trim().length < 3) {
+        setSuggestions([]);
+        setShowSuggestions(false);
+        return;
+      }
       abortRef.current?.abort();
       abortRef.current = new AbortController();
       setLoadingSuggestions(true);
