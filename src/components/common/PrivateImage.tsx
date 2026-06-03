@@ -16,7 +16,7 @@ const API_BASE_URL =
   "http://localhost:5000/api";
 
 export function PrivateImage({ fileId, alt, className, fallbackSrc }: PrivateImageProps) {
-  const [src, setSrc] = useState<string>(fallbackSrc);
+  const [src, setSrc] = useState<string | null>(fallbackSrc || null);
 
   useEffect(() => {
     const token = getToken();
@@ -42,6 +42,8 @@ export function PrivateImage({ fileId, alt, className, fallbackSrc }: PrivateIma
       if (blobUrl) URL.revokeObjectURL(blobUrl);
     };
   }, [fileId, fallbackSrc]);
+
+  if (!src) return null;
 
   // eslint-disable-next-line @next/next/no-img-element
   return <img src={src} alt={alt} className={className} />;

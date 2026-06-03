@@ -171,7 +171,11 @@ export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
           className="grid gap-10 lg:grid-cols-[180px_minmax(0,1fr)] lg:gap-[50px]"
         >
           <div className="flex flex-col items-center gap-9">
-            <div className="flex h-[292px] w-[180px] items-center justify-center overflow-hidden rounded-[14px] border border-[#c8c8c8] bg-white">
+            <div
+              className="flex h-[292px] w-[180px] cursor-pointer items-center justify-center overflow-hidden rounded-[14px] border border-[#c8c8c8] bg-white transition hover:border-[#ff8a24]"
+              onClick={() => fileInputRef.current?.click()}
+              title="Click to upload photo"
+            >
               {previewUrl ? (
                 <img
                   src={previewUrl}

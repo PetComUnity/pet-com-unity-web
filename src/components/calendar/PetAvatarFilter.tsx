@@ -46,31 +46,19 @@ export function PetAvatarFilter({ pets, selectedPetId, onSelect }: PetAvatarFilt
             onClick={() => onSelect(isSelected ? null : pet.id)}
             title={pet.name}
           >
-            {pet.imageFileId ? (
-              <PrivateImage
-                fileId={pet.imageFileId}
-                alt={pet.name}
-                className="w-[34px] h-[34px] rounded-full object-cover"
-                fallbackSrc=""
-              />
-            ) : pet.imageUrl ? (
-              <div className="relative w-[34px] h-[34px] rounded-full overflow-hidden">
-                <Image
-                  src={pet.imageUrl}
+            <div className="relative w-[34px] h-[34px] rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: color }}>
+              {pet.name[0]?.toUpperCase()}
+              {pet.imageFileId ? (
+                <PrivateImage
+                  fileId={pet.imageFileId}
                   alt={pet.name}
-                  fill
-                  sizes="34px"
-                  className="object-cover"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  fallbackSrc=""
                 />
-              </div>
-            ) : (
-              <div
-                className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-xs font-bold text-white"
-                style={{ backgroundColor: color }}
-              >
-                {pet.name[0]?.toUpperCase()}
-              </div>
-            )}
+              ) : pet.imageUrl ? (
+                <Image src={pet.imageUrl} alt={pet.name} fill sizes="34px" className="object-cover" />
+              ) : null}
+            </div>
           </div>
         );
       })}

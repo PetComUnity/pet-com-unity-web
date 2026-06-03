@@ -24,31 +24,19 @@ export function EventCard({ event, pets, onDelete, onEdit }: EventCardProps) {
 
   return (
     <div className="relative flex items-center gap-4 bg-white border border-gray-200 rounded-2xl shadow-sm p-3 pr-16 overflow-hidden">
-      {pet?.imageFileId ? (
-        <PrivateImage
-          fileId={pet.imageFileId}
-          alt={pet.name}
-          className="w-10 h-10 rounded-2xl object-cover shrink-0"
-          fallbackSrc=""
-        />
-      ) : pet?.imageUrl ? (
-        <div className="relative w-10 h-10 rounded-2xl overflow-hidden shrink-0">
-          <Image
-            src={pet.imageUrl}
-            alt={pet.name}
-            fill
-            sizes="40px"
-            className="object-cover"
+      <div className="relative w-10 h-10 rounded-2xl overflow-hidden flex items-center justify-center text-white font-bold text-sm shrink-0" style={{ backgroundColor: color }}>
+        {pet?.name[0]?.toUpperCase() ?? '?'}
+        {pet?.imageFileId ? (
+          <PrivateImage
+            fileId={pet.imageFileId}
+            alt={pet?.name ?? ''}
+            className="absolute inset-0 w-full h-full object-cover"
+            fallbackSrc=""
           />
-        </div>
-      ) : (
-        <div
-          className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-bold text-sm shrink-0"
-          style={{ backgroundColor: color }}
-        >
-          {pet?.name[0]?.toUpperCase() ?? '?'}
-        </div>
-      )}
+        ) : pet?.imageUrl ? (
+          <Image src={pet.imageUrl} alt={pet.name} fill sizes="40px" className="object-cover" />
+        ) : null}
+      </div>
 
       <div className="flex flex-col min-w-0">
         <span className="font-display text-sm md:text-base font-medium text-[#1a202c] truncate">
