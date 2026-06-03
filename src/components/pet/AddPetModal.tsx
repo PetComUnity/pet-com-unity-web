@@ -1,8 +1,7 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useState, type FormEvent } from "react";
-import { ChevronDown, Plus, X } from "lucide-react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { Camera, ChevronDown, Plus, X } from "lucide-react";
 import {
   createPet,
   type CreatePetApiInput,
@@ -73,6 +72,14 @@ function getPetPayload(formData: FormData): CreatePetApiInput {
 export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setPreviewUrl(URL.createObjectURL(file));
+  }
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -89,8 +96,11 @@ export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
     };
-  }, [onClose]);
+  }, [onClose, previewUrl]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -150,21 +160,34 @@ export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
         >
           <div className="flex flex-col items-center gap-9">
             <div className="flex h-[292px] w-[180px] items-center justify-center overflow-hidden rounded-[14px] border border-[#c8c8c8] bg-white">
-              <Image
-                src="/images/dog-black.png"
-                alt=""
-                width={180}
-                height={292}
-                aria-hidden="true"
-                className="h-full w-full object-cover object-center opacity-50"
-              />
+              {previewUrl ? (
+                <img
+                  src={previewUrl}
+                  alt="Pet avatar preview"
+                  className="h-full w-full object-cover object-center"
+                />
+              ) : (
+                <div className="flex flex-col items-center gap-3 text-[#c8c8c8]" aria-hidden="true">
+                  <Camera className="h-12 w-12" strokeWidth={1.5} />
+                  <span className="text-sm font-medium">Add a photo</span>
+                </div>
+              )}
             </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={handleFileChange}
+            />
 
             <button
               type="button"
               className="inline-flex min-h-[68px] w-[180px] items-center justify-center rounded-[14px] bg-[#ff8a24] px-5 text-[1.08rem] font-medium text-white transition hover:bg-[#e87918] focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-2 focus-visible:outline-none"
+              onClick={() => fileInputRef.current?.click()}
             >
-              + Pet Avatar
+              {previewUrl ? "Change Avatar" : "+ Pet Avatar"}
             </button>
           </div>
 
