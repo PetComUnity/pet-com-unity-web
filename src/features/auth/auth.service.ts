@@ -1,8 +1,10 @@
 import type { AppUser } from "@/types";
 import { apiRequest } from "@/lib/api";
 import type {
+  ChangePasswordPayload,
   LoginFormValues,
   RegisterFormValues,
+  UpdateProfilePayload,
 } from "@/features/auth/auth.types";
 
 const TOKEN_KEY = "auth_token";
@@ -24,6 +26,20 @@ type AuthResponse = {
   user: AppUser;
   token: string;
 };
+
+type UpdateProfileResponse = AppUser | { user: AppUser };
+
+function hasWrappedUser(
+  response: UpdateProfileResponse,
+): response is { user: AppUser } {
+  return (
+    typeof response === "object" &&
+    response !== null &&
+    "user" in response &&
+    typeof response.user === "object" &&
+    response.user !== null
+  );
+}
 
 export async function registerUser(
   values: RegisterFormValues,
@@ -56,5 +72,39 @@ export async function getCurrentUser(): Promise<AppUser> {
   const token = getToken();
   return apiRequest<AppUser>("/auth/me", {
     token: token ?? undefined,
+  });
+}
+
+export async function updateCurrentUserProfile(
+  values: UpdateProfilePayload,
+): Promise<AppUser> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("Please sign in to update your profile.");
+  }
+
+  const response = await apiRequest<UpdateProfileResponse>("/me", {
+    method: "PUT",
+    body: values,
+    token,
+  });
+
+  return hasWrappedUser(response) ? response.user : response;
+}
+
+export async function changeCurrentUserPassword(
+  values: ChangePasswordPayload,
+): Promise<void> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("Please sign in to change your password.");
+  }
+
+  await apiRequest<void>("/me/password", {
+    method: "PUT",
+    body: values,
+    token,
   });
 }
