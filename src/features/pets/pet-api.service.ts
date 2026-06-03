@@ -49,6 +49,8 @@ export type CreatePetApiInput = {
   gender?: string;
   weight?: number;
   colorTheme?: string;
+  imageUrl?: string;
+  imageFileId?: string;
 };
 
 const DEFAULT_API_BASE_URL = "http://localhost:5000/api";
@@ -290,6 +292,50 @@ export async function createPet(input: CreatePetApiInput): Promise<Pet | null> {
     hasWrappedPet(payload.data) ? payload.data.pet : payload.data;
 
   return createdPet ? mapPet(createdPet) : null;
+}
+
+type UploadType = "public" | "private" | "document";
+
+type UploadResult =
+  | { type: "public"; url: string }
+  | { type: "private" | "document"; fileId: string };
+
+export async function uploadPetImage(
+  file: File,
+  uploadType: UploadType = "private",
+): Promise<UploadResult> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("Please sign in to upload an image.");
+  }
+
+  const formData = new FormData();
+  formData.append("image", file);
+  formData.append("type", uploadType);
+
+  const response = await fetch(`${getApiBaseUrl()}/upload/image`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+
+  const payload = (await response.json().catch(() => ({}))) as ApiResponse<{
+    url?: string;
+    fileId?: string;
+  }>;
+
+  if (!response.ok) {
+    throw new Error(payload.message ?? "We could not upload the image.");
+  }
+
+  if (uploadType === "public") {
+    if (!payload.data?.url) throw new Error("Upload succeeded but no URL was returned.");
+    return { type: "public", url: payload.data.url };
+  }
+
+  if (!payload.data?.fileId) throw new Error("Upload succeeded but no fileId was returned.");
+  return { type: uploadType, fileId: payload.data.fileId };
 }
 
 export async function getMyPets(signal?: AbortSignal): Promise<Pet[]> {

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getPetDetailsRoute } from "@/constants/routes";
+import { PrivateImage } from "@/components/common/PrivateImage";
 import type { Pet } from "@/types";
 
 const fallbackPetImageSrc = "/images/mock-img.png";
@@ -15,12 +16,21 @@ export function MyPetCard({ pet }: { pet: Pet }) {
         className="relative flex min-h-[122px] w-full items-end justify-between gap-5 rounded-[14px] bg-white px-6 py-5 shadow-[0_4px_4px_rgba(0,0,0,0.25)] transition hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-2 focus-visible:outline-none sm:hidden sm:border sm:border-[#d0d0d0]"
       >
         <span className="relative shrink-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={pet.imageUrl ?? fallbackPetImageSrc}
-            alt={pet.description ?? `${pet.name} pet profile photo`}
-            className="h-20 w-20 rounded-[12px] object-cover"
-          />
+          {pet.imageFileId ? (
+            <PrivateImage
+              fileId={pet.imageFileId}
+              alt={pet.description ?? `${pet.name} pet profile photo`}
+              className="h-20 w-20 rounded-[12px] object-cover"
+              fallbackSrc={fallbackPetImageSrc}
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={pet.imageUrl ?? fallbackPetImageSrc}
+              alt={pet.description ?? `${pet.name} pet profile photo`}
+              className="h-20 w-20 rounded-[12px] object-cover"
+            />
+          )}
         </span>
         {pet.verificationStatus === "verified" ? (
           <Image
@@ -39,12 +49,21 @@ export function MyPetCard({ pet }: { pet: Pet }) {
 
       <article className="relative hidden w-full max-w-[360px] rounded-[18px] border border-[#1a202c] bg-white p-6 shadow-[0_4px_4px_rgba(0,0,0,0.25)] sm:block">
         <div className="aspect-[312/364] overflow-hidden rounded-[14px]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={pet.imageUrl ?? fallbackPetImageSrc}
-            alt={pet.description ?? `${pet.name} pet profile photo`}
-            className="h-full w-full object-cover"
-          />
+          {pet.imageFileId ? (
+            <PrivateImage
+              fileId={pet.imageFileId}
+              alt={pet.description ?? `${pet.name} pet profile photo`}
+              className="h-full w-full object-cover"
+              fallbackSrc={fallbackPetImageSrc}
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={pet.imageUrl ?? fallbackPetImageSrc}
+              alt={pet.description ?? `${pet.name} pet profile photo`}
+              className="h-full w-full object-cover"
+            />
+          )}
         </div>
 
         {pet.verificationStatus === "verified" ? (

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Camera, ChevronDown, Plus, X } from "lucide-react";
 import {
   createPet,
+  uploadPetImage,
   type CreatePetApiInput,
 } from "@/features/pets/pet-api.service";
 import type { Pet } from "@/types";
@@ -73,11 +74,13 @@ export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
+    setSelectedFile(file);
     setPreviewUrl(URL.createObjectURL(file));
   }
 
@@ -109,9 +112,18 @@ export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
     setSubmitError(null);
 
     try {
-      const createdPet = await createPet(
-        getPetPayload(new FormData(event.currentTarget)),
-      );
+      const payload = getPetPayload(new FormData(event.currentTarget));
+
+      if (selectedFile) {
+        const uploaded = await uploadPetImage(selectedFile, "private");
+        if (uploaded.type === "public") {
+          payload.imageUrl = uploaded.url;
+        } else {
+          payload.imageFileId = uploaded.fileId;
+        }
+      }
+
+      const createdPet = await createPet(payload);
       onCreated?.(createdPet);
       onClose();
     } catch (error) {
@@ -312,7 +324,7 @@ export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
                     aria-hidden="true"
                     className="h-5 w-5 animate-spin rounded-full border-2 border-[#17243b]/30 border-t-[#17243b]"
                   />
-                  Adding...
+                  {selectedFile ? "Uploading..." : "Adding..."}
                 </>
               ) : (
                 <>
