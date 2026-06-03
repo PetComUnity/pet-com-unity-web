@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { Pencil, Trash2 } from 'lucide-react';
+import { PrivateImage } from '@/components/common/PrivateImage';
 import { CalendarEvent, getEventTypeColor } from '@/features/calendar/calendar.types';
 import { Pet } from '@/types';
 
@@ -23,7 +24,14 @@ export function EventCard({ event, pets, onDelete, onEdit }: EventCardProps) {
 
   return (
     <div className="relative flex items-center gap-4 bg-white border border-gray-200 rounded-2xl shadow-sm p-3 pr-16 overflow-hidden">
-      {pet?.imageUrl ? (
+      {pet?.imageFileId ? (
+        <PrivateImage
+          fileId={pet.imageFileId}
+          alt={pet.name}
+          className="w-10 h-10 rounded-2xl object-cover shrink-0"
+          fallbackSrc=""
+        />
+      ) : pet?.imageUrl ? (
         <div className="relative w-10 h-10 rounded-2xl overflow-hidden shrink-0">
           <Image
             src={pet.imageUrl}

@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { PrivateImage } from '@/components/common/PrivateImage';
 import { Pet } from '@/types';
 import { getPetColor } from '@/features/calendar/calendar.types';
 
@@ -45,7 +46,14 @@ export function PetAvatarFilter({ pets, selectedPetId, onSelect }: PetAvatarFilt
             onClick={() => onSelect(isSelected ? null : pet.id)}
             title={pet.name}
           >
-            {pet.imageUrl ? (
+            {pet.imageFileId ? (
+              <PrivateImage
+                fileId={pet.imageFileId}
+                alt={pet.name}
+                className="w-[34px] h-[34px] rounded-full object-cover"
+                fallbackSrc=""
+              />
+            ) : pet.imageUrl ? (
               <div className="relative w-[34px] h-[34px] rounded-full overflow-hidden">
                 <Image
                   src={pet.imageUrl}
