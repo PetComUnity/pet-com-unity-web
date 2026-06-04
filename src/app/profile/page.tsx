@@ -23,6 +23,7 @@ import {
 import { ROLE_LABELS, VERIFICATION_ALLOWED_ROLES } from "@/constants/roles";
 import { ROUTES } from "@/constants/routes";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
+import { AddPetModal } from "@/components/pet/AddPetModal";
 import {
   passwordChangeSchema,
   profileUpdateFieldSchemas,
@@ -60,11 +61,19 @@ type EditableDetailItemProps = DetailItemProps & {
 };
 
 type QuickAction = {
-  href: string;
   label: string;
   description: string;
   icon: LucideIcon;
-};
+} & (
+  | {
+      href: string;
+      action?: never;
+    }
+  | {
+      action: "add-pet";
+      href?: never;
+    }
+);
 
 const emptyPasswordValues: ChangePasswordValues = {
   currentPassword: "",
@@ -458,6 +467,7 @@ function ProfileContent() {
   const [editingField, setEditingField] = useState<EditableProfileField | null>(
     null,
   );
+  const [addPetModalOpen, setAddPetModalOpen] = useState(false);
   const [draftValue, setDraftValue] = useState("");
   const [savingField, setSavingField] = useState<EditableProfileField | null>(
     null,
@@ -482,7 +492,7 @@ function ProfileContent() {
       icon: PawPrint,
     },
     {
-      href: ROUTES.newPet,
+      action: "add-pet",
       label: "Add Pet",
       description: "Create another pet profile",
       icon: Plus,
@@ -696,33 +706,59 @@ function ProfileContent() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {quickActions.map(({ href, label, description, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                className="group flex min-h-[126px] flex-col justify-between rounded-[18px] border border-[#1a202c] bg-white p-5 shadow-[0_4px_4px_rgba(0,0,0,0.16)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_35px_rgba(26,32,44,0.16)] focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-4 focus-visible:ring-offset-[#fcf5eb] focus-visible:outline-none"
-              >
-                <span className="flex items-center justify-between gap-4">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-[12px] bg-[#97ff7b] text-[#1a202c] transition group-hover:bg-[#8df86e]">
-                    <Icon className="h-5 w-5" strokeWidth={2.35} />
+            {quickActions.map((quickAction) => {
+              const Icon = quickAction.icon;
+              const content = (
+                <>
+                  <span className="flex items-center justify-between gap-4">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-[12px] bg-[#97ff7b] text-[#1a202c] transition group-hover:bg-[#8df86e]">
+                      <Icon className="h-5 w-5" strokeWidth={2.35} />
+                    </span>
+                    <span className="text-sm font-semibold text-[#7a695b]">
+                      Open
+                    </span>
                   </span>
-                  <span className="text-sm font-semibold text-[#7a695b]">
-                    Open
+                  <span>
+                    <span className="font-display block text-[1.55rem] leading-none font-bold text-[#1a202c]">
+                      {quickAction.label}
+                    </span>
+                    <span className="mt-2 block text-sm font-medium text-[#7a695b]">
+                      {quickAction.description}
+                    </span>
                   </span>
-                </span>
-                <span>
-                  <span className="font-display block text-[1.55rem] leading-none font-bold text-[#1a202c]">
-                    {label}
-                  </span>
-                  <span className="mt-2 block text-sm font-medium text-[#7a695b]">
-                    {description}
-                  </span>
-                </span>
-              </Link>
-            ))}
+                </>
+              );
+
+              if (quickAction.action === "add-pet") {
+                return (
+                  <button
+                    key={quickAction.action}
+                    type="button"
+                    className="group flex min-h-[126px] flex-col justify-between rounded-[18px] border border-[#1a202c] bg-white p-5 text-left shadow-[0_4px_4px_rgba(0,0,0,0.16)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_35px_rgba(26,32,44,0.16)] focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-4 focus-visible:ring-offset-[#fcf5eb] focus-visible:outline-none"
+                    onClick={() => setAddPetModalOpen(true)}
+                  >
+                    {content}
+                  </button>
+                );
+              }
+
+              return (
+                <Link
+                  key={quickAction.href}
+                  href={quickAction.href}
+                  className="group flex min-h-[126px] flex-col justify-between rounded-[18px] border border-[#1a202c] bg-white p-5 shadow-[0_4px_4px_rgba(0,0,0,0.16)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_35px_rgba(26,32,44,0.16)] focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-4 focus-visible:ring-offset-[#fcf5eb] focus-visible:outline-none"
+                >
+                  {content}
+                </Link>
+              );
+            })}
           </div>
         </section>
       </div>
+
+      {addPetModalOpen ? (
+        <AddPetModal onClose={() => setAddPetModalOpen(false)} />
+      ) : null}
     </section>
   );
 }

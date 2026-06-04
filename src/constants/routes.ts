@@ -7,7 +7,6 @@ export const ROUTES = {
   profile: "/profile",
   dashboard: "/dashboard",
   pets: "/pets",
-  newPet: "/pets/new",
   calendar: "/pets/calendar",
   adoptionList: "/pets/adoption-list",
   lostPets: "/lost-pets",
