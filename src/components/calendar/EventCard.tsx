@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { Pencil, Trash2 } from 'lucide-react';
 import { PrivateImage } from '@/components/common/PrivateImage';
-import { CalendarEvent, getEventTypeColor } from '@/features/calendar/calendar.types';
+import { CalendarEvent, getColorForPet } from '@/features/calendar/calendar.types';
 import { Pet } from '@/types';
 
 interface EventCardProps {
@@ -19,19 +19,18 @@ function formatDate(dateStr: string): string {
 }
 
 export function EventCard({ event, pets, onDelete, onEdit }: EventCardProps) {
-  const color = getEventTypeColor(event.eventType);
   const pet = pets.find((p) => p.id === event.petId);
+  const themeColor = getColorForPet(pet?.themeColor);
 
   return (
     <div className="relative flex items-center gap-4 bg-white border border-gray-200 rounded-2xl shadow-sm p-3 pr-16 overflow-hidden">
-      <div className="relative w-10 h-10 rounded-2xl overflow-hidden flex items-center justify-center text-white font-bold text-sm shrink-0" style={{ backgroundColor: color }}>
+      <div className="relative w-10 h-10 rounded-2xl overflow-hidden flex items-center justify-center text-white font-bold text-sm shrink-0" style={{ backgroundColor: themeColor }}>
         {pet?.name[0]?.toUpperCase() ?? '?'}
         {pet?.imageFileId ? (
           <PrivateImage
             fileId={pet.imageFileId}
             alt={pet?.name ?? ''}
             className="absolute inset-0 w-full h-full object-cover"
-            fallbackSrc=""
           />
         ) : pet?.imageUrl ? (
           <Image src={pet.imageUrl} alt={pet.name} fill sizes="40px" className="object-cover" />
@@ -69,7 +68,7 @@ export function EventCard({ event, pets, onDelete, onEdit }: EventCardProps) {
 
       <div
         className="absolute right-0 top-0 bottom-0 w-3.5 rounded-br-2xl rounded-tr-2xl"
-        style={{ backgroundColor: color }}
+        style={{ backgroundColor: themeColor }}
       />
     </div>
   );

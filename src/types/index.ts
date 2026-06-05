@@ -36,6 +36,7 @@ export interface Pet {
   location?: string;
   weight?: number;
   color?: string;
+  themeColor?: string;
   gender?: string;
   description?: string;
   imageUrl?: string;

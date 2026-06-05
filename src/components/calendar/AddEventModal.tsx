@@ -102,7 +102,7 @@ export function AddEventModal({
 
   const [selectedDate, setSelectedDate] = useState<Date>(defaultDate);
   const [title, setTitle] = useState(editEvent?.title ?? "");
-  const [petId, setPetId] = useState(editEvent?.petId ?? pets[0]?.id ?? "");
+  const [petId, setPetId] = useState(editEvent?.petId ?? "");
   const [eventType, setEventType] = useState<CalendarEventType | "">(
     editEvent?.eventType ?? "",
   );
@@ -119,6 +119,7 @@ export function AddEventModal({
   const dateInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const locationWrapRef = useRef<HTMLDivElement>(null);
+  const locationTouched = useRef(false);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -135,7 +136,7 @@ export function AddEventModal({
 
   useEffect(() => {
     const timer = setTimeout(async () => {
-      if (location.trim().length < 3) {
+      if (!locationTouched.current || location.trim().length < 3) {
         setSuggestions([]);
         setShowSuggestions(false);
         return;
@@ -183,6 +184,10 @@ export function AddEventModal({
       setError("Enter the event name");
       return;
     }
+    if (!isEdit && !petId) {
+      setError("Choose an animal");
+      return;
+    }
     setSaving(true);
     setError("");
     try {
@@ -205,7 +210,7 @@ export function AddEventModal({
         });
       } else {
         await onSave({
-          petId: petId || (pets[0]?.id ?? ""),
+          petId,
           title: title.trim(),
           date: isoDate,
           eventType: eventType || undefined,
@@ -304,7 +309,7 @@ export function AddEventModal({
                     onChange={(e) =>
                       setEventType(e.target.value as CalendarEventType | "")
                     }
-                    className={`${inputClass} pr-10 ${!eventType ? "text-[#7A7878]/50" : ""}`}
+                    className={`${inputClass} pr-10 [&>option]:text-[var(--primary-text)] ${!eventType ? "!text-[#7A7878]/50" : ""}`}
                   >
                     <option value="" disabled>
                       Choose event type
@@ -323,13 +328,11 @@ export function AddEventModal({
                     <select
                       value={petId}
                       onChange={(e) => setPetId(e.target.value)}
-                      className={`${inputClass} pr-10 ${!petId ? "text-[#7A7878]/50" : ""}`}
+                      className={`${inputClass} pr-10 [&>option]:text-[var(--primary-text)] ${!petId ? "!text-[#7A7878]/50" : ""}`}
                     >
-                      {pets.length === 0 && (
-                        <option value="" disabled>
-                          Choose related animal
-                        </option>
-                      )}
+                      <option value="" disabled>
+                        Choose animal
+                      </option>
                       {pets.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.name}
@@ -372,6 +375,7 @@ export function AddEventModal({
                       type="text"
                       value={location}
                       onChange={(e) => {
+                        locationTouched.current = true;
                         setLocation(e.target.value);
                         setShowSuggestions(false);
                       }}

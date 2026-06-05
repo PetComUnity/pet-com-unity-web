@@ -7,7 +7,7 @@ type PrivateImageProps = {
   fileId: string;
   alt: string;
   className?: string;
-  fallbackSrc: string;
+  fallbackSrc?: string;
 };
 
 const API_BASE_URL =
@@ -36,7 +36,7 @@ export function PrivateImage({ fileId, alt, className, fallbackSrc }: PrivateIma
         blobUrl = URL.createObjectURL(blob);
         setSrc(blobUrl);
       })
-      .catch(() => setSrc(fallbackSrc));
+      .catch(() => setSrc(fallbackSrc || null));
 
     return () => {
       if (blobUrl) URL.revokeObjectURL(blobUrl);

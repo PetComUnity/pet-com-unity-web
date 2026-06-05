@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { PrivateImage } from '@/components/common/PrivateImage';
 import { Pet } from '@/types';
-import { getPetColor } from '@/features/calendar/calendar.types';
+import { getColorForPet } from '@/features/calendar/calendar.types';
 
 interface PetAvatarFilterProps {
   pets: Pet[];
@@ -32,32 +32,38 @@ export function PetAvatarFilter({ pets, selectedPetId, onSelect }: PetAvatarFilt
         </button>
       )}
 
-      {visible.map((pet, index) => {
-        const color = getPetColor(page * PAGE_SIZE + index);
+      {visible.map((pet) => {
+        const themeColor = getColorForPet(pet.themeColor);
         const isSelected = selectedPetId === pet.id;
         return (
           <div
             key={pet.id}
-            className="rounded-full p-[3px] transition-transform hover:scale-110 cursor-pointer"
-            style={{
-              backgroundColor: color,
-              opacity: selectedPetId && !isSelected ? 0.5 : 1,
-            }}
-            onClick={() => onSelect(isSelected ? null : pet.id)}
-            title={pet.name}
+            className="group relative flex flex-col items-center"
           >
-            <div className="relative w-[34px] h-[34px] rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: color }}>
-              {pet.name[0]?.toUpperCase()}
-              {pet.imageFileId ? (
-                <PrivateImage
-                  fileId={pet.imageFileId}
-                  alt={pet.name}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  fallbackSrc=""
-                />
-              ) : pet.imageUrl ? (
-                <Image src={pet.imageUrl} alt={pet.name} fill sizes="34px" className="object-cover" />
-              ) : null}
+            <div
+              className="rounded-full p-[3px] transition-transform hover:scale-110 cursor-pointer"
+              style={{
+                backgroundColor: themeColor,
+                opacity: selectedPetId && !isSelected ? 0.5 : 1,
+              }}
+              onClick={() => onSelect(isSelected ? null : pet.id)}
+            >
+              <div className="relative w-[34px] h-[34px] rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: themeColor }}>
+                {pet.name[0]?.toUpperCase()}
+                {pet.imageFileId ? (
+                  <PrivateImage
+                    fileId={pet.imageFileId}
+                    alt={pet.name}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                ) : pet.imageUrl ? (
+                  <Image src={pet.imageUrl} alt={pet.name} fill sizes="34px" className="object-cover" />
+                ) : null}
+              </div>
+            </div>
+
+            <div className="pointer-events-none absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap font-sans text-[11px] text-[#969696] opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+              {pet.name}
             </div>
           </div>
         );
