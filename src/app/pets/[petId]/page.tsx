@@ -964,7 +964,7 @@ export default function PetDetailsPage() {
 
         {appUser ? <PetsQuickNav currentPetId={petId} pets={ownerPets} /> : null}
 
-        <section className="relative min-h-[390px] w-full overflow-hidden rounded-[18px] bg-white p-5 shadow-[0_4px_4px_rgba(0,0,0,0.25)] focus-within:ring-2 focus-within:ring-[#d68532]/40 focus-within:ring-offset-4 focus-within:ring-offset-[#fcf5eb] sm:p-8">
+        <section className="relative min-h-[390px] w-full overflow-hidden rounded-[18px] bg-white p-5 shadow-[0_4px_4px_rgba(0,0,0,0.25)] focus-within:ring-2 focus-within:ring-[#d68532]/40 focus-within:ring-offset-4 focus-within:ring-offset-[#fcf5eb] sm:p-8 md:px-7">
             <div className="grid grid-cols-1 gap-x-8 md:grid-cols-[180px_minmax(0,1fr)] xl:grid-cols-[176px_minmax(0,1fr)]">
               <div className="min-w-0 overflow-x-auto pb-7 md:col-span-2 xl:col-start-2 xl:col-span-1">
                 <div
@@ -1014,13 +1014,16 @@ export default function PetDetailsPage() {
                   Pet not found.
                 </div>
               ) : (
-                <>
-                  <aside className="flex flex-col items-center gap-11 pt-9 lg:col-start-1 lg:row-start-3 lg:items-start lg:pt-0">
+                <form
+                  onSubmit={handleSubmit}
+                  className="min-w-0 space-y-6 pt-12 md:col-span-2 md:row-start-2 md:grid md:grid-cols-[180px_174px_minmax(0,1fr)_174px] md:gap-x-10 md:gap-y-6 md:space-y-0 md:pt-0 xl:grid-cols-[176px_174px_174px_minmax(0,1fr)] xl:gap-x-[50px]"
+                >
+                  <aside className="flex flex-col items-center gap-11 md:col-start-1 md:row-start-1 md:row-end-5 md:items-start md:gap-[76px] xl:gap-11">
                     <button
                       type="button"
                       disabled={!canEditPet}
                       className={cn(
-                        "flex h-[292px] w-[176px] items-center justify-center overflow-hidden rounded-[14px] border border-[#c8c8c8] bg-white transition focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-2 focus-visible:outline-none",
+                        "flex h-[292px] w-[176px] items-center justify-center overflow-hidden rounded-[14px] border border-[#c8c8c8] bg-white transition focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-2 focus-visible:outline-none md:h-[260px] md:w-[180px] md:border-[4px] md:border-[#8438ff] md:shadow-[0_3px_6px_rgba(132,56,255,0.35)] xl:h-[292px] xl:w-[176px] xl:border xl:border-[#c8c8c8] xl:shadow-none",
                         canEditPet
                           ? "hover:border-[#ff8a24]"
                           : "cursor-default",
@@ -1072,7 +1075,7 @@ export default function PetDetailsPage() {
                       <button
                         type="button"
                         disabled={uploadingAvatar}
-                        className="inline-flex min-h-[60px] w-[176px] items-center justify-center gap-2 rounded-[14px] bg-[#ff8a24] px-5 text-[1.05rem] font-medium text-white transition hover:bg-[#e87918] focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-70"
+                        className="inline-flex min-h-[60px] w-[176px] items-center justify-center gap-2 rounded-[14px] bg-[#ff8a24] px-5 text-[1.05rem] font-medium text-white transition hover:bg-[#e87918] focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-70 md:w-[180px] xl:w-[176px]"
                         onClick={() => fileInputRef.current?.click()}
                       >
                         {uploadingAvatar ? (
@@ -1095,149 +1098,135 @@ export default function PetDetailsPage() {
                     ) : null}
                   </aside>
 
-                  <form
-                    onSubmit={handleSubmit}
-                    className="min-w-0 pt-12 lg:col-start-2 lg:row-start-3 lg:pt-[32px]"
-                  >
-                    <div className="space-y-6">
-                      <div className="grid gap-x-14 gap-y-6 lg:grid-cols-2">
-                        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-[174px_174px] xl:gap-x-[50px]">
-                        <TextField
-                          id="pet-name"
-                          label="name"
-                          name="name"
-                          value={formState.name}
-                          editable={canEditPet}
-                          onBlur={() => void savePetDetails("name")}
-                          onChange={updateFormField}
-                        />
-                        <TextField
-                          id="pet-birth-date"
-                          label="birth day"
-                          name="birthDate"
-                          value={formState.birthDate}
-                          editable={canEditPet}
-                          inputMode="numeric"
-                          onBlur={() => void savePetDetails("birthDate")}
-                          onChange={updateFormField}
-                        />
-                        </div>
+                  <TextField
+                    id="pet-name"
+                    label="name"
+                    name="name"
+                    value={formState.name}
+                    className="md:col-start-2 md:row-start-1 md:mt-6 xl:mt-8"
+                    editable={canEditPet}
+                    onBlur={() => void savePetDetails("name")}
+                    onChange={updateFormField}
+                  />
+                  <TextField
+                    id="pet-birth-date"
+                    label="date of birth"
+                    name="birthDate"
+                    value={formState.birthDate}
+                    className="md:col-start-4 md:row-start-1 md:mt-6 xl:col-start-3 xl:mt-8"
+                    editable={canEditPet}
+                    inputMode="numeric"
+                    onBlur={() => void savePetDetails("birthDate")}
+                    onChange={updateFormField}
+                  />
+                  <SelectField
+                    id="pet-species"
+                    label="species"
+                    name="species"
+                    options={speciesOptions}
+                    value={formState.species}
+                    className="md:col-start-2 md:col-end-5 md:row-start-2 xl:col-end-4"
+                    editable={canEditPet}
+                    onBlur={() => void savePetDetails("species")}
+                    onChange={updateFormField}
+                  />
+                  <SelectField
+                    id="pet-breed"
+                    label="breed"
+                    name="breed"
+                    options={getBreedOptionsForSpecies(formState.species)}
+                    value={formState.breed}
+                    className="md:col-start-2 md:col-end-5 md:row-start-3 xl:col-end-4"
+                    editable={canEditPet}
+                    onBlur={() => void savePetDetails("breed")}
+                    onChange={updateFormField}
+                  />
+                  <SelectField
+                    id="pet-gender"
+                    label="gender"
+                    name="gender"
+                    options={genderOptions}
+                    value={formState.gender}
+                    className="md:col-start-2 md:col-end-5 md:row-start-4 xl:col-end-4"
+                    editable={canEditPet}
+                    onBlur={() => void savePetDetails("gender")}
+                    onChange={updateFormField}
+                  />
+                  <TextField
+                    id="pet-chip"
+                    label="chip"
+                    name="microchipId"
+                    value={formState.microchipId}
+                    className="md:col-start-1 md:col-end-5 md:row-start-5 xl:col-start-4 xl:col-end-5 xl:row-start-1 xl:mt-8"
+                    editable={canEditPet}
+                    onBlur={() => void savePetDetails("microchipId")}
+                    onChange={updateFormField}
+                  />
+                  <SelectField
+                    id="pet-weight"
+                    label="weight"
+                    name="weight"
+                    options={weightOptions}
+                    value={formState.weight}
+                    className="md:col-start-1 md:col-end-5 md:row-start-6 xl:col-start-4 xl:col-end-5 xl:row-start-2"
+                    editable={canEditPet}
+                    onBlur={() => void savePetDetails("weight")}
+                    onChange={updateFormField}
+                  />
+                  <SelectField
+                    id="pet-color"
+                    label="color"
+                    name="color"
+                    options={colorOptions}
+                    value={formState.color}
+                    className="md:col-start-1 md:col-end-5 md:row-start-7 xl:col-start-4 xl:col-end-5 xl:row-start-3"
+                    editable={canEditPet}
+                    onBlur={() => void savePetDetails("color")}
+                    onChange={updateFormField}
+                  />
 
-                        <TextField
-                          id="pet-chip"
-                          label="chip"
-                          name="microchipId"
-                          value={formState.microchipId}
-                          editable={canEditPet}
-                          onBlur={() => void savePetDetails("microchipId")}
-                          onChange={updateFormField}
-                        />
-                      </div>
+                  <CheckboxField
+                    id="pet-ready-for-adoption"
+                    label="Ready for Adoption"
+                    name="isAdoptable"
+                    checked={formState.isAdoptable}
+                    className="md:col-start-1 md:col-end-5 md:row-start-8 xl:col-start-4 xl:col-end-5 xl:row-start-4"
+                    editable={canEditPet}
+                    onChange={updateAdoptionStatus}
+                  />
 
-                      <div className="grid gap-x-14 gap-y-6 lg:grid-cols-2">
-                        <SelectField
-                          id="pet-species"
-                          label="species"
-                          name="species"
-                          options={speciesOptions}
-                          value={formState.species}
-                          editable={canEditPet}
-                          onBlur={() => void savePetDetails("species")}
-                          onChange={updateFormField}
-                        />
-                        <SelectField
-                          id="pet-weight"
-                          label="weight"
-                          name="weight"
-                          options={weightOptions}
-                          value={formState.weight}
-                          editable={canEditPet}
-                          onBlur={() => void savePetDetails("weight")}
-                          onChange={updateFormField}
-                        />
-                      </div>
-
-                      <div className="grid gap-x-14 gap-y-6 lg:grid-cols-2">
-                        <SelectField
-                          id="pet-breed"
-                          label="breed"
-                          name="breed"
-                          options={getBreedOptionsForSpecies(formState.species)}
-                          value={formState.breed}
-                          editable={canEditPet}
-                          onBlur={() => void savePetDetails("breed")}
-                          onChange={updateFormField}
-                        />
-                        <SelectField
-                          id="pet-color"
-                          label="color"
-                          name="color"
-                          options={colorOptions}
-                          value={formState.color}
-                          editable={canEditPet}
-                          onBlur={() => void savePetDetails("color")}
-                          onChange={updateFormField}
-                        />
-                      </div>
-
-                      <div className="grid gap-x-14 gap-y-6 lg:grid-cols-2">
-                        <SelectField
-                          id="pet-gender"
-                          label="gender"
-                          name="gender"
-                          options={genderOptions}
-                          value={formState.gender}
-                          editable={canEditPet}
-                          onBlur={() => void savePetDetails("gender")}
-                          onChange={updateFormField}
-                        />
-
-                        <CheckboxField
-                          id="pet-ready-for-adoption"
-                          label="Ready for Adoption"
-                          name="isAdoptable"
-                          checked={formState.isAdoptable}
-                          editable={canEditPet}
-                          onChange={updateAdoptionStatus}
-                        />
-                      </div>
-
-                      <div className="grid gap-x-14 gap-y-6 lg:grid-cols-2">
-                        {canEditPet ? (
-                          <div className="space-y-3">
-                            <p className="text-[0.98rem] leading-none font-medium text-[#1a202c]">
-                              update your pet lost status
-                            </p>
-                            <button
-                              type="button"
-                              disabled={updatingLostStatus}
-                              className="flex h-[60px] w-full items-center justify-center rounded-[14px] border border-[#1a202c] bg-[#ff5277] px-5 text-center text-[1rem] font-medium text-[#1a1720] transition hover:bg-[#f5476f] focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-70"
-                              onClick={handleLostStatusToggle}
-                            >
-                              {updatingLostStatus
-                                ? pet.isLost
-                                  ? "Marking found..."
-                                  : "Marking lost..."
-                                : pet.isLost
-                                  ? "Mark as Found"
-                                  : "Mark as Lost"}
-                            </button>
-                          </div>
-                        ) : null}
-                      </div>
+                  {canEditPet ? (
+                    <div className="space-y-3 md:col-start-1 md:col-end-5 md:row-start-9 xl:col-start-4 xl:col-end-5 xl:row-start-5">
+                      <p className="text-[0.98rem] leading-none font-medium text-[#1a202c]">
+                        press immidiatly if you lost your pet
+                      </p>
+                      <button
+                        type="button"
+                        disabled={updatingLostStatus}
+                        className="flex h-[60px] w-full items-center justify-center rounded-[14px] border border-[#1a202c] bg-[#ff5277] px-5 text-center text-[1rem] font-medium text-[#1a1720] transition hover:bg-[#f5476f] focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-70"
+                        onClick={handleLostStatusToggle}
+                      >
+                        {updatingLostStatus
+                          ? pet.isLost
+                            ? "Marking found..."
+                            : "Marking lost..."
+                          : pet.isLost
+                            ? "Mark as Found"
+                            : "Lost my pet"}
+                      </button>
                     </div>
+                  ) : null}
 
-                    <div className="mt-4 min-h-5 text-right text-sm font-medium">
-                      {formError ? (
-                        <p className="text-[#b91c1c]">{formError}</p>
-                      ) : saveStatus === "saving" ? (
-                        <p className="text-[#4d443d]">Saving...</p>
-                      ) : saveStatus === "saved" ? (
-                        <p className="text-[#15803d]">Saved</p>
-                      ) : null}
-                    </div>
-                  </form>
-                </>
+                  <div className="min-h-5 text-right text-sm font-medium md:col-start-1 md:col-end-5 md:row-start-10 xl:col-start-2 xl:col-end-5 xl:row-start-6">
+                    {formError ? (
+                      <p className="text-[#b91c1c]">{formError}</p>
+                    ) : saveStatus === "saving" ? (
+                      <p className="text-[#4d443d]">Saving...</p>
+                    ) : saveStatus === "saved" ? (
+                      <p className="text-[#15803d]">Saved</p>
+                    ) : null}
+                  </div>
+                </form>
               )}
             </div>
           </section>
