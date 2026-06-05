@@ -11,7 +11,7 @@ import {
   type FormEvent,
 } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Camera, ChevronDown, ChevronRight, Pencil } from "lucide-react";
+import { ArrowLeft, Camera, ChevronDown, Pencil } from "lucide-react";
 import { PrivateImage } from "@/components/common/PrivateImage";
 import { Spinner } from "@/components/ui/Spinner";
 import { ROLE_LABELS } from "@/constants/roles";
@@ -626,6 +626,9 @@ export default function PetDetailsPage() {
   const [markingLost, setMarkingLost] = useState(false);
   const isPetOwner = Boolean(appUser && pet?.ownerId === appUser.id);
   const canEditPet = isPetOwner;
+  const visiblePetDetailsTabs = appUser
+    ? petDetailsTabs
+    : petDetailsTabs.filter((tab) => tab.id !== "calendar");
   const publicOwnerInfo = pet && !isPetOwner ? getPublicOwnerInfo(pet) : null;
 
   const loadPet = useCallback(
@@ -883,7 +886,7 @@ export default function PetDetailsPage() {
                   aria-label="Pet detail tabs"
                   className="flex min-w-max items-end gap-10 sm:gap-12 lg:gap-14"
                 >
-                  {petDetailsTabs.map((tab) => {
+                  {visiblePetDetailsTabs.map((tab) => {
                     const isActive = tab.id === "details";
 
                     return (
