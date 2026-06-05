@@ -2,14 +2,16 @@
 
 import {
   CalendarEvent,
-  getEventTypeColor,
+  getColorForPet,
 } from "@/features/calendar/calendar.types";
+import { Pet } from "@/types";
 import { CalendarEventChip } from "./CalendarEventChip";
 
 interface CalendarGridProps {
   year: number;
   month: number;
   events: CalendarEvent[];
+  pets: Pet[];
   onDayClick?: (date: Date) => void;
   onEventClick?: (event: CalendarEvent) => void;
 }
@@ -43,6 +45,7 @@ export function CalendarGrid({
   year,
   month,
   events,
+  pets,
   onDayClick,
   onEventClick,
 }: CalendarGridProps) {
@@ -53,8 +56,9 @@ export function CalendarGrid({
     return events.filter((e) => isSameDay(new Date(e.date), year, month, day));
   }
 
-  function getColorForEvent(event: CalendarEvent): string {
-    return getEventTypeColor(event.eventType);
+  function getThemeColorForEvent(event: CalendarEvent): string {
+    const pet = pets.find((p) => p.id === event.petId);
+    return getColorForPet(pet?.themeColor);
   }
 
   const isToday = (day: number) =>
@@ -120,7 +124,7 @@ export function CalendarGrid({
                       >
                         <CalendarEventChip
                           title={ev.title}
-                          color={getColorForEvent(ev)}
+                          color={getThemeColorForEvent(ev)}
                         />
                       </div>
                     ))}
@@ -136,7 +140,7 @@ export function CalendarGrid({
                       <div
                         key={ev.id}
                         className="h-1.5 w-1.5 rounded-full"
-                        style={{ backgroundColor: getColorForEvent(ev) }}
+                        style={{ backgroundColor: getThemeColorForEvent(ev) }}
                       />
                     ))}
                     {dayEvents.length > 3 && (

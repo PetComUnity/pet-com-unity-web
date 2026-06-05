@@ -59,7 +59,7 @@ const breedOptionsBySpecies: Record<SpeciesOption, readonly string[]> = {
 
 const genderOptions = ["female", "male", "unknown"] as const;
 
-const colorThemeOptions = ["Orange", "Green", "Blue", "Pink", "Purple", "Black", "White", "Mixed", "Brown", "Gray", "Other"] as const;
+const colorThemeOptions = ["None", "Red", "Orange", "Yellow", "Green", "Teal", "Blue", "Purple", "Pink", "Brown"] as const;
 
 type AddPetModalProps = {
   onClose: () => void;
@@ -90,7 +90,7 @@ function getPetPayload(formData: FormData): CreatePetApiInput {
       weightValue !== "" && Number.isFinite(parsedWeight)
         ? parsedWeight
         : undefined,
-    colorTheme: toOptionalText(getFormValue(formData, "color-theme")),
+    themeColor: toOptionalText(getFormValue(formData, "color-theme")),
   };
 }
 

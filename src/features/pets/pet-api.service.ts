@@ -48,7 +48,8 @@ export type CreatePetApiInput = {
   microchipId?: string;
   gender?: string;
   weight?: number;
-  colorTheme?: string;
+  color?: string;
+  themeColor?: string;
   imageUrl?: string;
   imageFileId?: string;
 };
@@ -94,9 +95,21 @@ function toOptionalText(value?: string | null) {
   return trimmed === "" ? undefined : trimmed;
 }
 
+const THEME_COLOR_KEYS = new Set([
+  "None", "Red", "Orange", "Yellow", "Green", "Teal", "Blue", "Purple", "Pink", "Brown",
+]);
+
 function mapPet(pet: ApiPet): Pet {
+  // Migration: old pets stored the calendar theme in `color`.
+  // If `themeColor` is absent but `color` is a known theme value → treat it as the theme.
+  const isLegacyTheme = !pet.themeColor && !!pet.color && THEME_COLOR_KEYS.has(pet.color);
+  const themeColor = toOptionalText(pet.themeColor) ?? (isLegacyTheme ? pet.color! : undefined);
+  const color      = isLegacyTheme ? undefined : toOptionalText(pet.color);
+
   return {
     ...pet,
+    color,
+    themeColor,
     location: toOptionalText(pet.location ?? pet.city),
     weight: toOptionalNumber(pet.weight),
     verifiedAt: toOptionalDate(pet.verifiedAt),
