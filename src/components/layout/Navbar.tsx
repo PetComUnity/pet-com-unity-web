@@ -19,7 +19,6 @@ const marketingLinks = [
 const appLinks = [
   { href: ROUTES.profile, label: "Profile" },
   { href: ROUTES.pets, label: "My Pets" },
-  { href: ROUTES.newPet, label: "Add Pet" },
 ];
 
 const socialIcons = [

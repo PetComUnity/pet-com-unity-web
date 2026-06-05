@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import Image from "next/image";
 import { Camera, ChevronDown, Plus, X } from "lucide-react";
 import {
   createPet,
@@ -9,33 +10,56 @@ import {
 } from "@/features/pets/pet-api.service";
 import type { Pet } from "@/types";
 
-const primaryPetFormSelects = [
-  {
-    id: "species",
-    placeholder: "species",
-    options: ["Dog", "Cat", "Bird", "Rabbit", "Other"],
-  },
-  {
-    id: "breed",
-    placeholder: "breed",
-    options: [
-      "Mixed breed",
-      "Border Collie",
-      "Labrador Retriever",
-      "German Shepherd",
-      "Persian",
-      "Siamese",
-      "Other",
-    ],
-  },
-  {
-    id: "gender",
-    placeholder: "gender",
-    options: ["female", "male", "unknown"],
-  },
-] as const;
+const speciesOptions = ["Dog", "Cat", "Bird", "Rabbit", "Other"] as const;
 
-const colorThemeOptions = ["Orange", "Green", "Blue", "Pink", "Purple"];
+type SpeciesOption = (typeof speciesOptions)[number];
+
+const breedOptionsBySpecies: Record<SpeciesOption, readonly string[]> = {
+  Dog: [
+    "Mixed breed",
+    "Border Collie",
+    "Labrador Retriever",
+    "German Shepherd",
+    "Golden Retriever",
+    "Beagle",
+    "Poodle",
+    "Bulldog",
+    "Other",
+  ],
+  Cat: [
+    "Mixed breed",
+    "Persian",
+    "Siamese",
+    "Maine Coon",
+    "British Shorthair",
+    "Ragdoll",
+    "Bengal",
+    "Other",
+  ],
+  Bird: [
+    "Budgerigar",
+    "Canary",
+    "Cockatiel",
+    "Lovebird",
+    "Parrot",
+    "Finch",
+    "Other",
+  ],
+  Rabbit: [
+    "Mixed breed",
+    "Holland Lop",
+    "Netherland Dwarf",
+    "Lionhead",
+    "Mini Rex",
+    "Flemish Giant",
+    "Other",
+  ],
+  Other: ["Other"],
+};
+
+const genderOptions = ["female", "male", "unknown"] as const;
+
+const colorThemeOptions = ["Orange", "Green", "Blue", "Pink", "Purple", "Black", "White", "Mixed", "Brown", "Gray", "Other"] as const;
 
 type AddPetModalProps = {
   onClose: () => void;
@@ -75,7 +99,13 @@ export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedSpecies, setSelectedSpecies] = useState<SpeciesOption | "">(
+    "",
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const breedOptions = selectedSpecies
+    ? breedOptionsBySpecies[selectedSpecies]
+    : [];
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -172,15 +202,17 @@ export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
         >
           <div className="flex flex-col items-center gap-9">
             <div
-              className="flex h-[292px] w-[180px] cursor-pointer items-center justify-center overflow-hidden rounded-[14px] border border-[#c8c8c8] bg-white transition hover:border-[#ff8a24]"
+              className="relative flex h-[292px] w-[180px] cursor-pointer items-center justify-center overflow-hidden rounded-[14px] border border-[#c8c8c8] bg-white transition hover:border-[#ff8a24]"
               onClick={() => fileInputRef.current?.click()}
               title="Click to upload photo"
             >
               {previewUrl ? (
-                <img
+                <Image
                   src={previewUrl}
                   alt="Pet avatar preview"
-                  className="h-full w-full object-cover object-center"
+                  fill
+                  unoptimized
+                  className="object-cover object-center"
                 />
               ) : (
                 <div className="flex flex-col items-center gap-3 text-[#c8c8c8]" aria-hidden="true">
@@ -232,10 +264,6 @@ export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
                   placeholder="date of birth"
                   className="h-11 w-full rounded-[14px] border border-[#1a202c] bg-white px-4 pr-12 text-[1rem] text-[#1a202c] outline-none transition placeholder:text-[#b8b8b8] focus:ring-2 focus:ring-[#1a202c]/15"
                 />
-                <ChevronDown
-                  aria-hidden="true"
-                  className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-[#1a202c]"
-                />
               </div>
 
               <label htmlFor="chip" className="sr-only">
@@ -249,33 +277,90 @@ export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
                 className="h-11 w-full rounded-[14px] border border-[#1a202c] bg-white px-4 text-[1rem] text-[#1a202c] outline-none transition placeholder:text-[#b8b8b8] focus:ring-2 focus:ring-[#1a202c]/15"
               />
 
-              {primaryPetFormSelects.map((field) => (
-                <label key={field.id} htmlFor={field.id} className="block">
-                  <span className="sr-only">{field.placeholder}</span>
-                  <span className="relative block">
-                    <select
-                      id={field.id}
-                      name={field.id}
-                      defaultValue=""
-                      className="h-11 w-full appearance-none rounded-[14px] border border-[#1a202c] bg-white px-4 pr-12 text-[1rem] text-[#1a202c] outline-none transition focus:ring-2 focus:ring-[#1a202c]/15 [&:invalid]:text-[#b8b8b8]"
-                      required
-                    >
-                      <option value="" disabled>
-                        {field.placeholder}
+              <label htmlFor="species" className="block">
+                <span className="sr-only">species</span>
+                <span className="relative block">
+                  <select
+                    id="species"
+                    name="species"
+                    value={selectedSpecies}
+                    onChange={(event) =>
+                      setSelectedSpecies(
+                        event.target.value as SpeciesOption | "",
+                      )
+                    }
+                    className="h-11 w-full appearance-none rounded-[14px] border border-[#1a202c] bg-white px-4 pr-12 text-[1rem] text-[#1a202c] outline-none transition focus:ring-2 focus:ring-[#1a202c]/15 [&:invalid]:text-[#b8b8b8]"
+                    required
+                  >
+                    <option value="" disabled>
+                      species
+                    </option>
+                    {speciesOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
                       </option>
-                      {field.options.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown
-                      aria-hidden="true"
-                      className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-[#1a202c]"
-                    />
-                  </span>
-                </label>
-              ))}
+                    ))}
+                  </select>
+                  <ChevronDown
+                    aria-hidden="true"
+                    className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-[#1a202c]"
+                  />
+                </span>
+              </label>
+
+              <label htmlFor="breed" className="block">
+                <span className="sr-only">breed</span>
+                <span className="relative block">
+                  <select
+                    id="breed"
+                    name="breed"
+                    key={selectedSpecies || "no-species"}
+                    defaultValue=""
+                    disabled={!selectedSpecies}
+                    className="h-11 w-full appearance-none rounded-[14px] border border-[#1a202c] bg-white px-4 pr-12 text-[1rem] text-[#1a202c] outline-none transition focus:ring-2 focus:ring-[#1a202c]/15 disabled:bg-[#f5f5f5] disabled:text-[#b8b8b8] [&:invalid]:text-[#b8b8b8]"
+                    required
+                  >
+                    <option value="" disabled>
+                      breed
+                    </option>
+                    {breedOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    aria-hidden="true"
+                    className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-[#1a202c]"
+                  />
+                </span>
+              </label>
+
+              <label htmlFor="gender" className="block">
+                <span className="sr-only">gender</span>
+                <span className="relative block">
+                  <select
+                    id="gender"
+                    name="gender"
+                    defaultValue=""
+                    className="h-11 w-full appearance-none rounded-[14px] border border-[#1a202c] bg-white px-4 pr-12 text-[1rem] text-[#1a202c] outline-none transition focus:ring-2 focus:ring-[#1a202c]/15 [&:invalid]:text-[#b8b8b8]"
+                    required
+                  >
+                    <option value="" disabled>
+                      gender
+                    </option>
+                    {genderOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    aria-hidden="true"
+                    className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-[#1a202c]"
+                  />
+                </span>
+              </label>
 
               <label htmlFor="weight" className="sr-only">
                 Weight
