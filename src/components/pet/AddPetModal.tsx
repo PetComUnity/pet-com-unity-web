@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import Image from "next/image";
 import { Camera, ChevronDown, Plus, X } from "lucide-react";
 import {
   createPet,
@@ -201,15 +202,17 @@ export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
         >
           <div className="flex flex-col items-center gap-9">
             <div
-              className="flex h-[292px] w-[180px] cursor-pointer items-center justify-center overflow-hidden rounded-[14px] border border-[#c8c8c8] bg-white transition hover:border-[#ff8a24]"
+              className="relative flex h-[292px] w-[180px] cursor-pointer items-center justify-center overflow-hidden rounded-[14px] border border-[#c8c8c8] bg-white transition hover:border-[#ff8a24]"
               onClick={() => fileInputRef.current?.click()}
               title="Click to upload photo"
             >
               {previewUrl ? (
-                <img
+                <Image
                   src={previewUrl}
                   alt="Pet avatar preview"
-                  className="h-full w-full object-cover object-center"
+                  fill
+                  unoptimized
+                  className="object-cover object-center"
                 />
               ) : (
                 <div className="flex flex-col items-center gap-3 text-[#c8c8c8]" aria-hidden="true">
