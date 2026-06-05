@@ -1,5 +1,4 @@
 import { Hero } from "@/components/Hero";
-import { Footer } from "@/components/layout/Footer";
 
 import { WhatWeDo } from "@/components/about/WhatWeDo";
 import { AdoptedPets } from "@/components/about/AdoptedPets";
@@ -35,7 +34,6 @@ export default function AboutUsPage() {
         </section>
       </main>
 
-      <Footer />
     </>
 
   )

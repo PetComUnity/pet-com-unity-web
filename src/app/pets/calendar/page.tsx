@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
@@ -121,6 +121,8 @@ export default function CalendarPage() {
   );
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fetching, setFetching] = useState(false);
+  const hasLoadedOnce = useRef(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -133,7 +135,9 @@ export default function CalendarPage() {
     let cancelled = false;
 
     async function fetchEvents() {
-      setLoading(true);
+      if (hasLoadedOnce.current) {
+        setFetching(true);
+      }
       setError("");
       try {
         const data = await getCalendarEvents({
@@ -146,7 +150,11 @@ export default function CalendarPage() {
         if (!cancelled)
           setError((e as Error)?.message ?? "Failed to load events");
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          hasLoadedOnce.current = true;
+          setLoading(false);
+          setFetching(false);
+        }
       }
     }
 
@@ -336,13 +344,16 @@ export default function CalendarPage() {
                     {error}
                   </p>
                 ) : (
-                  <CalendarGrid
-                    year={year}
-                    month={month}
-                    events={events}
-                    onDayClick={handleDayClick}
-                    onEventClick={(ev) => openEditModal(ev)}
-                  />
+                  <div className={fetching ? "pointer-events-none opacity-50 transition-opacity" : "transition-opacity"}>
+                    <CalendarGrid
+                      year={year}
+                      month={month}
+                      events={events}
+                      pets={pets}
+                      onDayClick={handleDayClick}
+                      onEventClick={(ev) => openEditModal(ev)}
+                    />
+                  </div>
                 )}
               </>
             )}
@@ -382,7 +393,7 @@ export default function CalendarPage() {
                     No events
                   </p>
                 ) : (
-                  <div className="flex flex-col gap-3">
+                  <div className={`flex flex-col gap-3 ${fetching ? "pointer-events-none opacity-50 transition-opacity" : "transition-opacity"}`}>
                     {displayedEvents.map((ev) => (
                       <EventCard
                         key={ev.id}
@@ -408,13 +419,16 @@ export default function CalendarPage() {
                 {error}
               </p>
             ) : (
-              <CalendarGrid
-                year={year}
-                month={month}
-                events={events}
-                onDayClick={handleDayClick}
-                onEventClick={(ev) => openEditModal(ev)}
-              />
+              <div className={fetching ? "pointer-events-none opacity-50 transition-opacity" : "transition-opacity"}>
+                <CalendarGrid
+                  year={year}
+                  month={month}
+                  events={events}
+                  pets={pets}
+                  onDayClick={handleDayClick}
+                  onEventClick={(ev) => openEditModal(ev)}
+                />
+              </div>
             )}
           </div>
 

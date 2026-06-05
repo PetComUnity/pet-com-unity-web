@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Heart } from "lucide-react";
+import { Heart, PawPrint } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PetVerificationStatus } from "@/types";
 
@@ -16,8 +16,6 @@ export type AdoptionPetCardData = {
   verificationStatus: PetVerificationStatus;
   detailsHref: string;
 };
-
-const fallbackImageSrc = "/images/mock-img.png";
 
 function formatBirthDate(birthDate?: string) {
   if (!birthDate) {
@@ -50,13 +48,19 @@ export function AdoptionPetCard({
       )}
     >
       <div className="relative aspect-[312/336] overflow-hidden rounded-[1rem]">
-        <Image
-          src={pet.imageSrc ?? fallbackImageSrc}
-          alt={pet.imageAlt ?? `${pet.name} waiting for adoption`}
-          fill
-          sizes="(max-width: 640px) calc(100vw - 3rem), 320px"
-          className="object-cover"
-        />
+        {pet.imageSrc ? (
+          <Image
+            src={pet.imageSrc}
+            alt={pet.imageAlt ?? `${pet.name} waiting for adoption`}
+            fill
+            sizes="(max-width: 640px) calc(100vw - 3rem), 320px"
+            className="object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-[#f0ebe4]">
+            <PawPrint className="h-1/3 w-1/3 text-[#c9b99a]" />
+          </div>
+        )}
       </div>
 
       <div className="space-y-6 px-2 pt-6 pb-2">

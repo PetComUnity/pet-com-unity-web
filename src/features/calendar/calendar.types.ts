@@ -58,29 +58,22 @@ export const EVENT_TYPE_LABELS: Record<CalendarEventType, string> = {
   other: 'Other',
 };
 
-export const EVENT_TYPE_COLORS: Record<CalendarEventType, string> = {
-  vaccination: '#f38c2c',
-  vet_visit:   '#ff5b7e',
-  checkup:     '#0085ff',
-  grooming:    '#00ba34',
-  medication:  '#a855f7',
-  other:       '#14b8a6',
+
+export const PET_COLOR_THEME_MAP: Record<string, string> = {
+  Red:    '#ef4444',
+  Orange: '#f97316',
+  Yellow: '#eab308',
+  Green:  '#22c55e',
+  Teal:   '#14b8a6',
+  Blue:   '#3b82f6',
+  Purple: '#a855f7',
+  Pink:   '#ec4899',
+  Brown:  '#92400e',
 };
 
-export function getEventTypeColor(eventType?: CalendarEventType): string {
-  if (!eventType) return EVENT_TYPE_COLORS.other;
-  return EVENT_TYPE_COLORS[eventType] ?? EVENT_TYPE_COLORS.other;
-}
+export const PET_COLOR_NONE = '#9ca3af';
 
-export const PET_COLORS = [
-  '#0085ff',
-  '#00ba34',
-  '#ff5b7e',
-  '#f38c2c',
-  '#a855f7',
-  '#14b8a6',
-];
-
-export function getPetColor(index: number): string {
-  return PET_COLORS[index % PET_COLORS.length];
+export function getColorForPet(themeColor: string | undefined): string {
+  if (!themeColor || themeColor === 'None') return PET_COLOR_NONE;
+  return PET_COLOR_THEME_MAP[themeColor] ?? PET_COLOR_NONE;
 }

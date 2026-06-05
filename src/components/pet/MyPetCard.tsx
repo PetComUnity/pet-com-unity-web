@@ -1,10 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
+import { PawPrint } from "lucide-react";
 import { getPetDetailsRoute } from "@/constants/routes";
 import { PrivateImage } from "@/components/common/PrivateImage";
 import type { Pet } from "@/types";
 
-const fallbackPetImageSrc = "/images/mock-img.png";
+function PetImagePlaceholder({ className }: { className: string }) {
+  return (
+    <div className={`${className} flex items-center justify-center bg-[#f0ebe4]`}>
+      <PawPrint className="w-1/2 h-1/2 text-[#c9b99a]" />
+    </div>
+  );
+}
 
 export function MyPetCard({ pet }: { pet: Pet }) {
   const detailsHref = getPetDetailsRoute(pet.id);
@@ -21,15 +28,16 @@ export function MyPetCard({ pet }: { pet: Pet }) {
               fileId={pet.imageFileId}
               alt={pet.description ?? `${pet.name} pet profile photo`}
               className="h-20 w-20 rounded-[12px] object-cover"
-              fallbackSrc={fallbackPetImageSrc}
             />
-          ) : (
+          ) : pet.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={pet.imageUrl ?? fallbackPetImageSrc}
+              src={pet.imageUrl}
               alt={pet.description ?? `${pet.name} pet profile photo`}
               className="h-20 w-20 rounded-[12px] object-cover"
             />
+          ) : (
+            <PetImagePlaceholder className="h-20 w-20 rounded-[12px]" />
           )}
         </span>
         {pet.verificationStatus === "verified" ? (
@@ -54,15 +62,16 @@ export function MyPetCard({ pet }: { pet: Pet }) {
               fileId={pet.imageFileId}
               alt={pet.description ?? `${pet.name} pet profile photo`}
               className="h-full w-full object-cover"
-              fallbackSrc={fallbackPetImageSrc}
             />
-          ) : (
+          ) : pet.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={pet.imageUrl ?? fallbackPetImageSrc}
+              src={pet.imageUrl}
               alt={pet.description ?? `${pet.name} pet profile photo`}
               className="h-full w-full object-cover"
             />
+          ) : (
+            <PetImagePlaceholder className="h-full w-full" />
           )}
         </div>
 
