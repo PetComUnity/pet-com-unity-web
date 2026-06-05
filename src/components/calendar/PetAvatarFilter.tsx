@@ -32,7 +32,7 @@ export function PetAvatarFilter({ pets, selectedPetId, onSelect }: PetAvatarFilt
         </button>
       )}
 
-      {visible.map((pet, index) => {
+      {visible.map((pet) => {
         const themeColor = getColorForPet(pet.themeColor);
         const isSelected = selectedPetId === pet.id;
         return (
