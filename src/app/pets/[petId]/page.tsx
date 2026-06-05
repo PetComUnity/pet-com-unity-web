@@ -19,7 +19,6 @@ import { getPetDetailsRoute, ROUTES } from "@/constants/routes";
 import {
   getMyPets,
   getPetById,
-  markPetAsLost,
   updatePet,
   uploadPetImage,
   type UpdatePetApiInput,
@@ -78,7 +77,7 @@ const colorOptions = [
 ];
 const weightOptions = Array.from({ length: 80 }, (_, index) => `${index + 1} kg`);
 
-const formFieldNames = [
+const textFormFieldNames = [
   "name",
   "birthDate",
   "microchipId",
@@ -89,9 +88,14 @@ const formFieldNames = [
   "gender",
 ] as const;
 
+const formFieldNames = [...textFormFieldNames, "isAdoptable"] as const;
+
+type TextFormFieldName = (typeof textFormFieldNames)[number];
 type FormFieldName = (typeof formFieldNames)[number];
 
-type PetDetailsFormState = Record<FormFieldName, string>;
+type PetDetailsFormState = Record<TextFormFieldName, string> & {
+  isAdoptable: boolean;
+};
 
 const emptyFormState: PetDetailsFormState = {
   name: "",
@@ -102,6 +106,7 @@ const emptyFormState: PetDetailsFormState = {
   breed: "",
   color: "",
   gender: "",
+  isAdoptable: false,
 };
 
 type SaveStatus = "idle" | "saving" | "saved";
@@ -175,6 +180,7 @@ function buildFormState(pet: Pet): PetDetailsFormState {
     breed: pet.breed ?? "",
     color: pet.color ?? "",
     gender: pet.gender ?? "",
+    isAdoptable: pet.isAdoptable,
   };
 }
 
@@ -229,6 +235,8 @@ function getPetFieldUpdatePayload(
       return { weight: normalizeWeight(formState.weight) };
     case "color":
       return { color: toApiText(formState.color) };
+    case "isAdoptable":
+      return { isAdoptable: formState.isAdoptable };
   }
 }
 
@@ -279,6 +287,10 @@ function mergePetWithPayload(pet: Pet, payload: UpdatePetApiInput): Pet {
 
   if ("color" in payload) {
     nextPet.color = toOptionalPetText(payload.color);
+  }
+
+  if ("isAdoptable" in payload && typeof payload.isAdoptable === "boolean") {
+    nextPet.isAdoptable = payload.isAdoptable;
   }
 
   return nextPet;
@@ -485,12 +497,13 @@ function PetsQuickNav({
 type TextFieldProps = {
   id: string;
   label: string;
-  name: FormFieldName;
+  name: TextFormFieldName;
   value: string;
+  className?: string;
   editable?: boolean;
   inputMode?: "text" | "decimal" | "numeric";
   onBlur: () => void;
-  onChange: (name: FormFieldName, value: string) => void;
+  onChange: (name: TextFormFieldName, value: string) => void;
 };
 
 function TextField({
@@ -498,13 +511,14 @@ function TextField({
   label,
   name,
   value,
+  className,
   editable = true,
   inputMode = "text",
   onBlur,
   onChange,
 }: TextFieldProps) {
   return (
-    <label htmlFor={id} className="block space-y-3">
+    <label htmlFor={id} className={cn("block space-y-3", className)}>
       <span className="block text-[0.98rem] leading-none font-medium text-[#1a202c]">
         {label}
       </span>
@@ -546,12 +560,17 @@ function TextField({
 type SelectFieldProps = {
   id: string;
   label: string;
-  name: FormFieldName;
+  name: TextFormFieldName;
   options: string[];
   value: string;
+  className?: string;
   editable?: boolean;
   onBlur: () => void;
-  onChange: (name: FormFieldName, value: string, shouldSave?: boolean) => void;
+  onChange: (
+    name: TextFormFieldName,
+    value: string,
+    shouldSave?: boolean,
+  ) => void;
 };
 
 function SelectField({
@@ -560,12 +579,13 @@ function SelectField({
   name,
   options,
   value,
+  className,
   editable = true,
   onBlur,
   onChange,
 }: SelectFieldProps) {
   return (
-    <label htmlFor={id} className="block space-y-3">
+    <label htmlFor={id} className={cn("block space-y-3", className)}>
       <span className="block text-[0.98rem] leading-none font-medium text-[#1a202c]">
         {label}
       </span>
@@ -603,6 +623,57 @@ function SelectField({
   );
 }
 
+type CheckboxFieldProps = {
+  id: string;
+  label: string;
+  name: "isAdoptable";
+  checked: boolean;
+  className?: string;
+  editable?: boolean;
+  onChange: (name: "isAdoptable", checked: boolean) => void;
+};
+
+function CheckboxField({
+  id,
+  label,
+  name,
+  checked,
+  className,
+  editable = true,
+  onChange,
+}: CheckboxFieldProps) {
+  return (
+    <label
+      htmlFor={id}
+      className={cn(
+        "block space-y-3",
+        editable ? "cursor-pointer" : "cursor-default",
+        className,
+      )}
+    >
+      <span className="block text-[0.98rem] leading-none font-medium text-[#1a202c]">
+        adoption
+      </span>
+      <span className="flex h-11 items-center gap-3 text-[1rem] font-medium text-[#1a202c] transition focus-within:ring-2 focus-within:ring-[#1a202c]/15">
+        <input
+          id={id}
+          name={name}
+          type="checkbox"
+          checked={checked}
+          disabled={!editable}
+          onChange={(event) => {
+            if (editable) {
+              onChange(name, event.target.checked);
+            }
+          }}
+          className="h-5 w-5 rounded border-[#1a202c] accent-[#02b75b] disabled:opacity-100"
+        />
+        <span>{label}</span>
+      </span>
+    </label>
+  );
+}
+
 export default function PetDetailsPage() {
   const params = useParams<{ petId: string }>();
   const router = useRouter();
@@ -623,7 +694,7 @@ export default function PetDetailsPage() {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [markingLost, setMarkingLost] = useState(false);
+  const [updatingLostStatus, setUpdatingLostStatus] = useState(false);
   const isPetOwner = Boolean(appUser && pet?.ownerId === appUser.id);
   const canEditPet = isPetOwner;
   const visiblePetDetailsTabs = appUser
@@ -764,7 +835,7 @@ export default function PetDetailsPage() {
   }
 
   function updateFormField(
-    name: FormFieldName,
+    name: TextFormFieldName,
     value: string,
     shouldSave = false,
   ) {
@@ -780,6 +851,18 @@ export default function PetDetailsPage() {
     if (shouldSave) {
       void savePetDetails(name, nextFormState);
     }
+  }
+
+  function updateAdoptionStatus(name: "isAdoptable", checked: boolean) {
+    if (!canEditPet) {
+      return;
+    }
+
+    const nextFormState = { ...formState, [name]: checked };
+    lastChangedFieldRef.current = name;
+    setFormState(nextFormState);
+    setSaveStatus("idle");
+    void savePetDetails(name, nextFormState);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -848,26 +931,29 @@ export default function PetDetailsPage() {
     }
   }
 
-  async function handleMarkLost() {
+  async function handleLostStatusToggle() {
     if (!pet || !canEditPet) {
       return;
     }
 
+    const nextIsLost = !pet.isLost;
+
     try {
-      setMarkingLost(true);
+      setUpdatingLostStatus(true);
       setFormError(null);
-      const updatedPet = await markPetAsLost(pet.id);
+      const updatedPet = await updatePet(pet.id, { isLost: nextIsLost });
       setPet((currentPet) =>
-        updatedPet ?? (currentPet ? { ...currentPet, isLost: true } : currentPet),
+        updatedPet ??
+        (currentPet ? { ...currentPet, isLost: nextIsLost } : currentPet),
       );
     } catch (error) {
       setFormError(
         error instanceof Error
           ? error.message
-          : "We could not mark this pet as lost right now.",
+          : `We could not mark this pet as ${nextIsLost ? "lost" : "found"} right now.`,
       );
     } finally {
-      setMarkingLost(false);
+      setUpdatingLostStatus(false);
     }
   }
 
@@ -879,8 +965,8 @@ export default function PetDetailsPage() {
         {appUser ? <PetsQuickNav currentPetId={petId} pets={ownerPets} /> : null}
 
         <section className="relative min-h-[390px] w-full overflow-hidden rounded-[18px] bg-white p-5 shadow-[0_4px_4px_rgba(0,0,0,0.25)] focus-within:ring-2 focus-within:ring-[#d68532]/40 focus-within:ring-offset-4 focus-within:ring-offset-[#fcf5eb] sm:p-8">
-            <div className="grid grid-cols-1 gap-x-8 lg:grid-cols-[176px_minmax(0,1fr)]">
-              <div className="min-w-0 overflow-x-auto pb-7 lg:col-start-2">
+            <div className="grid grid-cols-1 gap-x-8 md:grid-cols-[180px_minmax(0,1fr)] xl:grid-cols-[176px_minmax(0,1fr)]">
+              <div className="min-w-0 overflow-x-auto pb-7 md:col-span-2 xl:col-start-2 xl:col-span-1">
                 <div
                   role="tablist"
                   aria-label="Pet detail tabs"
@@ -915,18 +1001,16 @@ export default function PetDetailsPage() {
                 </div>
               </div>
 
-              <div className="border-t border-[#d6d6d6] lg:col-start-2" />
-
               {loadingPet ? (
-                <div className="flex min-h-[360px] items-center justify-center pt-12 lg:col-start-2">
+                <div className="flex min-h-[360px] items-center justify-center pt-12 md:col-span-2 xl:col-start-2 xl:col-span-1">
                   <Spinner label="Loading pet details..." />
                 </div>
               ) : loadError ? (
-                <div className="pt-12 text-center text-sm font-medium text-[#b91c1c] lg:col-start-2">
+                <div className="pt-12 text-center text-sm font-medium text-[#b91c1c] md:col-span-2 xl:col-start-2 xl:col-span-1">
                   {loadError}
                 </div>
               ) : !pet ? (
-                <div className="pt-12 text-center text-sm font-medium text-[#1a202c] lg:col-start-2">
+                <div className="pt-12 text-center text-sm font-medium text-[#1a202c] md:col-span-2 xl:col-start-2 xl:col-span-1">
                   Pet not found.
                 </div>
               ) : (
@@ -1001,7 +1085,7 @@ export default function PetDetailsPage() {
                           </>
                         ) : (
                           <>
-                            <Camera className="h-4 w-4" aria-hidden="true" />
+                            <Camera className="h-6 w-6" aria-hidden="true" />
                             {pet.imageFileId || pet.imageUrl
                               ? "Change Avatar"
                               : "Pet Avatar"}
@@ -1013,30 +1097,30 @@ export default function PetDetailsPage() {
 
                   <form
                     onSubmit={handleSubmit}
-                    className="min-w-0 pt-12 lg:col-start-2 lg:row-start-3 lg:pt-[52px]"
+                    className="min-w-0 pt-12 lg:col-start-2 lg:row-start-3 lg:pt-[32px]"
                   >
                     <div className="space-y-6">
                       <div className="grid gap-x-14 gap-y-6 lg:grid-cols-2">
-                        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-[174px_174px] xl:gap-x-[140px]">
-                          <TextField
-                            id="pet-name"
-                            label="name"
-                            name="name"
-                            value={formState.name}
-                            editable={canEditPet}
-                            onBlur={() => void savePetDetails("name")}
-                            onChange={updateFormField}
-                          />
-                          <TextField
-                            id="pet-birth-date"
-                            label="birth day"
-                            name="birthDate"
-                            value={formState.birthDate}
-                            editable={canEditPet}
-                            inputMode="numeric"
-                            onBlur={() => void savePetDetails("birthDate")}
-                            onChange={updateFormField}
-                          />
+                        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-[174px_174px] xl:gap-x-[50px]">
+                        <TextField
+                          id="pet-name"
+                          label="name"
+                          name="name"
+                          value={formState.name}
+                          editable={canEditPet}
+                          onBlur={() => void savePetDetails("name")}
+                          onChange={updateFormField}
+                        />
+                        <TextField
+                          id="pet-birth-date"
+                          label="birth day"
+                          name="birthDate"
+                          value={formState.birthDate}
+                          editable={canEditPet}
+                          inputMode="numeric"
+                          onBlur={() => void savePetDetails("birthDate")}
+                          onChange={updateFormField}
+                        />
                         </div>
 
                         <TextField
@@ -1108,22 +1192,35 @@ export default function PetDetailsPage() {
                           onChange={updateFormField}
                         />
 
+                        <CheckboxField
+                          id="pet-ready-for-adoption"
+                          label="Ready for Adoption"
+                          name="isAdoptable"
+                          checked={formState.isAdoptable}
+                          editable={canEditPet}
+                          onChange={updateAdoptionStatus}
+                        />
+                      </div>
+
+                      <div className="grid gap-x-14 gap-y-6 lg:grid-cols-2">
                         {canEditPet ? (
                           <div className="space-y-3">
                             <p className="text-[0.98rem] leading-none font-medium text-[#1a202c]">
-                              press immediately if you lost your pet
+                              update your pet lost status
                             </p>
                             <button
                               type="button"
-                              disabled={markingLost || pet.isLost}
+                              disabled={updatingLostStatus}
                               className="flex h-[60px] w-full items-center justify-center rounded-[14px] border border-[#1a202c] bg-[#ff5277] px-5 text-center text-[1rem] font-medium text-[#1a1720] transition hover:bg-[#f5476f] focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-70"
-                              onClick={handleMarkLost}
+                              onClick={handleLostStatusToggle}
                             >
-                              {markingLost
-                                ? "Marking..."
+                              {updatingLostStatus
+                                ? pet.isLost
+                                  ? "Marking found..."
+                                  : "Marking lost..."
                                 : pet.isLost
-                                  ? "Pet marked lost"
-                                  : "Lost my pet"}
+                                  ? "Mark as Found"
+                                  : "Mark as Lost"}
                             </button>
                           </div>
                         ) : null}

@@ -91,6 +91,7 @@ function getPetPayload(formData: FormData): CreatePetApiInput {
         ? parsedWeight
         : undefined,
     colorTheme: toOptionalText(getFormValue(formData, "color-theme")),
+    isAdoptable: formData.has("isAdoptable"),
   };
 }
 
@@ -399,6 +400,19 @@ export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
                     className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-[#1a202c]"
                   />
                 </span>
+              </label>
+
+              <label
+                htmlFor="ready-for-adoption"
+                className="flex min-h-11 cursor-pointer items-center gap-3 px-4 text-[1rem] font-medium text-[#1a202c] transition focus-within:ring-2 focus-within:ring-[#1a202c]/15"
+              >
+                <input
+                  id="ready-for-adoption"
+                  name="isAdoptable"
+                  type="checkbox"
+                  className="h-5 w-5 rounded border-[#1a202c] accent-[#02b75b]"
+                />
+                <span>Ready for Adoption</span>
               </label>
             </div>
 

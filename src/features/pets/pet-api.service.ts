@@ -98,6 +98,7 @@ export type CreatePetApiInput = {
   colorTheme?: string;
   imageUrl?: string;
   imageFileId?: string;
+  isAdoptable: boolean;
 };
 
 export type UpdatePetApiInput = Partial<{
