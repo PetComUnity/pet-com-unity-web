@@ -420,7 +420,7 @@ function PetAvatarLink({ pet, isActive }: PetAvatarLinkProps) {
       aria-label={`Open ${pet.name} details`}
       title={pet.name}
       className={cn(
-        "relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-[5px] transition hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-4 focus-visible:ring-offset-black focus-visible:outline-none",
+        "relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-[3px] transition hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-4 focus-visible:ring-offset-black focus-visible:outline-none",
         isActive ? "scale-105" : "",
       )}
       style={
@@ -780,6 +780,12 @@ export default function PetDetailsPage() {
       try {
         setLoadingPet(true);
         setLoadError(null);
+        setFormError(null);
+        setSaveStatus("idle");
+        setAvatarPreviewUrl(null);
+        setPet(null);
+        setFormState(emptyFormState);
+        setSavedFormState(emptyFormState);
         const result = await getPetById(petId, signal);
 
         if (signal?.aborted) {
@@ -1031,7 +1037,12 @@ export default function PetDetailsPage() {
       <div className="mx-auto flex w-full max-w-[1240px] flex-col gap-10 px-5 pt-8 pb-12 sm:px-8 sm:pt-10 sm:pb-10 lg:px-14 lg:pt-14 lg:pb-14">
         {publicOwnerInfo ? <OwnerInfoCard owner={publicOwnerInfo} /> : null}
 
-        {appUser ? <PetsQuickNav currentPetId={petId} pets={ownerPets} /> : null}
+        {appUser ? (
+          <PetsQuickNav
+            currentPetId={petId}
+            pets={ownerPets}
+          />
+        ) : null}
 
         <section className="relative min-h-[390px] w-full overflow-hidden rounded-[18px] bg-white p-5 shadow-[0_4px_4px_rgba(0,0,0,0.25)] focus-within:ring-2 focus-within:ring-[#d68532]/40 focus-within:ring-offset-4 focus-within:ring-offset-[#fcf5eb] sm:p-8 md:px-7">
             <div className="grid grid-cols-1 gap-x-8 md:grid-cols-[180px_minmax(0,1fr)] xl:grid-cols-[176px_minmax(0,1fr)]">
@@ -1183,7 +1194,7 @@ export default function PetDetailsPage() {
                     label="date of birth"
                     name="birthDate"
                     value={formState.birthDate}
-                    className="md:col-start-4 md:row-start-1 md:mt-6 xl:col-start-3 xl:mt-8"
+                    className="md:col-start-3 md:row-start-1 md:mt-6 xl:col-start-3 xl:mt-8"
                     editable={canEditPet}
                     inputMode="numeric"
                     onBlur={() => void savePetDetails("birthDate")}
