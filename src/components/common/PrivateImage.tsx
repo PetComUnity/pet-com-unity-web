@@ -8,6 +8,7 @@ type PrivateImageProps = {
   alt: string;
   className?: string;
   fallbackSrc?: string;
+  allowUnauthenticated?: boolean;
 };
 
 const API_BASE_URL =
@@ -15,18 +16,24 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   "http://localhost:5000/api";
 
-export function PrivateImage({ fileId, alt, className, fallbackSrc }: PrivateImageProps) {
+export function PrivateImage({
+  fileId,
+  alt,
+  className,
+  fallbackSrc,
+  allowUnauthenticated = false,
+}: PrivateImageProps) {
   const [src, setSrc] = useState<string | null>(fallbackSrc || null);
 
   useEffect(() => {
     const token = getToken();
-    if (!token) return;
+    if (!token && !allowUnauthenticated) return;
 
     const encodedFileId = fileId.replace(/\//g, "--");
     let blobUrl: string | null = null;
 
     fetch(`${API_BASE_URL}/files/${encodedFileId}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load image");
@@ -41,7 +48,7 @@ export function PrivateImage({ fileId, alt, className, fallbackSrc }: PrivateIma
     return () => {
       if (blobUrl) URL.revokeObjectURL(blobUrl);
     };
-  }, [fileId, fallbackSrc]);
+  }, [allowUnauthenticated, fileId, fallbackSrc]);
 
   if (!src) return null;
 

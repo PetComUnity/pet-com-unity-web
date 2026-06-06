@@ -21,6 +21,8 @@ type ApiPet = Omit<
   | "weight"
   | "color"
   | "gender"
+  | "imageUrl"
+  | "imageFileId"
   | "verifiedAt"
   | "createdAt"
   | "updatedAt"
@@ -31,6 +33,9 @@ type ApiPet = Omit<
   color?: string | null;
   themeColor?: string | null;
   gender?: string | null;
+  imageUrl?: string | null;
+  imageFileId?: string | null;
+  imageFieldId?: string | null;
   owner?: ApiPetOwner | null;
   user?: ApiPetOwner | null;
   shelter?: ApiPetOwner | null;
@@ -214,11 +219,14 @@ function mapPet(pet: ApiPet): Pet {
   const isLegacyTheme = !pet.themeColor && !!pet.color && THEME_COLOR_KEYS.has(pet.color);
   const themeColor = toOptionalText(pet.themeColor) ?? (isLegacyTheme ? pet.color! : undefined);
   const color      = isLegacyTheme ? undefined : toOptionalText(pet.color);
+  const imageFileId = toOptionalText(pet.imageFileId ?? pet.imageFieldId);
 
   return {
     ...pet,
     color,
     themeColor,
+    imageUrl: toOptionalText(pet.imageUrl),
+    imageFileId,
     location: toOptionalText(pet.location ?? pet.city),
     owner: getApiPetOwner(pet),
     weight: toOptionalNumber(pet.weight),
