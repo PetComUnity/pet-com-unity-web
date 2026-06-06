@@ -8,10 +8,18 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type CSSProperties,
   type FormEvent,
 } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Camera, ChevronDown, Pencil } from "lucide-react";
+import {
+  ArrowLeft,
+  Camera,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Pencil,
+} from "lucide-react";
 import { PrivateImage } from "@/components/common/PrivateImage";
 import { Spinner } from "@/components/ui/Spinner";
 import { ROLE_LABELS } from "@/constants/roles";
@@ -23,6 +31,7 @@ import {
   uploadPetImage,
   type UpdatePetApiInput,
 } from "@/features/pets/pet-api.service";
+import { getColorForPet } from "@/features/pets/pet-theme-colors";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import type { Pet, PetOwnerInfo } from "@/types";
@@ -399,29 +408,12 @@ function getPublicOwnerInfo(pet: Pet): PetOwnerInfo {
   return pet.owner ?? { city: pet.location, role: "owner" };
 }
 
-function getPetAvatarRingClass(index: number, isActive: boolean) {
-  if (isActive) {
-    return "ring-[#02b75b]";
-  }
-
-  if (index % 3 === 0) {
-    return "ring-[#1e9cff]";
-  }
-
-  if (index % 3 === 1) {
-    return "ring-[#02b75b]";
-  }
-
-  return "ring-[#fb5f89]";
-}
-
 type PetAvatarLinkProps = {
   pet: Pet;
-  index: number;
   isActive: boolean;
 };
 
-function PetAvatarLink({ pet, index, isActive }: PetAvatarLinkProps) {
+function PetAvatarLink({ pet, isActive }: PetAvatarLinkProps) {
   return (
     <Link
       href={getPetDetailsRoute(pet.id)}
@@ -429,8 +421,13 @@ function PetAvatarLink({ pet, index, isActive }: PetAvatarLinkProps) {
       title={pet.name}
       className={cn(
         "relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-[5px] transition hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-4 focus-visible:ring-offset-black focus-visible:outline-none",
-        getPetAvatarRingClass(index, isActive),
+        isActive ? "scale-105" : "",
       )}
+      style={
+        {
+          "--tw-ring-color": getColorForPet(pet.themeColor),
+        } as CSSProperties
+      }
     >
       {pet.imageFileId ? (
         <PrivateImage
@@ -451,6 +448,86 @@ function PetAvatarLink({ pet, index, isActive }: PetAvatarLinkProps) {
   );
 }
 
+function getCenteredPetStartIndex(pets: Pet[], currentPetId: string) {
+  const maxStartIndex = Math.max(0, pets.length - 3);
+  const currentPetIndex = pets.findIndex((pet) => pet.id === currentPetId);
+
+  if (currentPetIndex <= 1) {
+    return 0;
+  }
+
+  return Math.min(currentPetIndex - 1, maxStartIndex);
+}
+
+function PetAvatarCarousel({
+  currentPetId,
+  initialStartIndex,
+  pets,
+}: {
+  currentPetId: string;
+  initialStartIndex: number;
+  pets: Pet[];
+}) {
+  const [startIndex, setStartIndex] = useState(initialStartIndex);
+  const maxStartIndex = Math.max(0, pets.length - 3);
+  const hasMorePets = pets.length > 3;
+  const visiblePets = pets.slice(startIndex, startIndex + 3);
+
+  function showPreviousPets() {
+    setStartIndex((currentStartIndex) => Math.max(0, currentStartIndex - 1));
+  }
+
+  function showNextPets() {
+    setStartIndex((currentStartIndex) =>
+      Math.min(maxStartIndex, currentStartIndex + 1),
+    );
+  }
+
+  if (visiblePets.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      {hasMorePets ? (
+        <button
+          type="button"
+          aria-label="Show previous pets"
+          title="Show previous pets"
+          disabled={startIndex === 0}
+          onClick={showPreviousPets}
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#1a202c]/20 bg-white text-[#1a202c] transition hover:-translate-y-0.5 hover:bg-[#fff4e8] focus-visible:ring-2 focus-visible:ring-[#ff8a24]/35 focus-visible:ring-offset-4 focus-visible:ring-offset-black focus-visible:outline-none disabled:pointer-events-none disabled:opacity-35"
+        >
+          <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+        </button>
+      ) : null}
+
+      <div className="flex w-[132px] items-center justify-center gap-3">
+        {visiblePets.map((pet) => (
+          <PetAvatarLink
+            key={pet.id}
+            pet={pet}
+            isActive={pet.id === currentPetId}
+          />
+        ))}
+      </div>
+
+      {hasMorePets ? (
+        <button
+          type="button"
+          aria-label="Show next pets"
+          title="Show next pets"
+          disabled={startIndex >= maxStartIndex}
+          onClick={showNextPets}
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#1a202c]/20 bg-white text-[#1a202c] transition hover:-translate-y-0.5 hover:bg-[#fff4e8] focus-visible:ring-2 focus-visible:ring-[#ff8a24]/35 focus-visible:ring-offset-4 focus-visible:ring-offset-black focus-visible:outline-none disabled:pointer-events-none disabled:opacity-35"
+        >
+          <ChevronRight className="h-5 w-5" aria-hidden="true" />
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 function PetsQuickNav({
   currentPetId,
   pets,
@@ -458,10 +535,8 @@ function PetsQuickNav({
   currentPetId: string;
   pets: Pet[];
 }) {
-  const currentPet = pets.find((pet) => pet.id === currentPetId);
-  const visiblePets = currentPet
-    ? [currentPet, ...pets.filter((pet) => pet.id !== currentPetId)].slice(0, 3)
-    : pets.slice(0, 3);
+  const initialStartIndex = getCenteredPetStartIndex(pets, currentPetId);
+  const carouselKey = `${currentPetId}:${pets.map((pet) => pet.id).join("|")}`;
 
   return (
     <nav
@@ -477,18 +552,12 @@ function PetsQuickNav({
       </Link>
 
       <div className="flex items-center gap-4 pr-2">
-        {visiblePets.length > 0 ? (
-          <div className="flex items-center gap-3">
-            {visiblePets.map((pet, index) => (
-              <PetAvatarLink
-                key={pet.id}
-                pet={pet}
-                index={index}
-                isActive={pet.id === currentPetId}
-              />
-            ))}
-          </div>
-        ) : null}
+        <PetAvatarCarousel
+          key={carouselKey}
+          currentPetId={currentPetId}
+          initialStartIndex={initialStartIndex}
+          pets={pets}
+        />
       </div>
     </nav>
   );
@@ -1018,16 +1087,17 @@ export default function PetDetailsPage() {
                   onSubmit={handleSubmit}
                   className="min-w-0 space-y-6 pt-12 md:col-span-2 md:row-start-2 md:grid md:grid-cols-[180px_174px_minmax(0,1fr)_174px] md:gap-x-10 md:gap-y-6 md:space-y-0 md:pt-0 xl:grid-cols-[176px_174px_174px_minmax(0,1fr)] xl:gap-x-[50px]"
                 >
-                  <aside className="flex flex-col items-center gap-11 md:col-start-1 md:row-start-1 md:row-end-5 md:items-start md:gap-[76px] xl:gap-11">
+                  <aside className="flex flex-col items-center gap-11 md:col-start-1 md:row-start-1 md:row-end-5 md:items-start md:gap-11 xl:gap-11">
                     <button
                       type="button"
                       disabled={!canEditPet}
                       className={cn(
-                        "flex h-[292px] w-[176px] items-center justify-center overflow-hidden rounded-[14px] border border-[#c8c8c8] bg-white transition focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-2 focus-visible:outline-none md:h-[260px] md:w-[180px] md:border-[4px] md:border-[#8438ff] md:shadow-[0_3px_6px_rgba(132,56,255,0.35)] xl:h-[292px] xl:w-[176px] xl:border xl:border-[#c8c8c8] xl:shadow-none",
+                        "flex h-[292px] w-[176px] items-center justify-center overflow-hidden rounded-[14px] border bg-white transition focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-2 focus-visible:outline-none md:h-[260px] md:w-[180px] md:border-[4px] xl:h-[292px] xl:w-[176px] xl:border",
                         canEditPet
-                          ? "hover:border-[#ff8a24]"
+                          ? "hover:brightness-95"
                           : "cursor-default",
                       )}
+                      style={{ borderColor: getColorForPet(pet.themeColor) }}
                       onClick={() => {
                         if (canEditPet) {
                           fileInputRef.current?.click();
