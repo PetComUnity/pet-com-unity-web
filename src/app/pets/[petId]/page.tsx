@@ -8,7 +8,6 @@ import {
   useRef,
   useState,
   type ChangeEvent,
-  type CSSProperties,
   type FormEvent,
 } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -16,11 +15,11 @@ import {
   ArrowLeft,
   Camera,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
+  PawPrint,
   Pencil,
 } from "lucide-react";
 import { PrivateImage } from "@/components/common/PrivateImage";
+import { PetAvatarCarousel } from "@/components/pet/PetAvatarCarousel";
 import { Spinner } from "@/components/ui/Spinner";
 import { ROLE_LABELS } from "@/constants/roles";
 import { getPetDetailsRoute, ROUTES } from "@/constants/routes";
@@ -328,16 +327,11 @@ function OwnerInfoField({ value, className }: OwnerInfoFieldProps) {
   return (
     <div
       className={cn(
-        "relative flex h-11 min-w-0 items-center rounded-[14px] border border-[#c8c8c8] bg-white px-4 pr-11 text-[0.98rem] font-medium text-[#1a202c]",
+        "flex h-11 min-w-0 items-center rounded-[14px] border border-[#c8c8c8] bg-white px-4 text-[0.98rem] font-medium text-[#1a202c]",
         className,
       )}
     >
       <span className="min-w-0 truncate">{value}</span>
-      <Pencil
-        aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-[#1a202c]"
-        strokeWidth={1.8}
-      />
     </div>
   );
 }
@@ -371,20 +365,30 @@ function OwnerAvatar({ owner }: { owner: PetOwnerInfo }) {
   );
 }
 
+function PetImagePlaceholder({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "flex items-center justify-center bg-[#f0ebe4]",
+        className,
+      )}
+    >
+      <PawPrint className="h-1/2 w-1/2 text-[#c9b99a]" aria-hidden="true" />
+    </div>
+  );
+}
+
 function OwnerInfoCard({ owner }: { owner: PetOwnerInfo }) {
   const ownerLocation = getOwnerText(owner.city);
   const ownerRoleLabel = owner.role ? ROLE_LABELS[owner.role] : "Owner";
 
   return (
     <section className="rounded-[18px] bg-white p-5 shadow-[0_4px_4px_rgba(0,0,0,0.25)] sm:p-6 lg:px-7 lg:py-6">
-      <div className="grid gap-5 lg:grid-cols-[110px_minmax(220px,270px)_minmax(260px,1fr)_minmax(180px,268px)] lg:items-center lg:gap-x-9 lg:gap-y-6">
-        <div className="flex flex-col items-center gap-3 lg:row-span-2">
+      <div className="grid gap-5 md:grid-cols-[96px_minmax(0,1fr)_minmax(0,1fr)] md:items-center md:gap-x-6 md:gap-y-5 lg:grid-cols-[110px_minmax(220px,270px)_minmax(260px,1fr)_minmax(180px,268px)] lg:gap-x-9 lg:gap-y-6">
+        <div className="flex items-center justify-center md:row-span-3 md:items-start lg:row-span-2">
           <div className="relative h-20 w-24 overflow-hidden rounded-[14px] border border-[#c8c8c8] bg-white">
             <OwnerAvatar owner={owner} />
           </div>
-          <span className="inline-flex h-5 w-24 items-center justify-center rounded-full bg-[#ff8a24] px-4 text-[0.78rem] font-semibold text-white">
-            + Avatar
-          </span>
         </div>
 
         <OwnerInfoField value={getOwnerText(owner.name)} />
@@ -396,7 +400,7 @@ function OwnerInfoCard({ owner }: { owner: PetOwnerInfo }) {
           value={ownerLocation}
           className="lg:col-span-1"
         />
-        <div className="flex h-11 items-center justify-center rounded-[14px] border border-[#65c84f] bg-[#97ff7b] px-6 text-[0.98rem] font-medium text-[#1a202c]">
+        <div className="flex h-11 items-center justify-center rounded-[14px] border border-[#65c84f] bg-[#97ff7b] px-6 text-[0.98rem] font-medium text-[#1a202c] md:col-start-2 md:col-end-4 lg:col-start-4 lg:col-end-5">
           {ownerRoleLabel}
         </div>
       </div>
@@ -408,126 +412,6 @@ function getPublicOwnerInfo(pet: Pet): PetOwnerInfo {
   return pet.owner ?? { city: pet.location, role: "owner" };
 }
 
-type PetAvatarLinkProps = {
-  pet: Pet;
-  isActive: boolean;
-};
-
-function PetAvatarLink({ pet, isActive }: PetAvatarLinkProps) {
-  return (
-    <Link
-      href={getPetDetailsRoute(pet.id)}
-      aria-label={`Open ${pet.name} details`}
-      title={pet.name}
-      className={cn(
-        "relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-[3px] transition hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-4 focus-visible:ring-offset-black focus-visible:outline-none",
-        isActive ? "scale-105" : "",
-      )}
-      style={
-        {
-          "--tw-ring-color": getColorForPet(pet.themeColor),
-        } as CSSProperties
-      }
-    >
-      {pet.imageFileId ? (
-        <PrivateImage
-          fileId={pet.imageFileId}
-          alt=""
-          className="h-full w-full object-cover"
-          fallbackSrc={fallbackPetImageSrc}
-        />
-      ) : (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={pet.imageUrl ?? fallbackPetImageSrc}
-          alt=""
-          className="h-full w-full object-cover"
-        />
-      )}
-    </Link>
-  );
-}
-
-function getCenteredPetStartIndex(pets: Pet[], currentPetId: string) {
-  const maxStartIndex = Math.max(0, pets.length - 3);
-  const currentPetIndex = pets.findIndex((pet) => pet.id === currentPetId);
-
-  if (currentPetIndex <= 1) {
-    return 0;
-  }
-
-  return Math.min(currentPetIndex - 1, maxStartIndex);
-}
-
-function PetAvatarCarousel({
-  currentPetId,
-  initialStartIndex,
-  pets,
-}: {
-  currentPetId: string;
-  initialStartIndex: number;
-  pets: Pet[];
-}) {
-  const [startIndex, setStartIndex] = useState(initialStartIndex);
-  const maxStartIndex = Math.max(0, pets.length - 3);
-  const hasMorePets = pets.length > 3;
-  const visiblePets = pets.slice(startIndex, startIndex + 3);
-
-  function showPreviousPets() {
-    setStartIndex((currentStartIndex) => Math.max(0, currentStartIndex - 1));
-  }
-
-  function showNextPets() {
-    setStartIndex((currentStartIndex) =>
-      Math.min(maxStartIndex, currentStartIndex + 1),
-    );
-  }
-
-  if (visiblePets.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="flex items-center gap-2">
-      {hasMorePets ? (
-        <button
-          type="button"
-          aria-label="Show previous pets"
-          title="Show previous pets"
-          disabled={startIndex === 0}
-          onClick={showPreviousPets}
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#1a202c]/20 bg-white text-[#1a202c] transition hover:-translate-y-0.5 hover:bg-[#fff4e8] focus-visible:ring-2 focus-visible:ring-[#ff8a24]/35 focus-visible:ring-offset-4 focus-visible:ring-offset-black focus-visible:outline-none disabled:pointer-events-none disabled:opacity-35"
-        >
-          <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-        </button>
-      ) : null}
-
-      <div className="flex w-[132px] items-center justify-center gap-3">
-        {visiblePets.map((pet) => (
-          <PetAvatarLink
-            key={pet.id}
-            pet={pet}
-            isActive={pet.id === currentPetId}
-          />
-        ))}
-      </div>
-
-      {hasMorePets ? (
-        <button
-          type="button"
-          aria-label="Show next pets"
-          title="Show next pets"
-          disabled={startIndex >= maxStartIndex}
-          onClick={showNextPets}
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#1a202c]/20 bg-white text-[#1a202c] transition hover:-translate-y-0.5 hover:bg-[#fff4e8] focus-visible:ring-2 focus-visible:ring-[#ff8a24]/35 focus-visible:ring-offset-4 focus-visible:ring-offset-black focus-visible:outline-none disabled:pointer-events-none disabled:opacity-35"
-        >
-          <ChevronRight className="h-5 w-5" aria-hidden="true" />
-        </button>
-      ) : null}
-    </div>
-  );
-}
-
 function PetsQuickNav({
   currentPetId,
   pets,
@@ -535,9 +419,6 @@ function PetsQuickNav({
   currentPetId: string;
   pets: Pet[];
 }) {
-  const initialStartIndex = getCenteredPetStartIndex(pets, currentPetId);
-  const carouselKey = `${currentPetId}:${pets.map((pet) => pet.id).join("|")}`;
-
   return (
     <nav
       aria-label="Pet detail navigation"
@@ -553,10 +434,11 @@ function PetsQuickNav({
 
       <div className="flex items-center gap-4 pr-2">
         <PetAvatarCarousel
-          key={carouselKey}
-          currentPetId={currentPetId}
-          initialStartIndex={initialStartIndex}
           pets={pets}
+          activePetId={currentPetId}
+          centerActivePet
+          fallbackImageSrc={fallbackPetImageSrc}
+          getPetHref={(pet) => getPetDetailsRoute(pet.id)}
         />
       </div>
     </nav>
@@ -1130,17 +1012,18 @@ export default function PetDetailsPage() {
                             pet.description ?? `${pet.name} pet profile photo`
                           }
                           className="h-full w-full object-cover object-center"
-                          fallbackSrc={fallbackPetImageSrc}
                         />
-                      ) : (
+                      ) : pet.imageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          src={pet.imageUrl ?? fallbackPetImageSrc}
+                          src={pet.imageUrl}
                           alt={
                             pet.description ?? `${pet.name} pet profile photo`
                           }
                           className="h-full w-full object-cover object-center"
                         />
+                      ) : (
+                        <PetImagePlaceholder className="h-full w-full" />
                       )}
                     </button>
 
