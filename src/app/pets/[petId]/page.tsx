@@ -1046,7 +1046,7 @@ export default function PetDetailsPage() {
 
         <section className="relative min-h-[390px] w-full overflow-hidden rounded-[18px] bg-white p-5 shadow-[0_4px_4px_rgba(0,0,0,0.25)] focus-within:ring-2 focus-within:ring-[#d68532]/40 focus-within:ring-offset-4 focus-within:ring-offset-[#fcf5eb] sm:p-8 md:px-7">
             <div className="grid grid-cols-1 gap-x-8 md:grid-cols-[180px_minmax(0,1fr)] xl:grid-cols-[176px_minmax(0,1fr)]">
-              <div className="min-w-0 overflow-x-auto pb-7 md:col-span-2 xl:col-start-2 xl:col-span-1">
+              <div className="min-w-0 overflow-x-auto pb-7 md:col-span-2 md:col-start-2 md:ml-4">
                 <div
                   role="tablist"
                   aria-label="Pet detail tabs"
@@ -1096,9 +1096,9 @@ export default function PetDetailsPage() {
               ) : (
                 <form
                   onSubmit={handleSubmit}
-                  className="min-w-0 space-y-6 pt-12 md:col-span-2 md:row-start-2 md:grid md:grid-cols-[180px_174px_minmax(0,1fr)_174px] md:gap-x-10 md:gap-y-6 md:space-y-0 md:pt-0 xl:grid-cols-[176px_174px_174px_minmax(0,1fr)] xl:gap-x-[50px]"
+                  className="min-w-0 space-y-6 pt-12 md:col-span-2 md:row-start-2 md:grid md:grid-cols-[180px_minmax(0,1fr)_minmax(0,1fr)] md:gap-x-6 md:gap-y-6 md:space-y-0 md:pt-0 xl:grid-cols-[176px_174px_174px_minmax(0,1fr)] xl:gap-x-[50px]"
                 >
-                  <aside className="flex flex-col items-center gap-11 md:col-start-1 md:row-start-1 md:row-end-5 md:items-start md:gap-11 xl:gap-11">
+                  <aside className="flex flex-col items-center gap-11 md:col-start-1 md:row-start-1 md:row-end-5 md:mt-6 md:items-start md:gap-11 xl:gap-11 xl:mt-8">
                     <button
                       type="button"
                       disabled={!canEditPet}
@@ -1206,7 +1206,7 @@ export default function PetDetailsPage() {
                     name="species"
                     options={speciesOptions}
                     value={formState.species}
-                    className="md:col-start-2 md:col-end-5 md:row-start-2 xl:col-end-4"
+                    className="md:col-start-2 md:col-end-4 md:row-start-2"
                     editable={canEditPet}
                     onBlur={() => void savePetDetails("species")}
                     onChange={updateFormField}
@@ -1217,7 +1217,7 @@ export default function PetDetailsPage() {
                     name="breed"
                     options={getBreedOptionsForSpecies(formState.species)}
                     value={formState.breed}
-                    className="md:col-start-2 md:col-end-5 md:row-start-3 xl:col-end-4"
+                    className="md:col-start-2 md:col-end-4 md:row-start-3"
                     editable={canEditPet}
                     onBlur={() => void savePetDetails("breed")}
                     onChange={updateFormField}
@@ -1228,7 +1228,7 @@ export default function PetDetailsPage() {
                     name="gender"
                     options={genderOptions}
                     value={formState.gender}
-                    className="md:col-start-2 md:col-end-5 md:row-start-4 xl:col-end-4"
+                    className="md:col-start-2 md:col-end-4 md:row-start-4"
                     editable={canEditPet}
                     onBlur={() => void savePetDetails("gender")}
                     onChange={updateFormField}
@@ -1238,7 +1238,7 @@ export default function PetDetailsPage() {
                     label="chip"
                     name="microchipId"
                     value={formState.microchipId}
-                    className="md:col-start-1 md:col-end-5 md:row-start-5 xl:col-start-4 xl:col-end-5 xl:row-start-1 xl:mt-8"
+                    className="md:col-start-1 md:col-end-4 md:row-start-5 xl:col-start-4 xl:col-end-5 xl:row-start-1 xl:mt-8"
                     editable={canEditPet}
                     onBlur={() => void savePetDetails("microchipId")}
                     onChange={updateFormField}
@@ -1249,7 +1249,7 @@ export default function PetDetailsPage() {
                     name="weight"
                     options={weightOptions}
                     value={formState.weight}
-                    className="md:col-start-1 md:col-end-5 md:row-start-6 xl:col-start-4 xl:col-end-5 xl:row-start-2"
+                    className="md:col-start-1 md:col-end-4 md:row-start-6 xl:col-start-4 xl:col-end-5 xl:row-start-2"
                     editable={canEditPet}
                     onBlur={() => void savePetDetails("weight")}
                     onChange={updateFormField}
@@ -1260,7 +1260,7 @@ export default function PetDetailsPage() {
                     name="color"
                     options={colorOptions}
                     value={formState.color}
-                    className="md:col-start-1 md:col-end-5 md:row-start-7 xl:col-start-4 xl:col-end-5 xl:row-start-3"
+                    className="md:col-start-1 md:col-end-4 md:row-start-7 xl:col-start-4 xl:col-end-5 xl:row-start-3"
                     editable={canEditPet}
                     onBlur={() => void savePetDetails("color")}
                     onChange={updateFormField}
@@ -1271,13 +1271,13 @@ export default function PetDetailsPage() {
                     label="Ready for Adoption"
                     name="isAdoptable"
                     checked={formState.isAdoptable}
-                    className="md:col-start-1 md:col-end-5 md:row-start-8 xl:col-start-4 xl:col-end-5 xl:row-start-4"
+                    className="md:col-start-1 md:col-end-4 md:row-start-8 xl:col-start-4 xl:col-end-5 xl:row-start-4"
                     editable={canEditPet}
                     onChange={updateAdoptionStatus}
                   />
 
                   {canEditPet ? (
-                    <div className="space-y-3 md:col-start-1 md:col-end-5 md:row-start-9 xl:col-start-4 xl:col-end-5 xl:row-start-5">
+                    <div className="space-y-3 md:col-start-1 md:col-end-4 md:row-start-9 xl:col-start-4 xl:col-end-5 xl:row-start-5">
                       <p className="text-[0.98rem] leading-none font-medium text-[#1a202c]">
                         press immidiatly if you lost your pet
                       </p>
@@ -1298,7 +1298,7 @@ export default function PetDetailsPage() {
                     </div>
                   ) : null}
 
-                  <div className="min-h-5 text-right text-sm font-medium md:col-start-1 md:col-end-5 md:row-start-10 xl:col-start-2 xl:col-end-5 xl:row-start-6">
+                  <div className="min-h-5 text-right text-sm font-medium md:col-start-1 md:col-end-4 md:row-start-10 xl:col-start-2 xl:col-end-5 xl:row-start-6">
                     {formError ? (
                       <p className="text-[#b91c1c]">{formError}</p>
                     ) : saveStatus === "saving" ? (
