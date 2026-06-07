@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, PawPrint } from "lucide-react";
+import { PrivateImage } from "@/components/common/PrivateImage";
 import { cn } from "@/lib/utils";
 import type { PetVerificationStatus } from "@/types";
 
@@ -11,6 +12,7 @@ export type AdoptionPetCardData = {
   breed?: string;
   birthDate?: string;
   imageSrc?: string;
+  imageFileId?: string;
   imageAlt?: string;
   location?: string;
   verificationStatus: PetVerificationStatus;
@@ -40,6 +42,8 @@ export function AdoptionPetCard({
   pet: AdoptionPetCardData;
   className?: string;
 }) {
+  const imageAlt = pet.imageAlt ?? `${pet.name} waiting for adoption`;
+
   return (
     <article
       className={cn(
@@ -47,20 +51,29 @@ export function AdoptionPetCard({
         className,
       )}
     >
-      <div className="relative aspect-[312/336] overflow-hidden rounded-[1rem]">
-        {pet.imageSrc ? (
+      <div className="relative aspect-[312/336] overflow-hidden rounded-[1rem] bg-[#f0ebe4]">
+        {pet.imageFileId || !pet.imageSrc ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <PawPrint className="h-1/3 w-1/3 text-[#c9b99a]" />
+          </div>
+        ) : null}
+
+        {pet.imageFileId ? (
+          <PrivateImage
+            fileId={pet.imageFileId}
+            alt={imageAlt}
+            allowUnauthenticated
+            className="relative h-full w-full object-cover"
+          />
+        ) : pet.imageSrc ? (
           <Image
             src={pet.imageSrc}
-            alt={pet.imageAlt ?? `${pet.name} waiting for adoption`}
+            alt={imageAlt}
             fill
             sizes="(max-width: 640px) calc(100vw - 3rem), 320px"
             className="object-cover"
           />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-[#f0ebe4]">
-            <PawPrint className="h-1/3 w-1/3 text-[#c9b99a]" />
-          </div>
-        )}
+        ) : null}
       </div>
 
       <div className="space-y-6 px-2 pt-6 pb-2">
