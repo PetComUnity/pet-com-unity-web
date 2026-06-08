@@ -64,6 +64,17 @@ export interface LostReport {
   createdAt?: Date | null;
 }
 
+export interface PetDocument {
+  id: string;
+  petId: string;
+  ownerId: string;
+  name: string;
+  issuedDate: string;
+  fileId: string;
+  mimeType?: string;
+  createdAt?: string | null;
+}
+
 export type PublicPet = Pick<
   Pet,
   | "id"

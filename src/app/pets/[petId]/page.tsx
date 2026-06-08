@@ -19,6 +19,7 @@ import {
   Pencil,
 } from "lucide-react";
 import { PrivateImage } from "@/components/common/PrivateImage";
+import { DocumentsTab } from "@/components/documents/DocumentsTab";
 import { PetAvatarCarousel } from "@/components/pet/PetAvatarCarousel";
 import { Spinner } from "@/components/ui/Spinner";
 import { ROLE_LABELS } from "@/constants/roles";
@@ -633,6 +634,7 @@ export default function PetDetailsPage() {
   const lastChangedFieldRef = useRef<FormFieldName | null>(null);
   const petId = getRouteParam(params.petId);
 
+  const [activeTab, setActiveTab] = useState<(typeof petDetailsTabs)[number]["id"]>("details");
   const [pet, setPet] = useState<Pet | null>(null);
   const [formState, setFormState] =
     useState<PetDetailsFormState>(emptyFormState);
@@ -648,9 +650,11 @@ export default function PetDetailsPage() {
   const [updatingLostStatus, setUpdatingLostStatus] = useState(false);
   const isPetOwner = Boolean(appUser && pet?.ownerId === appUser.id);
   const canEditPet = isPetOwner;
-  const visiblePetDetailsTabs = appUser
-    ? petDetailsTabs
-    : petDetailsTabs.filter((tab) => tab.id !== "calendar");
+  const visiblePetDetailsTabs = petDetailsTabs.filter((tab) => {
+    if (tab.id === "calendar") return Boolean(appUser);
+    if (tab.id === "documents") return isPetOwner;
+    return true;
+  });
   const publicOwnerInfo = pet && !isPetOwner ? getPublicOwnerInfo(pet) : null;
 
   const loadPet = useCallback(
@@ -750,7 +754,9 @@ export default function PetDetailsPage() {
   function handleTabClick(tabId: (typeof petDetailsTabs)[number]["id"]) {
     if (tabId === "calendar") {
       router.push(ROUTES.calendar);
+      return;
     }
+    setActiveTab(tabId);
   }
 
   async function savePetDetails(
@@ -928,14 +934,14 @@ export default function PetDetailsPage() {
 
         <section className="relative min-h-[390px] w-full overflow-hidden rounded-[18px] bg-white p-5 shadow-[0_4px_4px_rgba(0,0,0,0.25)] focus-within:ring-2 focus-within:ring-[#d68532]/40 focus-within:ring-offset-4 focus-within:ring-offset-[#fcf5eb] sm:p-8 md:px-7">
             <div className="grid grid-cols-1 gap-x-8 md:grid-cols-[180px_minmax(0,1fr)] xl:grid-cols-[176px_minmax(0,1fr)]">
-              <div className="min-w-0 overflow-x-auto pb-7 md:col-span-2 md:col-start-2 md:ml-4">
+              <div className="min-w-0 overflow-x-auto pb-7 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:col-span-2 md:col-start-2 md:ml-4">
                 <div
                   role="tablist"
                   aria-label="Pet detail tabs"
                   className="flex min-w-max items-end gap-10 sm:gap-12 lg:gap-14"
                 >
                   {visiblePetDetailsTabs.map((tab) => {
-                    const isActive = tab.id === "details";
+                    const isActive = tab.id === activeTab;
 
                     return (
                       <button
@@ -943,9 +949,6 @@ export default function PetDetailsPage() {
                         type="button"
                         role="tab"
                         aria-selected={isActive}
-                        aria-disabled={
-                          tab.id !== "details" && tab.id !== "calendar"
-                        }
                         className={tabClassName(isActive)}
                         onClick={() => handleTabClick(tab.id)}
                       >
@@ -975,6 +978,13 @@ export default function PetDetailsPage() {
                 <div className="pt-12 text-center text-sm font-medium text-[#1a202c] md:col-span-2 xl:col-start-2 xl:col-span-1">
                   Pet not found.
                 </div>
+              ) : activeTab === "documents" ? (
+                <DocumentsTab
+                  pet={pet}
+                  avatarPreviewUrl={avatarPreviewUrl}
+                  uploadingAvatar={uploadingAvatar}
+                  onAvatarClick={() => fileInputRef.current?.click()}
+                />
               ) : (
                 <form
                   onSubmit={handleSubmit}
