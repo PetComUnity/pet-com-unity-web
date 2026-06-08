@@ -26,6 +26,7 @@ function toAdoptionPetCardData(pet: Pet): AdoptionPetCardData {
     birthDate: pet.birthDate,
     location: pet.location,
     imageSrc: pet.imageUrl,
+    imageFileId: pet.imageFileId,
     imageAlt:
       pet.description ?? `${pet.name} the ${pet.species} waiting for adoption`,
     verificationStatus: pet.verificationStatus,

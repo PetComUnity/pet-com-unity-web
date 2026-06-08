@@ -3,15 +3,12 @@ import { PetAdoptedCard } from "./PetAdoptedCard";
 const pets = [
   {
     name: "Buddy",
-    image: "/",
   },
   {
     name: "Name",
-    image: "/",
   },
   {
     name: "Buddy",
-    image: "/",
   },
 ];
 
