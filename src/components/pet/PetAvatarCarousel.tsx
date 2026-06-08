@@ -82,7 +82,7 @@ function PetAvatarImage({
   pet: Pet;
 }) {
   const themeColor = getColorForPet(pet.themeColor);
-  const publicImageSrc = pet.imageUrl ?? fallbackImageSrc;
+  const publicImageSrc = pet.imageUrl;
 
   return (
     <span
