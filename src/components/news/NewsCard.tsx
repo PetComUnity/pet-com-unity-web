@@ -1,12 +1,18 @@
+import type { Pet } from "@/types";
+
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 
-export function NewsCard() {
+type NewsCardProps = {
+  pet: Pet;
+};
+
+export function NewsCard({ pet }: NewsCardProps) {
   return (
     <Card className="w-full max-w-[312px] overflow-hidden rounded-2xl border border-[#010101] bg-white shadow-sm">
       <div className="m-4 flex h-56 items-center justify-center rounded-2xl bg-[#fff8ef]">
         <span className="font-display text-[24px] font-bold text-[#1A202C]/45">
-          Pet photo
+          {pet.name}
         </span>
       </div>
 
@@ -16,7 +22,7 @@ export function NewsCard() {
         </h3>
 
         <p className="font-display mt-3 text-[18px] leading-[120%] text-[#1A202C]/70">
-          Information about lost and found pets will appear here.
+          {pet.species} • {pet.breed}
         </p>
 
         <Button
