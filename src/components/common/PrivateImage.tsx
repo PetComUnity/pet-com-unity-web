@@ -11,6 +11,11 @@ type PrivateImageProps = {
   allowUnauthenticated?: boolean;
 };
 
+type PrivateImageState = {
+  fileId: string;
+  src: string;
+};
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ??
   process.env.NEXT_PUBLIC_API_URL ??
