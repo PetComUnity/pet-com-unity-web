@@ -716,6 +716,13 @@ export default function PetDetailsPage() {
     }
   }, []);
 
+  // Reset active tab whenever the pet changes so a non-owner navigating from
+  // an owned pet (Documents tab open) to an unowned pet doesn't see the
+  // Documents upload form (tab is hidden but activeTab state persisted).
+  useEffect(() => {
+    void Promise.resolve().then(() => setActiveTab("details"));
+  }, [petId]);
+
   useEffect(() => {
     const abortController = new AbortController();
     void Promise.resolve().then(() => loadPet(abortController.signal));

@@ -20,12 +20,16 @@ import {
   Pencil,
   Plus,
   Trash2,
+  X,
 } from "lucide-react";
 import { PrivateImage } from "@/components/common/PrivateImage";
 import { Spinner } from "@/components/ui/Spinner";
 import {
   addPetDocument,
+  deleteUploadedFile,
   deletePetDocument,
+  downloadPetDocument,
+  fetchDocumentBlob,
   getPetDocuments,
   uploadDocumentFile,
 } from "@/features/documents/documents-api.service";
@@ -59,18 +63,81 @@ function isValidIssuedDate(value: string) {
   const day = parseInt(match[1], 10);
   const month = parseInt(match[2], 10);
   const year = parseInt(match[3], 10);
+  if (year < 1900 || year > 2100) return false;
+  const date = new Date(year, month - 1, day);
   return (
-    month >= 1 &&
-    month <= 12 &&
-    day >= 1 &&
-    day <= 31 &&
-    year >= 1900 &&
-    year <= 2100
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day
   );
 }
 
 function isImageMimeType(mimeType?: string) {
   return Boolean(mimeType?.startsWith("image/"));
+}
+
+type ImageViewerState =
+  | { status: "loading"; doc: PetDocument }
+  | { status: "ready"; doc: PetDocument; blobUrl: string }
+  | { status: "error"; doc: PetDocument };
+
+function ImageViewerModal({
+  state,
+  onClose,
+}: {
+  state: ImageViewerState;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Preview: ${state.doc.name}`}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="relative max-h-[90vh] max-w-[90vw]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          aria-label="Close preview"
+          onClick={onClose}
+          className="absolute -top-3 -right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#1a202c] shadow-md transition hover:bg-[#f0ebe4] focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
+        >
+          <X className="h-4 w-4" strokeWidth={2} />
+        </button>
+
+        {state.status === "loading" && (
+          <div className="flex h-40 w-40 items-center justify-center rounded-[14px] bg-white">
+            <Spinner label="Loading…" />
+          </div>
+        )}
+        {state.status === "error" && (
+          <div className="flex h-40 w-60 items-center justify-center rounded-[14px] bg-white text-sm text-[#b91c1c]">
+            Could not load image.
+          </div>
+        )}
+        {state.status === "ready" && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={state.blobUrl}
+            alt={state.doc.name}
+            className="max-h-[90vh] max-w-[90vw] rounded-[14px] object-contain shadow-2xl"
+          />
+        )}
+      </div>
+    </div>
+  );
 }
 
 function useItemsPerPage() {
@@ -144,7 +211,7 @@ function DocumentFormField({
 }
 
 function DocumentThumbnail({ doc }: { doc: PetDocument }) {
-  if (!doc.mimeType || isImageMimeType(doc.mimeType)) {
+  if (doc.mimeType && isImageMimeType(doc.mimeType)) {
     return (
       <PrivateImage
         fileId={doc.fileId}
@@ -162,52 +229,106 @@ function DocumentThumbnail({ doc }: { doc: PetDocument }) {
 
 function DocumentCard({
   doc,
+  isDeleting,
+  onOpen,
   onDelete,
 }: {
   doc: PetDocument;
+  isDeleting: boolean;
+  onOpen: (doc: PetDocument) => void;
   onDelete: (id: string) => void;
 }) {
   const label = `${doc.name} ${formatDisplayDate(doc.issuedDate)}`;
+  const isImage = isImageMimeType(doc.mimeType);
   return (
     <div className="group flex flex-col items-center gap-2">
-      <div className="h-[100px] w-full overflow-hidden rounded-[12px] border border-[#e2e8f0] bg-[#f7f7f7] transition group-hover:border-[#c8c8c8]">
+      <button
+        type="button"
+        aria-label={isImage ? `Preview ${label}` : `Download ${label}`}
+        onClick={() => onOpen(doc)}
+        className="h-[100px] w-full overflow-hidden rounded-[12px] border border-[#e2e8f0] bg-[#f7f7f7] transition group-hover:border-[#c8c8c8] hover:brightness-95 focus-visible:ring-2 focus-visible:ring-[#1a202c]/20 focus-visible:outline-none"
+      >
         <DocumentThumbnail doc={doc} />
-      </div>
+      </button>
       <p className="w-full text-center text-[0.82rem] leading-tight font-medium text-[#1a202c]">
         {label}
       </p>
-      <button
-        type="button"
-        aria-label={`Delete ${label}`}
-        onClick={() => onDelete(doc.id)}
-        className="text-[#e53e3e] transition hover:text-[#c53030] focus-visible:ring-2 focus-visible:ring-[#e53e3e]/40 focus-visible:ring-offset-1 focus-visible:outline-none"
-      >
-        <Trash2 className="h-5 w-5" strokeWidth={1.8} />
-      </button>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          aria-label={`Download ${label}`}
+          onClick={() => void downloadPetDocument(doc.fileId, doc.name)}
+          className="text-[#1a202c]/60 transition hover:text-[#1a202c] focus-visible:ring-2 focus-visible:ring-[#1a202c]/30 focus-visible:ring-offset-1 focus-visible:outline-none"
+        >
+          <Download className="h-4 w-4" strokeWidth={1.8} />
+        </button>
+        <button
+          type="button"
+          aria-label={`Delete ${label}`}
+          disabled={isDeleting}
+          onClick={() => onDelete(doc.id)}
+          className="text-[#e53e3e] transition hover:text-[#c53030] focus-visible:ring-2 focus-visible:ring-[#e53e3e]/40 focus-visible:ring-offset-1 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {isDeleting ? (
+            <span
+              aria-hidden="true"
+              className="block h-4 w-4 animate-spin rounded-full border-2 border-[#e53e3e]/30 border-t-[#e53e3e]"
+            />
+          ) : (
+            <Trash2 className="h-5 w-5" strokeWidth={1.8} />
+          )}
+        </button>
+      </div>
     </div>
   );
 }
 
 function DocumentRow({
   doc,
+  isDeleting,
+  onOpen,
   onDelete,
 }: {
   doc: PetDocument;
+  isDeleting: boolean;
+  onOpen: (doc: PetDocument) => void;
   onDelete: (id: string) => void;
 }) {
   const label = `${doc.name} ${formatDisplayDate(doc.issuedDate)}`;
+  const isImage = isImageMimeType(doc.mimeType);
   return (
     <div className="flex items-center gap-4 border-b border-[#e2e8f0] py-3 transition last:border-b-0 hover:bg-[#fafafa]">
-      <span className="min-w-0 flex-1 text-[0.98rem] font-medium text-[#1a202c]">
+      <button
+        type="button"
+        aria-label={isImage ? `Preview ${label}` : `Download ${label}`}
+        onClick={() => onOpen(doc)}
+        className="min-w-0 flex-1 text-left text-[0.98rem] font-medium text-[#1a202c] transition hover:text-[#1a202c]/70 focus-visible:outline-none"
+      >
         {label}
-      </span>
+      </button>
+      <button
+        type="button"
+        aria-label={`Download ${label}`}
+        onClick={() => void downloadPetDocument(doc.fileId, doc.name)}
+        className="shrink-0 text-[#1a202c]/60 transition hover:text-[#1a202c] focus-visible:ring-2 focus-visible:ring-[#1a202c]/30 focus-visible:outline-none"
+      >
+        <Download className="h-5 w-5" strokeWidth={1.8} />
+      </button>
       <button
         type="button"
         aria-label={`Delete ${label}`}
+        disabled={isDeleting}
         onClick={() => onDelete(doc.id)}
-        className="shrink-0 text-[#e53e3e] transition hover:text-[#c53030] focus-visible:ring-2 focus-visible:ring-[#e53e3e]/40 focus-visible:outline-none"
+        className="shrink-0 text-[#e53e3e] transition hover:text-[#c53030] focus-visible:ring-2 focus-visible:ring-[#e53e3e]/40 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
       >
-        <Trash2 className="h-5 w-5" strokeWidth={1.8} />
+        {isDeleting ? (
+          <span
+            aria-hidden="true"
+            className="block h-4 w-4 animate-spin rounded-full border-2 border-[#e53e3e]/30 border-t-[#e53e3e]"
+          />
+        ) : (
+          <Trash2 className="h-5 w-5" strokeWidth={1.8} />
+        )}
       </button>
     </div>
   );
@@ -215,9 +336,13 @@ function DocumentRow({
 
 function DocumentsGallery({
   documents,
+  deletingId,
+  onOpen,
   onDelete,
 }: {
   documents: PetDocument[];
+  deletingId: string | null;
+  onOpen: (doc: PetDocument) => void;
   onDelete: (id: string) => void;
 }) {
   const itemsPerPage = useItemsPerPage();
@@ -253,7 +378,13 @@ function DocumentsGallery({
         }}
       >
         {currentDocs.map((doc) => (
-          <DocumentCard key={doc.id} doc={doc} onDelete={onDelete} />
+          <DocumentCard
+            key={doc.id}
+            doc={doc}
+            isDeleting={deletingId === doc.id}
+            onOpen={onOpen}
+            onDelete={onDelete}
+          />
         ))}
         {Array.from({ length: itemsPerPage - currentDocs.length }).map(
           (_, i) => (
@@ -303,9 +434,11 @@ export function DocumentsTab({
   const [dateError, setDateError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [search, setSearch] = useState("");
+  const [viewer, setViewer] = useState<ImageViewerState | null>(null);
 
   const isFormComplete =
     form.name.trim() !== "" &&
@@ -313,8 +446,6 @@ export function DocumentsTab({
     form.file !== null;
 
   const borderColor = getColorForPet(pet.themeColor);
-
-  // ── Load ────────────────────────────────────────────────────────────────────
 
   const loadDocuments = useCallback(
     async (signal?: AbortSignal) => {
@@ -368,20 +499,32 @@ export function DocumentsTab({
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!isFormComplete || !validateDate()) return;
+
+    let uploadedFileId: string | null = null;
+
     try {
       setSubmitting(true);
       setSubmitError(null);
-      const { fileId, mimeType } = await uploadDocumentFile(form.file!);
+
+      const { fileId, mimeType, secureUrl } = await uploadDocumentFile(
+        form.file!,
+      );
+      uploadedFileId = fileId;
+
       const newDoc = await addPetDocument(pet.id, {
         name: form.name.trim(),
         issuedDate: formatIssuedDateForApi(form.issuedDate),
         fileId,
         mimeType,
+        secureUrl,
       });
+
+      uploadedFileId = null;
       setDocuments((prev) => [newDoc, ...prev]);
       setForm(emptyForm);
       setSelectedFileName("");
     } catch (error) {
+      if (uploadedFileId) void deleteUploadedFile(uploadedFileId);
       setSubmitError(
         error instanceof Error ? error.message : "Could not add document.",
       );
@@ -390,14 +533,37 @@ export function DocumentsTab({
     }
   }
 
+  async function handleOpen(doc: PetDocument) {
+    if (!isImageMimeType(doc.mimeType)) {
+      void downloadPetDocument(doc.fileId, doc.name);
+      return;
+    }
+    setViewer({ status: "loading", doc });
+    const blobUrl = await fetchDocumentBlob(doc.fileId);
+    if (blobUrl) {
+      setViewer({ status: "ready", doc, blobUrl });
+    } else {
+      setViewer({ status: "error", doc });
+    }
+  }
+
+  function handleCloseViewer() {
+    if (viewer?.status === "ready") URL.revokeObjectURL(viewer.blobUrl);
+    setViewer(null);
+  }
+
   async function handleDelete(docId: string) {
+    if (deletingId) return;
     try {
+      setDeletingId(docId);
       await deletePetDocument(pet.id, docId);
       setDocuments((prev) => prev.filter((d) => d.id !== docId));
     } catch (error) {
       setSubmitError(
         error instanceof Error ? error.message : "Could not delete document.",
       );
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -412,6 +578,9 @@ export function DocumentsTab({
       onSubmit={handleSubmit}
       className="min-w-0 md:col-span-2 md:row-start-2"
     >
+      {viewer && (
+        <ImageViewerModal state={viewer} onClose={handleCloseViewer} />
+      )}
       <div
         className={cn(
           "flex flex-col gap-6 pt-8",
@@ -553,12 +722,13 @@ export function DocumentsTab({
             disabled={!isFormComplete || submitting}
             className={cn(
               "font-display inline-flex h-[60px] w-full items-center justify-center gap-2 rounded-[14px]",
+              "border border-[#1a202c]",
               "text-xl leading-6 font-semibold transition",
               "focus-visible:ring-2 focus-visible:ring-[#1a202c]/20 focus-visible:outline-none",
               "md:max-w-[320px]",
               isFormComplete
-                ? "border border-[#1a202c] bg-[#97ff7b] text-[#1a202c] hover:bg-[#6bb556] disabled:opacity-70"
-                : "cursor-not-allowed border-transparent bg-[#7a7878]/50 text-white",
+                ? "bg-[#97ff7b] text-[#1a202c] hover:bg-[#6bb556] disabled:opacity-70"
+                : "cursor-not-allowed bg-[#7a7878]/50 text-white",
             )}
           >
             {submitting ? (
@@ -639,12 +809,20 @@ export function DocumentsTab({
         ) : viewMode === "grid" ? (
           <DocumentsGallery
             documents={filteredDocuments}
+            deletingId={deletingId}
+            onOpen={handleOpen}
             onDelete={handleDelete}
           />
         ) : (
           <div className="rounded-[14px] border border-[#e2e8f0] bg-white px-4">
             {filteredDocuments.map((doc) => (
-              <DocumentRow key={doc.id} doc={doc} onDelete={handleDelete} />
+              <DocumentRow
+                key={doc.id}
+                doc={doc}
+                isDeleting={deletingId === doc.id}
+                onOpen={handleOpen}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         )}
