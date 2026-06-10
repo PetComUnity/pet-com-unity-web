@@ -6,9 +6,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { CalendarGrid } from "@/components/calendar/CalendarGrid";
 import { EventCard } from "@/components/calendar/EventCard";
-import { PetAvatarFilter } from "@/components/calendar/PetAvatarFilter";
 import { AddEventModal } from "@/components/calendar/AddEventModal";
 import { DayEventsSheet } from "@/components/calendar/DayEventsSheet";
+import { PetAvatarCarousel } from "@/components/pet/PetAvatarCarousel";
 import { cn } from "@/lib/utils";
 import { ROUTES } from "@/constants/routes";
 import {
@@ -302,10 +302,16 @@ export default function CalendarPage() {
                 {year}
               </span>
             </div>
-            <PetAvatarFilter
+            <PetAvatarCarousel
               pets={pets}
-              selectedPetId={selectedPetId}
-              onSelect={setSelectedPetId}
+              activePetId={selectedPetId}
+              allowDeselect
+              controlVariant="minimal"
+              dimInactivePets
+              onSelectPet={setSelectedPetId}
+              paginationMode="pages"
+              showNameTooltip
+              variant="filter"
             />
           </div>
 

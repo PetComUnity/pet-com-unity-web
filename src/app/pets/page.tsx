@@ -8,10 +8,13 @@ import { getMyPets } from "@/features/pets/pet-api.service";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { AddPetModal } from "@/components/pet/AddPetModal";
 import { MyPetCard } from "@/components/pet/MyPetCard";
+import { Pagination } from "@/components/ui/Pagination";
 import { Spinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import type { Pet } from "@/types";
+
+const PETS_PER_PAGE = 6;
 
 const petTabs = [
   { id: "my-pets", label: "My pets" },
@@ -35,6 +38,7 @@ export default function MyPetsPage() {
   const { appUser, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<PetTabId>("my-pets");
   const [pets, setPets] = useState<Pet[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loadingPets, setLoadingPets] = useState(true);
   const [petsError, setPetsError] = useState<string | null>(null);
   const [addPetModalOpen, setAddPetModalOpen] = useState(false);
@@ -81,6 +85,11 @@ export default function MyPetsPage() {
   }, [appUser, authLoading, loadPets]);
 
   const hasPets = !loadingPets && !petsError && pets.length > 0;
+  const totalPages = Math.ceil(pets.length / PETS_PER_PAGE);
+  const safeCurrentPage =
+    totalPages > 0 ? Math.min(currentPage, totalPages) : 1;
+  const pageStartIndex = (safeCurrentPage - 1) * PETS_PER_PAGE;
+  const visiblePets = pets.slice(pageStartIndex, pageStartIndex + PETS_PER_PAGE);
 
   function handleTabClick(tabId: PetTabId) {
     if (tabId === "calendar") {
@@ -193,11 +202,21 @@ export default function MyPetsPage() {
                     </p>
                   </div>
                 ) : (
-                  <div className="grid justify-items-center gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                    {pets.map((pet) => (
-                      <MyPetCard key={pet.id} pet={pet} />
-                    ))}
-                  </div>
+                  <>
+                    <div className="grid justify-items-center gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                      {visiblePets.map((pet) => (
+                        <MyPetCard key={pet.id} pet={pet} />
+                      ))}
+                    </div>
+
+                    <Pagination
+                      currentPage={safeCurrentPage}
+                      totalPages={totalPages}
+                      onPageChange={setCurrentPage}
+                      ariaLabel="My pets pagination"
+                      className="pt-6"
+                    />
+                  </>
                 )}
               </section>
             </>

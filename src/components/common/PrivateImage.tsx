@@ -8,6 +8,12 @@ type PrivateImageProps = {
   alt: string;
   className?: string;
   fallbackSrc?: string;
+  allowUnauthenticated?: boolean;
+};
+
+type PrivateImageState = {
+  fileId: string;
+  src: string;
 };
 
 const API_BASE_URL =
@@ -15,33 +21,66 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   "http://localhost:5000/api";
 
-export function PrivateImage({ fileId, alt, className, fallbackSrc }: PrivateImageProps) {
-  const [src, setSrc] = useState<string | null>(fallbackSrc || null);
+export function PrivateImage({
+  fileId,
+  alt,
+  className,
+  fallbackSrc,
+  allowUnauthenticated = false,
+}: PrivateImageProps) {
+  const [imageState, setImageState] = useState<PrivateImageState | null>(null);
 
   useEffect(() => {
     const token = getToken();
-    if (!token) return;
+    if (!token && !allowUnauthenticated) {
+      let isMounted = true;
+
+      if (fallbackSrc) {
+        Promise.resolve().then(() => {
+          if (isMounted) {
+            setImageState({ fileId, src: fallbackSrc });
+          }
+        });
+      }
+
+      return () => {
+        isMounted = false;
+      };
+    }
 
     const encodedFileId = fileId.replace(/\//g, "--");
+    let isMounted = true;
     let blobUrl: string | null = null;
 
     fetch(`${API_BASE_URL}/files/${encodedFileId}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load image");
         return res.blob();
       })
       .then((blob) => {
-        blobUrl = URL.createObjectURL(blob);
-        setSrc(blobUrl);
+        const nextBlobUrl = URL.createObjectURL(blob);
+        blobUrl = nextBlobUrl;
+        if (isMounted) {
+          setImageState({ fileId, src: nextBlobUrl });
+        } else {
+          URL.revokeObjectURL(nextBlobUrl);
+        }
       })
-      .catch(() => setSrc(fallbackSrc || null));
+      .catch(() => {
+        if (isMounted && fallbackSrc) {
+          setImageState({ fileId, src: fallbackSrc });
+        }
+      });
 
     return () => {
+      isMounted = false;
       if (blobUrl) URL.revokeObjectURL(blobUrl);
     };
-  }, [fileId, fallbackSrc]);
+  }, [allowUnauthenticated, fileId, fallbackSrc]);
+
+  const src = imageState?.fileId === fileId ? imageState.src : null;
 
   if (!src) return null;
 
