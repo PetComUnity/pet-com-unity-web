@@ -11,11 +11,6 @@ type PrivateImageProps = {
   allowUnauthenticated?: boolean;
 };
 
-type PrivateImageState = {
-  fileId: string;
-  src: string;
-};
-
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ??
   process.env.NEXT_PUBLIC_API_URL ??
@@ -28,24 +23,18 @@ export function PrivateImage({
   fallbackSrc,
   allowUnauthenticated = false,
 }: PrivateImageProps) {
-  const [imageState, setImageState] = useState<PrivateImageState | null>(null);
+  const [imageState, setImageState] = useState<{ fileId: string; src: string } | null>(null);
 
   useEffect(() => {
     const token = getToken();
     if (!token && !allowUnauthenticated) {
       let isMounted = true;
-
       if (fallbackSrc) {
         Promise.resolve().then(() => {
-          if (isMounted) {
-            setImageState({ fileId, src: fallbackSrc });
-          }
+          if (isMounted) setImageState({ fileId, src: fallbackSrc });
         });
       }
-
-      return () => {
-        isMounted = false;
-      };
+      return () => { isMounted = false; };
     }
 
     const encodedFileId = fileId.replace(/\//g, "--");
@@ -60,28 +49,22 @@ export function PrivateImage({
         return res.blob();
       })
       .then((blob) => {
-        const nextBlobUrl = URL.createObjectURL(blob);
-        blobUrl = nextBlobUrl;
-        if (isMounted) {
-          setImageState({ fileId, src: nextBlobUrl });
-        } else {
-          URL.revokeObjectURL(nextBlobUrl);
-        }
+        const url = URL.createObjectURL(blob);
+        blobUrl = url;
+        if (isMounted) setImageState({ fileId, src: url });
+        else URL.revokeObjectURL(url);
       })
       .catch(() => {
-        if (isMounted && fallbackSrc) {
-          setImageState({ fileId, src: fallbackSrc });
-        }
+        if (isMounted && fallbackSrc) setImageState({ fileId, src: fallbackSrc });
       });
 
     return () => {
       isMounted = false;
       if (blobUrl) URL.revokeObjectURL(blobUrl);
     };
-  }, [allowUnauthenticated, fileId, fallbackSrc]);
+  }, [fileId, fallbackSrc, allowUnauthenticated]);
 
   const src = imageState?.fileId === fileId ? imageState.src : null;
-
   if (!src) return null;
 
   // eslint-disable-next-line @next/next/no-img-element
