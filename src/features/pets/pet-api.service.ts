@@ -165,7 +165,16 @@ function toOptionalText(value?: string | null) {
 }
 
 const THEME_COLOR_KEYS = new Set([
-  "None", "Red", "Orange", "Yellow", "Green", "Teal", "Blue", "Purple", "Pink", "Brown",
+  "None",
+  "Red",
+  "Orange",
+  "Yellow",
+  "Green",
+  "Teal",
+  "Blue",
+  "Purple",
+  "Pink",
+  "Brown",
 ]);
 
 function toOptionalRole(value?: string | null): UserRole | undefined {
@@ -216,9 +225,11 @@ function getApiPetOwner(pet: ApiPet): PetOwnerInfo | undefined {
 function mapPet(pet: ApiPet): Pet {
   // Migration: old pets stored the calendar theme in `color`.
   // If `themeColor` is absent but `color` is a known theme value → treat it as the theme.
-  const isLegacyTheme = !pet.themeColor && !!pet.color && THEME_COLOR_KEYS.has(pet.color);
-  const themeColor = toOptionalText(pet.themeColor) ?? (isLegacyTheme ? pet.color! : undefined);
-  const color      = isLegacyTheme ? undefined : toOptionalText(pet.color);
+  const isLegacyTheme =
+    !pet.themeColor && !!pet.color && THEME_COLOR_KEYS.has(pet.color);
+  const themeColor =
+    toOptionalText(pet.themeColor) ?? (isLegacyTheme ? pet.color! : undefined);
+  const color = isLegacyTheme ? undefined : toOptionalText(pet.color);
   const imageFileId = toOptionalText(pet.imageFileId ?? pet.imageFieldId);
 
   return {
@@ -546,11 +557,13 @@ export async function uploadPetImage(
   }
 
   if (uploadType === "public") {
-    if (!payload.data?.url) throw new Error("Upload succeeded but no URL was returned.");
+    if (!payload.data?.url)
+      throw new Error("Upload succeeded but no URL was returned.");
     return { type: "public", url: payload.data.url };
   }
 
-  if (!payload.data?.fileId) throw new Error("Upload succeeded but no fileId was returned.");
+  if (!payload.data?.fileId)
+    throw new Error("Upload succeeded but no fileId was returned.");
   return { type: uploadType, fileId: payload.data.fileId };
 }
 
@@ -570,4 +583,17 @@ export async function getMyPets(signal?: AbortSignal): Promise<Pet[]> {
   const pets = Array.isArray(payload.data) ? payload.data : payload.data?.pets;
 
   return Array.isArray(pets) ? pets.map(mapPet) : [];
+}
+
+export async function getLostPets() {
+  const payload = await fetchApi<ApiPet[], PaginationMeta>(
+    "/pets?page=1&limit=20",
+    {
+      errorMessage: "We could not load lost pets right now.",
+    },
+  );
+
+  const pets = Array.isArray(payload.data) ? payload.data.map(mapPet) : [];
+
+  return pets.filter((pet) => pet.isLost);
 }

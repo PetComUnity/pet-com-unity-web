@@ -11,11 +11,6 @@ type PrivateImageProps = {
   allowUnauthenticated?: boolean;
 };
 
-type PrivateImageState = {
-  fileId: string;
-  src: string;
-};
-
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ??
   process.env.NEXT_PUBLIC_API_URL ??
@@ -43,18 +38,12 @@ export function PrivateImage({
     const token = getToken();
     if (!token && !allowUnauthenticated) {
       let isMounted = true;
-
       if (fallbackSrc) {
         Promise.resolve().then(() => {
-          if (isMounted) {
-            setImageState({ fileId, src: fallbackSrc });
-          }
+          if (isMounted) setImageState({ fileId, src: fallbackSrc });
         });
       }
-
-      return () => {
-        isMounted = false;
-      };
+      return () => { isMounted = false; };
     }
 
     const encodedFileId = fileId.replace(/\//g, "--");
@@ -76,15 +65,13 @@ export function PrivateImage({
         }
       })
       .catch(() => {
-        if (isMounted && fallbackSrc) {
-          setImageState({ fileId, src: fallbackSrc });
-        }
+        if (isMounted && fallbackSrc) setImageState({ fileId, src: fallbackSrc });
       });
 
     return () => {
       isMounted = false;
     };
-  }, [allowUnauthenticated, fileId, fallbackSrc]);
+  }, [fileId, fallbackSrc, allowUnauthenticated]);
 
   const cachedSrc = privateImageSrcCache.get(fileId);
   const src =
