@@ -21,6 +21,8 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   "http://localhost:5000/api";
 
+const privateImageSrcCache = new Map<string, string>();
+
 export function PrivateImage({
   fileId,
   alt,
@@ -28,9 +30,16 @@ export function PrivateImage({
   fallbackSrc,
   allowUnauthenticated = false,
 }: PrivateImageProps) {
-  const [imageState, setImageState] = useState<PrivateImageState | null>(null);
+  const [imageState, setImageState] = useState<PrivateImageState | null>(() => {
+    const cachedSrc = privateImageSrcCache.get(fileId);
+    return cachedSrc ? { fileId, src: cachedSrc } : null;
+  });
 
   useEffect(() => {
+    if (privateImageSrcCache.has(fileId)) {
+      return undefined;
+    }
+
     const token = getToken();
     if (!token && !allowUnauthenticated) {
       let isMounted = true;
@@ -50,7 +59,6 @@ export function PrivateImage({
 
     const encodedFileId = fileId.replace(/\//g, "--");
     let isMounted = true;
-    let blobUrl: string | null = null;
 
     fetch(`${API_BASE_URL}/files/${encodedFileId}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -61,11 +69,10 @@ export function PrivateImage({
       })
       .then((blob) => {
         const nextBlobUrl = URL.createObjectURL(blob);
-        blobUrl = nextBlobUrl;
+        privateImageSrcCache.set(fileId, nextBlobUrl);
+
         if (isMounted) {
           setImageState({ fileId, src: nextBlobUrl });
-        } else {
-          URL.revokeObjectURL(nextBlobUrl);
         }
       })
       .catch(() => {
@@ -76,11 +83,12 @@ export function PrivateImage({
 
     return () => {
       isMounted = false;
-      if (blobUrl) URL.revokeObjectURL(blobUrl);
     };
   }, [allowUnauthenticated, fileId, fallbackSrc]);
 
-  const src = imageState?.fileId === fileId ? imageState.src : null;
+  const cachedSrc = privateImageSrcCache.get(fileId);
+  const src =
+    cachedSrc ?? (imageState?.fileId === fileId ? imageState.src : null);
 
   if (!src) return null;
 

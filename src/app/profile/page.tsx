@@ -8,8 +8,6 @@ import {
   Edit3,
   Eye,
   EyeOff,
-  KeyRound,
-  LockKeyhole,
   PawPrint,
   Plus,
   ShieldCheck,
@@ -734,67 +732,72 @@ function ChangePasswordCard() {
 
   return (
     <section className="rounded-[18px] border border-[#1a202c] bg-white p-5 shadow-[0_4px_4px_rgba(0,0,0,0.22)] sm:p-6">
-      <div className="grid gap-6 lg:grid-cols-[112px_minmax(0,1fr)] lg:gap-12">
-
-        <form
-          className="grid min-w-0 gap-6 lg:auto-rows-min lg:grid-cols-[minmax(220px,268px)_minmax(260px,1fr)_minmax(220px,268px)] lg:gap-x-[60px]"
-          onSubmit={handlePasswordSubmit}
-        >
-          <PasswordPillInput
-            field="currentPassword"
-            placeholder="Current password"
-            value={passwordValues.currentPassword}
-            error={passwordErrors.currentPassword}
-            visible={Boolean(visiblePasswordFields.currentPassword)}
-            disabled={submittingPassword}
-            autoComplete="current-password"
-            onChange={handlePasswordChange}
-            onToggleVisibility={togglePasswordVisibility}
-          />
-          <PasswordPillInput
-            field="newPassword"
-            placeholder="New password"
-            value={passwordValues.newPassword}
-            error={passwordErrors.newPassword}
-            visible={Boolean(visiblePasswordFields.newPassword)}
-            disabled={submittingPassword}
-            autoComplete="new-password"
-            onChange={handlePasswordChange}
-            onToggleVisibility={togglePasswordVisibility}
-          />
-          <PasswordPillInput
-            field="confirmPassword"
-            placeholder="Confirm password"
-            value={passwordValues.confirmPassword}
-            error={passwordErrors.confirmPassword}
-            visible={Boolean(visiblePasswordFields.confirmPassword)}
-            disabled={submittingPassword}
-            autoComplete="new-password"
-            onChange={handlePasswordChange}
-            onToggleVisibility={togglePasswordVisibility}
-          />
-
-          <button
-            type="submit"
-            disabled={submittingPassword}
-            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-[14px] border border-[#5fb953] bg-[#8df86e] px-5 text-[0.95rem] font-medium text-[#010101] transition hover:bg-[#7eea60] focus-visible:ring-2 focus-visible:ring-[#1a202c]/20 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60 sm:text-[1rem] lg:col-start-3"
-          >
-            <KeyRound className="h-4 w-4" strokeWidth={2.35} />
-            {submittingPassword ? "Updating..." : "Change password"}
-          </button>
-
-          {passwordFormError ? (
-            <p className="text-sm font-medium text-[#b91c1c] lg:col-span-3">
-              {passwordFormError}
-            </p>
-          ) : null}
-          {passwordSuccess ? (
-            <p className="text-sm font-semibold text-[#166534] lg:col-span-3">
-              {passwordSuccess}
-            </p>
-          ) : null}
-        </form>
+      <div className="mb-5 text-center lg:text-left">
+        <h2 className="text-[1.05rem] leading-tight font-semibold text-[#1a202c]">
+          Change password
+        </h2>
+        <p className="mt-1 text-sm font-medium text-[#7a7878]">
+          Update your sign-in password
+        </p>
       </div>
+
+      <form
+        className="grid min-w-0 gap-6 lg:auto-rows-min lg:grid-cols-[minmax(130px,1fr)_minmax(130px,1fr)_minmax(145px,1fr)_170px] lg:gap-x-3 xl:grid-cols-[minmax(160px,1fr)_minmax(160px,1fr)_minmax(170px,1fr)_190px] xl:gap-x-6"
+        onSubmit={handlePasswordSubmit}
+      >
+        <PasswordPillInput
+          field="currentPassword"
+          placeholder="Current password"
+          value={passwordValues.currentPassword}
+          error={passwordErrors.currentPassword}
+          visible={Boolean(visiblePasswordFields.currentPassword)}
+          disabled={submittingPassword}
+          autoComplete="current-password"
+          onChange={handlePasswordChange}
+          onToggleVisibility={togglePasswordVisibility}
+        />
+        <PasswordPillInput
+          field="newPassword"
+          placeholder="New password"
+          value={passwordValues.newPassword}
+          error={passwordErrors.newPassword}
+          visible={Boolean(visiblePasswordFields.newPassword)}
+          disabled={submittingPassword}
+          autoComplete="new-password"
+          onChange={handlePasswordChange}
+          onToggleVisibility={togglePasswordVisibility}
+        />
+        <PasswordPillInput
+          field="confirmPassword"
+          placeholder="Confirm password"
+          value={passwordValues.confirmPassword}
+          error={passwordErrors.confirmPassword}
+          visible={Boolean(visiblePasswordFields.confirmPassword)}
+          disabled={submittingPassword}
+          autoComplete="new-password"
+          onChange={handlePasswordChange}
+          onToggleVisibility={togglePasswordVisibility}
+        />
+
+        <button
+          type="submit"
+          disabled={submittingPassword}
+          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-[14px] border border-[#5fb953] bg-[#8df86e] px-5 text-[0.95rem] font-medium text-[#010101] transition hover:bg-[#7eea60] focus-visible:ring-2 focus-visible:ring-[#1a202c]/20 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60 sm:text-[1rem]"
+        >
+          {submittingPassword ? "Updating..." : "Update"}
+        </button>
+
+        {passwordFormError ? (
+          <p className="text-sm font-medium text-[#b91c1c] lg:col-span-4">
+            {passwordFormError}
+          </p>
+        ) : null}
+        {passwordSuccess ? (
+          <p className="text-sm font-semibold text-[#166534] lg:col-span-4">
+            {passwordSuccess}
+          </p>
+        ) : null}
+      </form>
     </section>
   );
 }
@@ -997,8 +1000,15 @@ function ProfileContent() {
 
       await updateProfile(
         uploaded.type === "public"
-          ? { imageUrl: uploaded.url, imageFileId: null }
-          : { imageFileId: uploaded.fileId },
+          ? {
+              avatarUrl: uploaded.url,
+              avatarFileId: null,
+              name: profileValues.name,
+            }
+          : {
+              avatarFileId: uploaded.fileId,
+              name: profileValues.name,
+            },
       );
     } catch (error) {
       setAvatarError(

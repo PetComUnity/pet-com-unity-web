@@ -70,8 +70,6 @@ export type UpdateProfilePayload = Partial<UpdateProfileValues> &
   Partial<{
     avatarFileId: string | null;
     avatarUrl: string | null;
-    imageFileId: string | null;
-    imageUrl: string | null;
   }>;
 export type ChangePasswordValues = z.infer<typeof passwordChangeSchema>;
 export type ChangePasswordPayload = Pick<
