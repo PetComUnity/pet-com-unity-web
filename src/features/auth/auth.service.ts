@@ -8,6 +8,25 @@ import type {
 } from "@/features/auth/auth.types";
 
 const TOKEN_KEY = "auth_token";
+const DEFAULT_API_BASE_URL = "http://localhost:5000/api";
+
+type ApiResponse<T> = {
+  success: boolean;
+  message: string;
+  data?: T;
+};
+
+type UploadProfileImageResult =
+  | { type: "public"; url: string }
+  | { type: "private"; fileId: string };
+
+function getApiBaseUrl() {
+  return (
+    process.env.NEXT_PUBLIC_API_BASE_URL ??
+    process.env.NEXT_PUBLIC_API_URL ??
+    DEFAULT_API_BASE_URL
+  ).replace(/\/$/, "");
+}
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -107,4 +126,43 @@ export async function changeCurrentUserPassword(
     body: values,
     token,
   });
+}
+
+export async function uploadCurrentUserProfileImage(
+  file: File,
+): Promise<UploadProfileImageResult> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("Please sign in to upload a profile image.");
+  }
+
+  const formData = new FormData();
+  formData.append("image", file);
+  formData.append("type", "private");
+
+  const response = await fetch(`${getApiBaseUrl()}/upload/image`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+
+  const payload = (await response.json().catch(() => ({}))) as ApiResponse<{
+    fileId?: string;
+    url?: string;
+  }>;
+
+  if (!response.ok) {
+    throw new Error(payload.message ?? "We could not upload this image.");
+  }
+
+  if (payload.data?.fileId) {
+    return { type: "private", fileId: payload.data.fileId };
+  }
+
+  if (payload.data?.url) {
+    return { type: "public", url: payload.data.url };
+  }
+
+  throw new Error("Upload succeeded but no image reference was returned.");
 }
