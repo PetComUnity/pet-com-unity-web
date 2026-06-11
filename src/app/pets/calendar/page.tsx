@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { CalendarGrid } from "@/components/calendar/CalendarGrid";
@@ -9,8 +8,7 @@ import { EventCard } from "@/components/calendar/EventCard";
 import { AddEventModal } from "@/components/calendar/AddEventModal";
 import { DayEventsSheet } from "@/components/calendar/DayEventsSheet";
 import { PetAvatarCarousel } from "@/components/pet/PetAvatarCarousel";
-import { cn } from "@/lib/utils";
-import { ROUTES } from "@/constants/routes";
+import { PetDashboardTabs } from "@/components/pet/PetDashboardTabs";
 import {
   getCalendarEvents,
   createCalendarEvent,
@@ -88,24 +86,7 @@ function MonthNav({
   );
 }
 
-const PET_TABS = [
-  { label: "My pets", href: ROUTES.pets },
-  { label: "My Calendar", href: ROUTES.calendar },
-  { label: "Adoption list", href: ROUTES.adoptionList },
-] as const;
-
-function tabClassName(isActive: boolean) {
-  return cn(
-    "relative shrink-0 pb-3 text-left font-display text-[1rem] leading-none tracking-[-0.035em] transition-colors duration-200",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d68532]/40 focus-visible:ring-offset-4",
-    "sm:text-[1.5rem] lg:text-[1.75rem]",
-    isActive ? "text-[#1f1c19]" : "text-[#4d443d] hover:text-[#1f1c19]",
-  );
-}
-
 export default function CalendarPage() {
-  const router = useRouter();
-  const pathname = usePathname();
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
@@ -251,36 +232,7 @@ export default function CalendarPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-[#fff8f0]">
         <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 md:py-8 lg:px-8">
-          <div className="mb-6 overflow-x-auto pb-3">
-            <div
-              role="tablist"
-              aria-label="Pet dashboard tabs"
-              className="flex min-w-max items-end justify-center gap-8 sm:gap-10 lg:justify-start lg:gap-14"
-            >
-              {PET_TABS.map((tab) => {
-                const isActive = pathname === tab.href;
-                return (
-                  <button
-                    key={tab.href}
-                    type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    className={tabClassName(isActive)}
-                    onClick={() => router.push(tab.href)}
-                  >
-                    {tab.label}
-                    <span
-                      aria-hidden="true"
-                      className={cn(
-                        "absolute right-0 bottom-0 left-0 h-[2px] origin-left rounded-full bg-[#d68532] transition-transform duration-200",
-                        isActive ? "scale-x-100" : "scale-x-0",
-                      )}
-                    />
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <PetDashboardTabs className="mb-6" />
           <div className="mb-6 flex items-center justify-center md:justify-between md:pr-4">
             <div className="hidden items-center gap-1 md:flex">
               <button
@@ -350,7 +302,13 @@ export default function CalendarPage() {
                     {error}
                   </p>
                 ) : (
-                  <div className={fetching ? "pointer-events-none opacity-50 transition-opacity" : "transition-opacity"}>
+                  <div
+                    className={
+                      fetching
+                        ? "pointer-events-none opacity-50 transition-opacity"
+                        : "transition-opacity"
+                    }
+                  >
                     <CalendarGrid
                       year={year}
                       month={month}
@@ -399,7 +357,9 @@ export default function CalendarPage() {
                     No events
                   </p>
                 ) : (
-                  <div className={`flex flex-col gap-3 ${fetching ? "pointer-events-none opacity-50 transition-opacity" : "transition-opacity"}`}>
+                  <div
+                    className={`flex flex-col gap-3 ${fetching ? "pointer-events-none opacity-50 transition-opacity" : "transition-opacity"}`}
+                  >
                     {displayedEvents.map((ev) => (
                       <EventCard
                         key={ev.id}
@@ -425,7 +385,13 @@ export default function CalendarPage() {
                 {error}
               </p>
             ) : (
-              <div className={fetching ? "pointer-events-none opacity-50 transition-opacity" : "transition-opacity"}>
+              <div
+                className={
+                  fetching
+                    ? "pointer-events-none opacity-50 transition-opacity"
+                    : "transition-opacity"
+                }
+              >
                 <CalendarGrid
                   year={year}
                   month={month}

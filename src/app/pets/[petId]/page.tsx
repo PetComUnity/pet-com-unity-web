@@ -1002,7 +1002,7 @@ export default function PetDetailsPage() {
                       type="button"
                       disabled={!canEditPet}
                       className={cn(
-                        "flex h-[292px] w-[176px] items-center justify-center overflow-hidden rounded-[14px] border bg-white transition focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-2 focus-visible:outline-none md:h-[260px] md:w-[180px] md:border-[4px] xl:h-[292px] xl:w-[176px] xl:border",
+                        "flex h-[292px] w-[176px] items-center justify-center overflow-hidden rounded-[14px] border border-[4px] bg-white transition focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-2 focus-visible:outline-none md:h-[260px] md:w-[180px] xl:h-[292px] xl:w-[176px]",
                         canEditPet
                           ? "hover:brightness-95"
                           : "cursor-default",
