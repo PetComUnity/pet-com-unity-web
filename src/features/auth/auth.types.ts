@@ -25,10 +25,26 @@ export const loginSchema = z.object({
 });
 
 export const profileUpdateFieldSchemas = {
-  name: requiredText("Name", 2, 50),
+  name: requiredText("Name", 2, 80),
   email: z.string().trim().email("Enter a valid email address."),
   phone: z.string().trim().max(30, "Phone must be 30 characters or fewer."),
-  city: z.string().trim().max(80, "City must be 80 characters or fewer."),
+  city: z.string().trim().max(120, "Address must be 120 characters or fewer."),
+  website: z
+    .string()
+    .trim()
+    .max(120, "Website must be 120 characters or fewer."),
+  socialLinks: z
+    .string()
+    .trim()
+    .max(180, "Social links must be 180 characters or fewer."),
+  operatingHours: z
+    .string()
+    .trim()
+    .max(120, "Operating hours must be 120 characters or fewer."),
+  registrationNumber: z
+    .string()
+    .trim()
+    .max(80, "Registration number must be 80 characters or fewer."),
 };
 
 export const profileUpdateSchema = z.object(profileUpdateFieldSchemas);
@@ -50,7 +66,11 @@ export const passwordChangeSchema = z
 export type RegisterFormValues = z.infer<typeof registerSchema>;
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type UpdateProfileValues = z.infer<typeof profileUpdateSchema>;
-export type UpdateProfilePayload = Partial<UpdateProfileValues>;
+export type UpdateProfilePayload = Partial<UpdateProfileValues> &
+  Partial<{
+    avatarFileId: string | null;
+    avatarUrl: string | null;
+  }>;
 export type ChangePasswordValues = z.infer<typeof passwordChangeSchema>;
 export type ChangePasswordPayload = Pick<
   ChangePasswordValues,

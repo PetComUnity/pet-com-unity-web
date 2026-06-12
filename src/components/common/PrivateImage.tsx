@@ -11,10 +11,17 @@ type PrivateImageProps = {
   allowUnauthenticated?: boolean;
 };
 
+type PrivateImageState = {
+  fileId: string;
+  src: string;
+};
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ??
   process.env.NEXT_PUBLIC_API_URL ??
   "http://localhost:5000/api";
+
+const privateImageSrcCache = new Map<string, string>();
 
 export function PrivateImage({
   fileId,
@@ -23,9 +30,16 @@ export function PrivateImage({
   fallbackSrc,
   allowUnauthenticated = false,
 }: PrivateImageProps) {
-  const [imageState, setImageState] = useState<{ fileId: string; src: string } | null>(null);
+  const [imageState, setImageState] = useState<PrivateImageState | null>(() => {
+    const cachedSrc = privateImageSrcCache.get(fileId);
+    return cachedSrc ? { fileId, src: cachedSrc } : null;
+  });
 
   useEffect(() => {
+    if (privateImageSrcCache.has(fileId)) {
+      return undefined;
+    }
+
     const token = getToken();
     if (!token && !allowUnauthenticated) {
       let isMounted = true;
@@ -39,7 +53,6 @@ export function PrivateImage({
 
     const encodedFileId = fileId.replace(/\//g, "--");
     let isMounted = true;
-    let blobUrl: string | null = null;
 
     fetch(`${API_BASE_URL}/files/${encodedFileId}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -49,10 +62,12 @@ export function PrivateImage({
         return res.blob();
       })
       .then((blob) => {
-        const url = URL.createObjectURL(blob);
-        blobUrl = url;
-        if (isMounted) setImageState({ fileId, src: url });
-        else URL.revokeObjectURL(url);
+        const nextBlobUrl = URL.createObjectURL(blob);
+        privateImageSrcCache.set(fileId, nextBlobUrl);
+
+        if (isMounted) {
+          setImageState({ fileId, src: nextBlobUrl });
+        }
       })
       .catch(() => {
         if (isMounted && fallbackSrc) setImageState({ fileId, src: fallbackSrc });
@@ -60,11 +75,13 @@ export function PrivateImage({
 
     return () => {
       isMounted = false;
-      if (blobUrl) URL.revokeObjectURL(blobUrl);
     };
   }, [fileId, fallbackSrc, allowUnauthenticated]);
 
-  const src = imageState?.fileId === fileId ? imageState.src : null;
+  const cachedSrc = privateImageSrcCache.get(fileId);
+  const src =
+    cachedSrc ?? (imageState?.fileId === fileId ? imageState.src : null);
+
   if (!src) return null;
 
   // eslint-disable-next-line @next/next/no-img-element

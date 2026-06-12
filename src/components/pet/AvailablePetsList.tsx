@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { getPetDetailsRoute } from "@/constants/routes";
 import { getAllAdoptablePets } from "@/features/pets/pet-api.service";
 import {
+  DEFAULT_ADOPTION_SEARCH_FILTERS,
   getPetSizeFromWeight,
   type AdoptionSearchFilters,
 } from "@/features/pets/adoption-search";
@@ -13,6 +14,7 @@ import {
 } from "@/components/pet/AdoptionPetCard";
 import { Pagination } from "@/components/ui/Pagination";
 import { Spinner } from "@/components/ui/Spinner";
+import { cn } from "@/lib/utils";
 import type { Pet } from "@/types";
 
 const PETS_PER_PAGE = 6;
@@ -35,14 +37,18 @@ function toAdoptionPetCardData(pet: Pet): AdoptionPetCardData {
 }
 
 export function AvailablePetsList({
-  filters,
+  filters = DEFAULT_ADOPTION_SEARCH_FILTERS,
   searchToken,
   sectionId,
+  className,
+  contentClassName,
   onSearchSettled,
 }: {
-  filters: AdoptionSearchFilters;
+  filters?: AdoptionSearchFilters;
   searchToken?: number;
   sectionId?: string;
+  className?: string;
+  contentClassName?: string;
   onSearchSettled?: (searchToken: number) => void;
 }) {
   const activeSearchKey = `${searchToken ?? 0}:${filters.animal}:${filters.size}:${filters.location}`;
@@ -155,16 +161,24 @@ export function AvailablePetsList({
   return (
     <section
       id={sectionId}
-      className="scroll-mt-24 bg-[#fff8f0] px-5 py-14 sm:px-8 lg:px-16 lg:py-20"
+      className={cn(
+        "scroll-mt-24 bg-[#fff8f0] px-5 py-14 sm:px-8 lg:px-16 lg:py-20",
+        className,
+      )}
     >
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-10">
+      <div
+        className={cn(
+          "mx-auto flex w-full max-w-[1440px] flex-col gap-10",
+          contentClassName,
+        )}
+      >
         <div className="max-w-[42rem] space-y-3 p-5 text-[#17243b]">
           <p className="font-display text-semibold text-[3rem] leading-none tracking-[-0.04em] text-[#1a202c]">
             Available Pets
           </p>
-          <p className="max-w-[34rem] text-base leading-7 text-[#7A7878] sm:text-[1.1rem]">
+          {/* <p className="max-w-[34rem] text-base leading-7 text-[#7A7878] sm:text-[1.1rem]">
             Sign in to start the adoption process
-          </p>
+          </p> */}
         </div>
 
         {loading ? (

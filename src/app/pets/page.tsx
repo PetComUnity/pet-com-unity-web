@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { getMyPets } from "@/features/pets/pet-api.service";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { AddPetModal } from "@/components/pet/AddPetModal";
 import { MyPetCard } from "@/components/pet/MyPetCard";
+import { PetDashboardTabs } from "@/components/pet/PetDashboardTabs";
 import { Pagination } from "@/components/ui/Pagination";
 import { Spinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,27 +16,8 @@ import type { Pet } from "@/types";
 
 const PETS_PER_PAGE = 6;
 
-const petTabs = [
-  { id: "my-pets", label: "My pets" },
-  { id: "calendar", label: "My Calendar" },
-  { id: "adoption-list", label: "Adoption list" },
-] as const;
-
-type PetTabId = (typeof petTabs)[number]["id"];
-
-function tabClassName(isActive: boolean) {
-  return cn(
-    "relative shrink-0 pb-3 text-left font-display text-[1rem] leading-none tracking-[-0.035em] text-[#2d2925] transition-colors duration-200",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d68532]/40 focus-visible:ring-offset-4 focus-visible:ring-offset-[#fcf5eb]",
-    "sm:text-[1.5rem] lg:text-[1.75rem]",
-    isActive ? "text-[#1f1c19]" : "text-[#4d443d] hover:text-[#1f1c19]",
-  );
-}
-
 export default function MyPetsPage() {
-  const router = useRouter();
   const { appUser, loading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState<PetTabId>("my-pets");
   const [pets, setPets] = useState<Pet[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loadingPets, setLoadingPets] = useState(true);
@@ -89,17 +70,10 @@ export default function MyPetsPage() {
   const safeCurrentPage =
     totalPages > 0 ? Math.min(currentPage, totalPages) : 1;
   const pageStartIndex = (safeCurrentPage - 1) * PETS_PER_PAGE;
-  const visiblePets = pets.slice(pageStartIndex, pageStartIndex + PETS_PER_PAGE);
-
-  function handleTabClick(tabId: PetTabId) {
-    if (tabId === "calendar") {
-      router.push("/pets/calendar");
-    } else if (tabId === "adoption-list") {
-      router.push("/pets/adoption-list");
-    } else {
-      setActiveTab(tabId);
-    }
-  }
+  const visiblePets = pets.slice(
+    pageStartIndex,
+    pageStartIndex + PETS_PER_PAGE,
+  );
 
   return (
     <ProtectedRoute>
@@ -119,116 +93,72 @@ export default function MyPetsPage() {
             </button>
           </div>
 
-          <div className="overflow-x-auto pb-3">
-            <div
-              role="tablist"
-              aria-label="Pet dashboard tabs"
-              className="flex min-w-max items-end justify-center gap-8 sm:gap-10 lg:justify-start lg:gap-14"
-            >
-              {petTabs.map((tab) => {
-                const isActive = activeTab === tab.id;
+          <PetDashboardTabs />
 
-                return (
-                  <button
-                    key={tab.id}
-                    id={`tab-${tab.id}`}
-                    type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    aria-controls={`panel-${tab.id}`}
-                    className={tabClassName(isActive)}
-                    onClick={() => handleTabClick(tab.id)}
-                  >
-                    {tab.label}
-                    <span
-                      aria-hidden="true"
-                      className={cn(
-                        "absolute right-0 bottom-0 left-0 h-[2px] origin-left rounded-full bg-[#d68532] transition-transform duration-200",
-                        isActive ? "scale-x-100" : "scale-x-0",
-                      )}
-                    />
-                  </button>
-                );
-              })}
+          {hasPets ? (
+            <div className="absolute top-[30%] right-[5%] sm:top-[25%] lg:top-[30%] xl:top-[25%] xl:right-[10%]">
+              <Image
+                src="/images/yellow-cat.png"
+                alt=""
+                width={124}
+                height={182}
+                aria-hidden="true"
+                loading="eager"
+                className="pointer-events-none relative z-10 -mb-1 w-[43px] select-none sm:w-[90px] lg:w-[110px]"
+              />
             </div>
-          </div>
-
-          {activeTab === "my-pets" ? (
-            <>
-              {hasPets ? (
-                <div className="absolute top-[30%] right-[5%] sm:top-[25%] lg:top-[30%] xl:top-[25%] xl:right-[10%]">
-                  <Image
-                    src="/images/yellow-cat.png"
-                    alt=""
-                    width={124}
-                    height={182}
-                    aria-hidden="true"
-                    loading="eager"
-                    className="pointer-events-none relative z-10 -mb-1 w-[43px] select-none sm:w-[90px] lg:w-[110px]"
-                  />
+          ) : null}
+          <section
+            id="panel-my-pets"
+            role="tabpanel"
+            aria-labelledby="tab-my-pets"
+            tabIndex={0}
+            className={cn(
+              "relative min-h-[390px] w-full overflow-hidden rounded-[18px] bg-transparent focus-visible:ring-2 focus-visible:ring-[#d68532]/40 focus-visible:ring-offset-4 focus-visible:ring-offset-[#fcf5eb] focus-visible:outline-none sm:bg-white sm:p-8 sm:shadow-[0_4px_4px_rgba(0,0,0,0.25)]",
+              hasPets ? "mt-0" : "sm:mt-7 lg:mt-8",
+            )}
+          >
+            {loadingPets ? (
+              <div className="flex min-h-[326px] items-center justify-center">
+                <Spinner label="Loading your pets..." />
+              </div>
+            ) : petsError ? (
+              <div className="flex min-h-[326px] items-center justify-center text-center text-sm font-medium text-[#b91c1c]">
+                {petsError}
+              </div>
+            ) : pets.length === 0 ? (
+              <div className="flex min-h-[326px] flex-col items-center justify-end gap-4">
+                <Image
+                  src="/images/yellow-cat.png"
+                  alt=""
+                  width={124}
+                  height={182}
+                  aria-hidden="true"
+                  loading="eager"
+                  className="pointer-events-none relative w-[130px] opacity-50 select-none sm:absolute sm:right-10 sm:bottom-6 sm:w-[190px] lg:right-16 lg:w-[230px]"
+                />
+                <p className="font-display relative z-10 text-[1.75rem] leading-none font-semibold text-[#c3c0bc] sm:text-[2rem]">
+                  No saved pets yet
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="grid justify-items-center gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                  {visiblePets.map((pet) => (
+                    <MyPetCard key={pet.id} pet={pet} />
+                  ))}
                 </div>
-              ) : null}
-              <section
-                id="panel-my-pets"
-                role="tabpanel"
-                aria-labelledby="tab-my-pets"
-                tabIndex={0}
-                className={cn(
-                  "bg-transaprent relative min-h-[390px] w-full overflow-hidden rounded-[18px] focus-visible:ring-2 focus-visible:ring-[#d68532]/40 focus-visible:ring-offset-4 focus-visible:ring-offset-[#fcf5eb] focus-visible:outline-none sm:bg-white sm:p-8 sm:shadow-[0_4px_4px_rgba(0,0,0,0.25)]",
-                  hasPets ? "mt-0" : "sm:mt-7 lg:mt-8",
-                )}
-              >
-                {loadingPets ? (
-                  <div className="flex min-h-[326px] items-center justify-center">
-                    <Spinner label="Loading your pets..." />
-                  </div>
-                ) : petsError ? (
-                  <div className="flex min-h-[326px] items-center justify-center text-center text-sm font-medium text-[#b91c1c]">
-                    {petsError}
-                  </div>
-                ) : pets.length === 0 ? (
-                  <div className="flex min-h-[326px] flex-col items-center justify-end gap-4">
-                    <Image
-                      src="/images/yellow-cat.png"
-                      alt=""
-                      width={124}
-                      height={182}
-                      aria-hidden="true"
-                      loading="eager"
-                      className="pointer-events-none relative w-[130px] opacity-50 select-none sm:absolute sm:right-10 sm:bottom-6 sm:w-[190px] lg:right-16 lg:w-[230px]"
-                    />
-                    <p className="font-display relative z-10 text-[1.75rem] leading-none font-semibold text-[#c3c0bc] sm:text-[2rem]">
-                      No saved pets yet
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="grid justify-items-center gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                      {visiblePets.map((pet) => (
-                        <MyPetCard key={pet.id} pet={pet} />
-                      ))}
-                    </div>
 
-                    <Pagination
-                      currentPage={safeCurrentPage}
-                      totalPages={totalPages}
-                      onPageChange={setCurrentPage}
-                      ariaLabel="My pets pagination"
-                      className="pt-6"
-                    />
-                  </>
-                )}
-              </section>
-            </>
-          ) : (
-            <section
-              id={`panel-${activeTab}`}
-              role="tabpanel"
-              aria-labelledby={`tab-${activeTab}`}
-              tabIndex={0}
-              className="mt-5 min-h-[390px] focus-visible:outline-none sm:mt-6 lg:mt-7"
-            />
-          )}
+                <Pagination
+                  currentPage={safeCurrentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                  ariaLabel="My pets pagination"
+                  className="pt-6"
+                />
+              </>
+            )}
+          </section>
         </div>
         {addPetModalOpen ? (
           <AddPetModal

@@ -11,6 +11,17 @@ export interface AppUser {
   name: string;
   phone?: string;
   city?: string;
+  address?: string;
+  location?: string;
+  website?: string;
+  socialLinks?: string;
+  socialMediaLinks?: string;
+  operatingHours?: string;
+  registrationNumber?: string;
+  imageUrl?: string;
+  avatarUrl?: string;
+  imageFileId?: string;
+  avatarFileId?: string;
   createdAt?: Date | null;
 }
 
