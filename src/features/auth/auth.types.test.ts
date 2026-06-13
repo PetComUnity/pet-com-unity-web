@@ -44,6 +44,15 @@ describe("auth validation schemas", () => {
         role: "vet",
       }).success,
     ).toBe(true);
+
+    expect(
+      registerSchema.safeParse({
+        name: "Shelter Home",
+        email: "shelter@example.test",
+        password: "secret123",
+        role: "shelter",
+      }).success,
+    ).toBe(true);
   });
 
   it("returns validation errors for invalid registration data", () => {
