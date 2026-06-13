@@ -65,6 +65,7 @@ function MonthNav({
   return (
     <div className="flex items-center gap-1">
       <button
+        aria-label="Previous month"
         onClick={onPrev}
         className="p-1 text-[#f38c2c] transition-opacity hover:opacity-70"
       >
@@ -74,6 +75,7 @@ function MonthNav({
         {MONTH_NAMES[month - 1]}
       </span>
       <button
+        aria-label="Next month"
         onClick={onNext}
         className="p-1 text-[#f38c2c] transition-opacity hover:opacity-70"
       >
@@ -236,6 +238,7 @@ export default function CalendarPage() {
           <div className="mb-6 flex items-center justify-center md:justify-between md:pr-4">
             <div className="hidden items-center gap-1 md:flex">
               <button
+                aria-label="Previous month"
                 onClick={prevMonth}
                 className="p-1 text-[#f38c2c] transition-opacity hover:opacity-70"
               >
@@ -245,6 +248,7 @@ export default function CalendarPage() {
                 {MONTH_NAMES[month - 1]}
               </span>
               <button
+                aria-label="Next month"
                 onClick={nextMonth}
                 className="p-1 text-[#f38c2c] transition-opacity hover:opacity-70"
               >
