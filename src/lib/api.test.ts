@@ -1,5 +1,3 @@
-import { apiRequest as staticApiRequest } from "@/lib/api";
-
 type FetchInitWithHeaders = RequestInit & {
   headers: Record<string, string>;
 };
@@ -112,8 +110,9 @@ describe("apiRequest", () => {
     fetchMock.mockResolvedValue(
       mockJsonResponse({ data: { id: "pet-1", name: "Milo" } }),
     );
+    const apiRequest = await importApiRequest();
 
-    await expect(staticApiRequest("/pets/pet-1")).resolves.toEqual({
+    await expect(apiRequest("/pets/pet-1")).resolves.toEqual({
       id: "pet-1",
       name: "Milo",
     });
@@ -126,8 +125,9 @@ describe("apiRequest", () => {
         { ok: false, status: 409 },
       ),
     );
+    const apiRequest = await importApiRequest();
 
-    await expect(staticApiRequest("/pets")).rejects.toThrow(
+    await expect(apiRequest("/pets")).rejects.toThrow(
       "Pet name already exists.",
     );
   });
@@ -136,8 +136,9 @@ describe("apiRequest", () => {
     fetchMock.mockResolvedValue(
       mockJsonResponse({}, { ok: false, status: 401 }),
     );
+    const apiRequest = await importApiRequest();
 
-    await expect(staticApiRequest("/me")).rejects.toThrow(
+    await expect(apiRequest("/me")).rejects.toThrow(
       "Please sign in to continue.",
     );
   });
@@ -146,8 +147,9 @@ describe("apiRequest", () => {
     fetchMock.mockResolvedValue(
       mockJsonResponse({}, { ok: false, status: 403 }),
     );
+    const apiRequest = await importApiRequest();
 
-    await expect(staticApiRequest("/admin")).rejects.toThrow(
+    await expect(apiRequest("/admin")).rejects.toThrow(
       "You do not have permission to perform this action.",
     );
   });
