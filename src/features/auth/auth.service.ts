@@ -44,6 +44,7 @@ export function removeToken(): void {
 type AuthResponse = {
   user: AppUser;
   token: string;
+  organization: any;
 };
 
 type UpdateProfileResponse = AppUser | { user: AppUser };
@@ -87,9 +88,9 @@ export async function logoutUser(): Promise<void> {
   removeToken();
 }
 
-export async function getCurrentUser(): Promise<AppUser> {
+export async function getCurrentUser(): Promise<AuthResponse> {
   const token = getToken();
-  return apiRequest<AppUser>("/auth/me", {
+  return apiRequest<AuthResponse>("/auth/me", {
     token: token ?? undefined,
   });
 }
@@ -165,4 +166,34 @@ export async function uploadCurrentUserProfileImage(
   }
 
   throw new Error("Upload succeeded but no image reference was returned.");
+}
+
+export async function updateVetClinicProfile(values: any): Promise<any> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("Please sign in to update your clinic profile.");
+  }
+
+  // Uses your native apiRequest, passes the token automatically, and hits your Express PATCH route
+  return apiRequest<any>("/clinics", {
+    method: "PATCH",
+    body: values,
+    token,
+  });
+}
+
+export async function updateShelterProfileData(values: any): Promise<any> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("Please sign in to update your shelter profile.");
+  }
+
+  // Uses your native apiRequest, passes the token automatically, and hits your Express PATCH route
+  return apiRequest<any>("/shelters", {
+    method: "PATCH",
+    body: values,
+    token,
+  });
 }

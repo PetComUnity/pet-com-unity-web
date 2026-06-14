@@ -11,6 +11,7 @@ export const ROUTES = {
   adoptionList: "/pets/adoption-list",
   lostPets: "/lost-pets",
   adminVerification: "/admin/verification",
+  clinic: "/clinic",
 } as const;
 
 export const getPetDetailsRoute = (petId: string) => `/pets/${petId}`;

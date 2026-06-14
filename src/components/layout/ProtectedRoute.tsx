@@ -33,6 +33,14 @@ export function ProtectedRoute({
     }
 
     if (isUnauthorized) {
+      if (appUser.role === "vet") {
+  
+  router.replace(ROUTES.clinic);
+} else {
+  
+  router.replace(ROUTES.pets);
+}
+      
       router.replace(ROUTES.pets);
     }
   }, [isUnauthorized, loading, router, appUser]);

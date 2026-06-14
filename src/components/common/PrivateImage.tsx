@@ -19,7 +19,7 @@ type PrivateImageState = {
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ??
   process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:5000/api";
+  "http://localhost:5001/api";
 
 const privateImageSrcCache = new Map<string, string>();
 

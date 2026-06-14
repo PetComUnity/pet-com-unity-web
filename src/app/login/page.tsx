@@ -14,9 +14,9 @@ export default function LoginPage() {
   const router = useRouter();
   const { loading, appUser } = useAuth();
 
-  useEffect(() => {
-    if (appUser) router.replace(ROUTES.pets);
-  }, [router, appUser]);
+  // useEffect(() => {
+  //   if (appUser) router.replace(ROUTES.pets);
+  // }, [router, appUser]);
 
   if (loading || appUser) {
     return (
