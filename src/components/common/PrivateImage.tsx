@@ -53,6 +53,7 @@ export function PrivateImage({
 
     const encodedFileId = fileId.replace(/\//g, "--");
     let isMounted = true;
+    let objectUrl: string | null = null;
 
     fetch(`${API_BASE_URL}/files/${encodedFileId}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -63,11 +64,16 @@ export function PrivateImage({
       })
       .then((blob) => {
         const nextBlobUrl = URL.createObjectURL(blob);
+        objectUrl = nextBlobUrl;
+
+        if (!isMounted) {
+          URL.revokeObjectURL(nextBlobUrl);
+          return;
+        }
+
         privateImageSrcCache.set(fileId, nextBlobUrl);
 
-        if (isMounted) {
-          setImageState({ fileId, src: nextBlobUrl });
-        }
+        setImageState({ fileId, src: nextBlobUrl });
       })
       .catch(() => {
         if (isMounted && fallbackSrc) setImageState({ fileId, src: fallbackSrc });
@@ -75,6 +81,12 @@ export function PrivateImage({
 
     return () => {
       isMounted = false;
+      if (objectUrl) {
+        if (privateImageSrcCache.get(fileId) === objectUrl) {
+          privateImageSrcCache.delete(fileId);
+        }
+        URL.revokeObjectURL(objectUrl);
+      }
     };
   }, [fileId, fallbackSrc, allowUnauthenticated]);
 
