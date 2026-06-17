@@ -145,7 +145,13 @@ export default function MyPetsPage() {
               <>
                 <div className="grid justify-items-center gap-6 sm:grid-cols-2 xl:grid-cols-3">
                   {visiblePets.map((pet) => (
-                    <MyPetCard key={pet.id} pet={pet} />
+                    <MyPetCard
+                      key={pet.id}
+                      pet={pet}
+                      onDeleted={(id) =>
+                        setPets((prev) => prev.filter((p) => p.id !== id))
+                      }
+                    />
                   ))}
                 </div>
 
