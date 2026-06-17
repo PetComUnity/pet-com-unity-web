@@ -21,6 +21,7 @@ import {
 import { PrivateImage } from "@/components/common/PrivateImage";
 import { DocumentsTab } from "@/components/documents/DocumentsTab";
 import { PetAvatarCarousel } from "@/components/pet/PetAvatarCarousel";
+import { PublicQrProfileCard } from "@/components/pet/PublicQrProfileCard";
 import { Spinner } from "@/components/ui/Spinner";
 import { ROLE_LABELS } from "@/constants/roles";
 import { getPetDetailsRoute, ROUTES } from "@/constants/routes";
@@ -1207,6 +1208,14 @@ export default function PetDetailsPage() {
                       <p className="text-[#15803d]">Saved</p>
                     ) : null}
                   </div>
+
+                  {canEditPet && pet.publicQrId ? (
+                    <PublicQrProfileCard
+                      publicQrId={pet.publicQrId}
+                      petName={pet.name}
+                      className="md:col-start-1 md:col-end-4 md:row-start-11 xl:col-start-1 xl:col-end-5 xl:row-start-7"
+                    />
+                  ) : null}
                 </form>
               )}
             </div>
