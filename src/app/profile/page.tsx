@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { toast } from "sonner";
 import {
   Check,
   Edit3,
@@ -650,10 +651,6 @@ function ChangePasswordCard() {
     Partial<Record<PasswordField, boolean>>
   >({});
   const [submittingPassword, setSubmittingPassword] = useState(false);
-  const [passwordFormError, setPasswordFormError] = useState<string | null>(
-    null,
-  );
-  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
 
   function clearPasswordError(field: PasswordField) {
     setPasswordErrors((currentErrors) => {
@@ -669,8 +666,6 @@ function ChangePasswordCard() {
       [field]: value,
     }));
     clearPasswordError(field);
-    setPasswordFormError(null);
-    setPasswordSuccess(null);
   }
 
   function togglePasswordVisibility(field: PasswordField) {
@@ -701,15 +696,11 @@ function ChangePasswordCard() {
       });
 
       setPasswordErrors(nextErrors);
-      setPasswordFormError(null);
-      setPasswordSuccess(null);
       return;
     }
 
     setSubmittingPassword(true);
     setPasswordErrors({});
-    setPasswordFormError(null);
-    setPasswordSuccess(null);
 
     try {
       await changeCurrentUserPassword({
@@ -718,9 +709,9 @@ function ChangePasswordCard() {
       });
       setPasswordValues(emptyPasswordValues);
       setVisiblePasswordFields({});
-      setPasswordSuccess("Password updated successfully.");
+      toast.success("Password updated successfully.");
     } catch (error) {
-      setPasswordFormError(
+      toast.error(
         error instanceof Error
           ? error.message
           : "We could not update your password right now.",
@@ -787,16 +778,6 @@ function ChangePasswordCard() {
           {submittingPassword ? "Updating..." : "Update"}
         </button>
 
-        {passwordFormError ? (
-          <p className="text-sm font-medium text-[#b91c1c] lg:col-span-4">
-            {passwordFormError}
-          </p>
-        ) : null}
-        {passwordSuccess ? (
-          <p className="text-sm font-semibold text-[#166534] lg:col-span-4">
-            {passwordSuccess}
-          </p>
-        ) : null}
       </form>
     </section>
   );
@@ -963,6 +944,7 @@ function ProfileContent() {
 
     try {
       await updateProfile({ [field]: nextValue } as UpdateProfilePayload);
+      toast.success("Profile updated.");
       setEditingField(null);
       setDraftValue("");
     } catch (error) {
@@ -1010,6 +992,7 @@ function ProfileContent() {
               name: profileValues.name,
             },
       );
+      toast.success("Avatar updated.");
     } catch (error) {
       setAvatarError(
         error instanceof Error
