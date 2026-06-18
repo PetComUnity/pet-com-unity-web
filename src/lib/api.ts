@@ -1,31 +1,10 @@
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:5000/api"
-).replace(/\/$/, "");
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api";
 
 type RequestOptions = {
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   body?: unknown;
   token?: string;
 };
-
-type ApiEnvelope<T> = {
-  data?: T;
-  message?: string;
-};
-
-function getDefaultErrorMessage(status: number) {
-  if (status === 401) {
-    return "Please sign in to continue.";
-  }
-
-  if (status === 403) {
-    return "You do not have permission to perform this action.";
-  }
-
-  return "Something went wrong";
-}
 
 export async function apiRequest<T>(
   endpoint: string,
@@ -47,10 +26,10 @@ export async function apiRequest<T>(
     body: body ? JSON.stringify(body) : undefined,
   });
 
-  const data = (await response.json().catch(() => ({}))) as ApiEnvelope<T>;
+  const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message ?? getDefaultErrorMessage(response.status));
+    throw new Error(data.message ?? "Something went wrong");
   }
 
   return data.data as T;

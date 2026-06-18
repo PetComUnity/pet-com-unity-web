@@ -108,7 +108,6 @@ export function CalendarGrid({
                       ? "flex h-5 w-5 items-center justify-center rounded-full bg-[#f38c2c] text-[10px] !text-white md:h-7 md:w-7"
                       : "",
                   ].join(" ")}
-                  aria-current={isToday(day) ? "date" : undefined}
                 >
                   {day}
                 </span>
