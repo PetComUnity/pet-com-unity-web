@@ -33,15 +33,14 @@ export function ProtectedRoute({
     }
 
     if (isUnauthorized) {
+      // Direct the user based on their specific role, 
+      // otherwise default to pets
+      console.log("User is unauthorized for this route. Redirecting based on role...", appUser.role);
       if (appUser.role === "vet") {
-  
-  router.replace(ROUTES.clinic);
-} else {
-  
-  router.replace(ROUTES.pets);
-}
-      
-      router.replace(ROUTES.pets);
+        router.replace(ROUTES.clinic);
+      } else {
+        router.replace(ROUTES.pets);
+      }
     }
   }, [isUnauthorized, loading, router, appUser]);
 

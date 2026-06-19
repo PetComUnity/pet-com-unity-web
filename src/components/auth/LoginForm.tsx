@@ -8,6 +8,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { loginSchema, type LoginFormValues } from "@/features/auth/auth.types";
 import { useAuth } from "@/hooks/useAuth";
+import { getCurrentUser } from "@/features/auth/auth.service";
 
 const inputClass =
   "h-11 w-full appearance-none rounded-[1rem] border border-[var(--input-border)] bg-white px-4 font-sans text-sm font-medium leading-5 text-[var(--primary-text)] outline-none transition placeholder:text-[#7A7878]/50 hover:border-[#7A7878] focus:border-[var(--input-border)] focus:ring-2 focus:ring-[var(--input-border)]/10";
@@ -27,19 +28,39 @@ export function LoginForm() {
     mode: "onChange",
   });
 
+  // async function handleLogin(values: LoginFormValues) {
+  //   setFormError(null);
+  //   try {
+  //     await login(values);
+  //     router.replace(ROUTES.pets);
+  //   } catch (error) {
+  //     setFormError(
+  //       error instanceof Error
+  //         ? error.message
+  //         : "We could not sign you in right now.",
+  //     );
+  //   }
+  // }
   async function handleLogin(values: LoginFormValues) {
-    setFormError(null);
-    try {
-      await login(values);
+  setFormError(null);
+  try {
+   await login(values);
+
+    const user = await getCurrentUser(); 
+
+    if (user?.user.role === 'vet') {
+      router.replace(ROUTES.clinic);
+    } else {
       router.replace(ROUTES.pets);
-    } catch (error) {
-      setFormError(
-        error instanceof Error
-          ? error.message
-          : "We could not sign you in right now.",
-      );
     }
+  } catch (error) {
+    setFormError(
+      error instanceof Error
+        ? error.message
+        : "We could not sign you in right now.",
+    );
   }
+}
 
   return (
     <form className="flex flex-col" onSubmit={handleSubmit(handleLogin)}>

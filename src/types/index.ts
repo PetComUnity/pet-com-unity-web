@@ -150,9 +150,6 @@ export interface Shelter {
   updatedAt: string;
 }
 
-
-
-////////////////////
 export type WeekDay =
   | "monday"
   | "tuesday"
