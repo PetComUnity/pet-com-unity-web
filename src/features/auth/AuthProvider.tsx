@@ -9,7 +9,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
+
 import type { AppUser } from "@/types";
+
 import {
   getCurrentUser,
   getToken,
@@ -19,6 +21,7 @@ import {
   setToken,
   updateCurrentUserProfile,
 } from "@/features/auth/auth.service";
+
 import type {
   LoginFormValues,
   RegisterFormValues,
@@ -28,100 +31,239 @@ import type {
 type AuthContextValue = {
   appUser: AppUser | null;
   loading: boolean;
-  register: (values: RegisterFormValues) => Promise<void>;
-  login: (values: LoginFormValues) => Promise<void>;
-  logout: () => void; // Changed to void as logoutUser usually handles the API
-  updateProfile: (values: UpdateProfilePayload) => Promise<AppUser>;
-  getCurrentUser: () => Promise<void>; // Added this
+
+  register: (
+    values: RegisterFormValues,
+  ) => Promise<AppUser>;
+
+  login: (
+    values: LoginFormValues,
+  ) => Promise<AppUser>;
+
+  logout: () => Promise<void>;
+
+  updateProfile: (
+    values: UpdateProfilePayload,
+  ) => Promise<AppUser>;
+
+  getCurrentUser: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+const AuthContext =
+  createContext<AuthContextValue | undefined>(
+    undefined,
+  );
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AppUser | null>(null);
-  const [loading, setLoading] = useState(true);
+export function AuthProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const [user, setUser] =
+    useState<AppUser | null>(null);
 
+  const [loading, setLoading] =
+    useState(true);
+
+  /**
+   * =========================
+   * REFRESH USER
+   * =========================
+   */
   const refreshUser = useCallback(async () => {
     try {
       const response = await getCurrentUser();
-      
-      // Check if the response comes as { user: ..., organization: ... }
-      if (response && typeof response === 'object' && 'user' in response && 'organization' in response) {
-        const { user: userData, organization } = response as any;
-        
-        // Merge them into one object that matches your AppUser interface
+
+      /**
+       * Backend:
+       * {
+       *   user: {...},
+       *   organization: {...}
+       * }
+       */
+      if (
+        response &&
+        typeof response === "object" &&
+        "user" in response
+      ) {
+        const {
+          user: userData,
+          organization,
+        } = response as any;
+
         const mergedUser = {
           ...userData,
-          organization: organization,
+          ...(organization
+            ? { organization }
+            : {}),
         } as AppUser;
-        
+
         setUser(mergedUser);
-      } else {
-        // If it's already just an AppUser, set it directly
-        setUser(response as AppUser);
+        return;
       }
-    } catch {
+
+      setUser(response as any);
+    } catch (error) {
+      console.error(
+        "refreshUser failed",
+        error,
+      );
+
       setUser(null);
     }
   }, []);
 
+  /**
+   * =========================
+   * INIT SESSION
+   * =========================
+   */
   useEffect(() => {
     async function initAuth() {
       const token = getToken();
+
       if (!token) {
         setLoading(false);
         return;
       }
+
       await refreshUser();
+
       setLoading(false);
     }
+
     void initAuth();
   }, [refreshUser]);
 
-  const register = useCallback(async (values: RegisterFormValues) => {
-    const { user: newUser, token } = await registerUser(values);
-    setToken(token);
-    setUser(newUser);
-  }, []);
+  /**
+   * =========================
+   * REGISTER
+   * =========================
+   */
+  const register = useCallback(
+    async (
+      values: RegisterFormValues,
+    ): Promise<AppUser> => {
+      const {
+        user: newUser,
+        token,
+      } = await registerUser(values);
 
-  const login = useCallback(async (values: LoginFormValues) => {
-    const { user: newUser, token } = await loginUser(values);
-    setToken(token);
-    setUser(newUser);
-    await refreshUser(); // Fetch the full profile (including organization) after login
-  }, [refreshUser]);
+      setToken(token);
 
+      setUser(newUser);
+
+      return newUser;
+    },
+    [],
+  );
+
+  /**
+   * =========================
+   * LOGIN
+   * =========================
+   */
+  const login = useCallback(
+    async (
+      values: LoginFormValues,
+    ): Promise<AppUser> => {
+      const {
+        user: newUser,
+        token,
+      } = await loginUser(values);
+
+      setToken(token);
+
+      /**
+       * immediate state
+       */
+      setUser(newUser);
+
+      /**
+       * fetch full profile
+       * including organization
+       */
+      await refreshUser();
+
+      return newUser;
+    },
+    [refreshUser],
+  );
+
+  /**
+   * =========================
+   * LOGOUT
+   * =========================
+   */
   const logout = useCallback(async () => {
     await logoutUser();
+
     setUser(null);
   }, []);
 
-  const updateProfile = useCallback(async (values: UpdateProfilePayload) => {
-    const updatedUser = await updateCurrentUserProfile(values);
-    setUser(updatedUser);
-    return updatedUser;
-  }, []);
+  /**
+   * =========================
+   * UPDATE PROFILE
+   * =========================
+   */
+  const updateProfile = useCallback(
+    async (
+      values: UpdateProfilePayload,
+    ): Promise<AppUser> => {
+      const updatedUser =
+        await updateCurrentUserProfile(
+          values,
+        );
 
-  const value = useMemo<AuthContextValue>(
-    () => ({ 
-      appUser: user, 
-      loading, 
-      register, 
-      login, 
-      logout, 
-      updateProfile, 
-      getCurrentUser: refreshUser // Expose the refresh function
-    }),
-    [user, loading, register, login, logout, updateProfile, refreshUser],
+      setUser(updatedUser);
+
+      return updatedUser;
+    },
+    [],
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  const value =
+    useMemo<AuthContextValue>(
+      () => ({
+        appUser: user,
+        loading,
+
+        register,
+        login,
+        logout,
+
+        updateProfile,
+
+        getCurrentUser:
+          refreshUser,
+      }),
+      [
+        user,
+        loading,
+        register,
+        login,
+        logout,
+        updateProfile,
+        refreshUser,
+      ],
+    );
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuthContext() {
-  const context = useContext(AuthContext);
+  const context =
+    useContext(AuthContext);
+
   if (!context) {
-    throw new Error("useAuthContext must be used inside AuthProvider.");
+    throw new Error(
+      "useAuthContext must be used inside AuthProvider.",
+    );
   }
+
   return context;
 }
