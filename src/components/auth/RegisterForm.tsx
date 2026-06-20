@@ -18,15 +18,22 @@ const inputClass =
 export function RegisterForm() {
   const router = useRouter();
   const { register: registerAccount } = useAuth();
+
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
   const {
     formState: { errors, isSubmitting, isDirty, isValid },
     handleSubmit,
     register,
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { name: "", email: "", password: "", role: "" as "owner" },
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      role: "",
+    },
     mode: "onChange",
   });
 
@@ -53,9 +60,9 @@ export function RegisterForm() {
           className={inputClass}
           {...register("email")}
         />
-        {errors.email ? (
+        {errors.email && (
           <p className="text-xs text-red-500">{errors.email.message}</p>
-        ) : null}
+        )}
 
         <div className="relative">
           <input
@@ -77,18 +84,18 @@ export function RegisterForm() {
             )}
           </button>
         </div>
-        {errors.password ? (
+        {errors.password && (
           <p className="text-xs text-red-500">{errors.password.message}</p>
-        ) : null}
+        )}
 
         <input
           placeholder="Enter your name"
           className={inputClass}
           {...register("name")}
         />
-        {errors.name ? (
+        {errors.name && (
           <p className="text-xs text-red-500">{errors.name.message}</p>
-        ) : null}
+        )}
 
         <div className="relative">
           <select
@@ -110,11 +117,11 @@ export function RegisterForm() {
           </select>
           <ChevronDown className="pointer-events-none absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 text-[#7A7878]/50" />
         </div>
-        {errors.role ? (
+        {errors.role && (
           <p className="text-xs text-red-500">{errors.role.message}</p>
-        ) : null}
+        )}
 
-        {formError ? <p className="text-xs text-red-500">{formError}</p> : null}
+        {formError && <p className="text-xs text-red-500">{formError}</p>}
       </div>
 
       <button

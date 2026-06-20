@@ -23,6 +23,7 @@ export interface AppUser {
   imageFileId?: string;
   avatarFileId?: string;
   createdAt?: Date | null;
+  organization?: Record<string, unknown>;
 }
 
 export type PetOwnerInfo = {
@@ -99,3 +100,76 @@ export type PublicPet = Pick<
   | "verificationStatus"
   | "publicQrId"
 >;
+
+export interface SocialMediaLink {
+  platform: string;
+  url: string;
+}
+
+export interface Clinic {
+  _id: string;
+  userId: string;
+
+  name: string;
+  website?: string;
+  registrationNumber?: string;
+
+  phoneNumbers: string[];
+  location: string;
+
+  workingHours: WorkingHours;
+
+  socialMediaLinks: SocialMediaLink[];
+
+  verified: boolean;
+
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Shelter {
+  _id: string;
+  userId: string;
+
+  name: string;
+
+  website?: string;
+  registrationNumber?: string;
+
+  phoneNumbers: string[];
+
+  location: string;
+
+  workingHours: WorkingHours;
+
+  socialMediaLinks: SocialMediaLink[];
+
+  verified: boolean;
+
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type WeekDay =
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "sunday";
+
+export interface DayWorkingHours {
+  start: string | null;
+  end: string | null;
+}
+
+export interface WorkingHours {
+  monday?: DayWorkingHours | null;
+  tuesday?: DayWorkingHours | null;
+  wednesday?: DayWorkingHours | null;
+  thursday?: DayWorkingHours | null;
+  friday?: DayWorkingHours | null;
+  saturday?: DayWorkingHours | null;
+  sunday?: DayWorkingHours | null;
+}

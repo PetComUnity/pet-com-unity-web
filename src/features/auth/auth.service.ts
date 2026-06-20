@@ -44,6 +44,19 @@ export function removeToken(): void {
 type AuthResponse = {
   user: AppUser;
   token: string;
+  organization: {
+    name?: string;
+    email?: string;
+    phoneNumbers?: string[];
+    location?: string;
+    website?: string;
+    registrationNumber?: string;
+    socialMediaLinks?: {
+      platform?: string;
+      url?: string;
+    }[];
+    workingHours?: unknown;
+  };
 };
 
 type UpdateProfileResponse = AppUser | { user: AppUser };
@@ -87,9 +100,9 @@ export async function logoutUser(): Promise<void> {
   removeToken();
 }
 
-export async function getCurrentUser(): Promise<AppUser> {
+export async function getCurrentUser(): Promise<AuthResponse> {
   const token = getToken();
-  return apiRequest<AppUser>("/auth/me", {
+  return apiRequest<AuthResponse>("/auth/me", {
     token: token ?? undefined,
   });
 }
@@ -165,4 +178,36 @@ export async function uploadCurrentUserProfileImage(
   }
 
   throw new Error("Upload succeeded but no image reference was returned.");
+}
+
+export async function updateVetClinicProfile(
+  values: Record<string, unknown>,
+): Promise<unknown> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("Please sign in to update your clinic profile.");
+  }
+
+  return apiRequest<unknown>("/clinics", {
+    method: "PATCH",
+    body: values,
+    token,
+  });
+}
+
+export async function updateShelterProfileData(
+  values: Record<string, unknown>,
+): Promise<unknown> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("Please sign in to update your shelter profile.");
+  }
+
+  return apiRequest<unknown>("/shelters", {
+    method: "PATCH",
+    body: values,
+    token,
+  });
 }

@@ -19,6 +19,7 @@ const marketingLinks = [
 const appLinks = [
   { href: ROUTES.profile, label: "Profile" },
   { href: ROUTES.pets, label: "My Pets" },
+  {href: ROUTES.clinic, label: "Clinic" }
 ];
 
 const socialIcons = [
@@ -166,9 +167,12 @@ export function Navbar() {
                 <Link href={ROUTES.profile} className={authTextClassName()}>
                   Profile
                 </Link>
-                <Link href={ROUTES.pets} className={authTextClassName()}>
+                {appUser.role === "vet" ? (
+                <Link href={ROUTES.clinic} className={authTextClassName()}>
+                  Clinic
+                </Link>):(<Link href={ROUTES.pets} className={authTextClassName()}>
                   My Pets
-                </Link>
+                </Link>)}
                 <button
                   type="button"
                   className={authTextClassName()}
