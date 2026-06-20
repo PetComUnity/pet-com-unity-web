@@ -43,3 +43,4 @@ export async function updateMyClinic(
 
   return result.data;
 }
+
