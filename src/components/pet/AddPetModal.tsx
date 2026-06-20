@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
 import { Camera, ChevronDown, Plus, X } from "lucide-react";
+import { toast } from "sonner";
 import {
   createPet,
   uploadPetImage,
@@ -97,7 +98,6 @@ function getPetPayload(formData: FormData): CreatePetApiInput {
 
 export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedSpecies, setSelectedSpecies] = useState<SpeciesOption | "">(
@@ -140,7 +140,6 @@ export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
     event.preventDefault();
 
     setIsSubmitting(true);
-    setSubmitError(null);
 
     try {
       const payload = getPetPayload(new FormData(event.currentTarget));
@@ -155,13 +154,12 @@ export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
       }
 
       const createdPet = await createPet(payload);
+      toast.success("Pet added successfully!");
       onCreated?.(createdPet);
       onClose();
     } catch (error) {
-      setSubmitError(
-        error instanceof Error
-          ? error.message
-          : "We could not add your pet right now.",
+      toast.error(
+        error instanceof Error ? error.message : "We could not add your pet right now.",
       );
       setIsSubmitting(false);
     }
@@ -436,11 +434,6 @@ export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
                 </>
               )}
             </button>
-            {submitError ? (
-              <p className="mt-3 text-center text-sm font-medium text-[#b91c1c]">
-                {submitError}
-              </p>
-            ) : null}
           </div>
         </form>
       </section>

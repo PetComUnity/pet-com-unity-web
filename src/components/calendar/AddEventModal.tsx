@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { X, MapPin, ChevronDown, Loader2, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Pet } from "@/types";
 import {
   CalendarEvent,
@@ -170,9 +171,10 @@ export function AddEventModal({
     setDeleting(true);
     try {
       await onDelete(editEvent.id);
+      toast.success("Event deleted.");
       onClose();
     } catch (err: unknown) {
-      setError((err as Error)?.message ?? "Failed to delete event");
+      toast.error((err as Error)?.message ?? "Failed to delete event");
     } finally {
       setDeleting(false);
     }
@@ -208,6 +210,7 @@ export function AddEventModal({
           endTime: endTime || undefined,
           location: location.trim() || undefined,
         });
+        toast.success("Event updated.");
       } else {
         await onSave({
           petId,
@@ -218,10 +221,11 @@ export function AddEventModal({
           endTime: endTime || undefined,
           location: location.trim() || undefined,
         });
+        toast.success("Event created.");
       }
       onClose();
     } catch (err: unknown) {
-      setError((err as Error)?.message ?? "Failed to save event");
+      toast.error((err as Error)?.message ?? "Failed to save event");
     } finally {
       setSaving(false);
     }
