@@ -54,9 +54,12 @@ export function OwnerProfile() {
             ) : null}
 
             {imageUrl ? (
-              <img
+              <Image
                 src={imageUrl}
                 alt="Profile avatar"
+                fill
+                unoptimized
+                sizes="100px"
                 className="absolute inset-0 h-full w-full object-cover"
               />
             ) : null}

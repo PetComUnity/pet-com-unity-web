@@ -1,73 +1,34 @@
 "use client";
 
-import { useState, useEffect, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { updateVetClinicProfile } from "@/features/auth/auth.service";
+import { type MongoOrganization } from "@/components/auth/profile/profile.types";
 import { useProfileAvatar } from "@/hooks/useProfileAvatar";
+
+const DEFAULT_WORKING_HOURS = {
+  monday: { start: "08:00", end: "20:00" },
+  tuesday: { start: "08:00", end: "20:00" },
+  wednesday: { start: "08:00", end: "20:00" },
+  thursday: { start: "08:00", end: "20:00" },
+  friday: { start: "08:00", end: "20:00" },
+  saturday: { start: "09:00", end: "14:00" },
+  sunday: { start: "09:00", end: "14:00" },
+};
 
 export function useVetProfile() {
   const { appUser, updateProfile, getCurrentUser: refreshUser } = useAuth();
 
-  const [profileValues, setProfileValues] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    location: "",
-    website: "",
-    instagram: "",
-    facebook: "",
-    registrationNumber: "",
-    workingHours: {
-      monday: { start: "08:00", end: "20:00" },
-      tuesday: { start: "08:00", end: "20:00" },
-      wednesday: { start: "08:00", end: "20:00" },
-      thursday: { start: "08:00", end: "20:00" },
-      friday: { start: "08:00", end: "20:00" },
-      saturday: { start: "09:00", end: "14:00" },
-      sunday: { start: "09:00", end: "14:00" },
-    },
-  });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-
-  const avatarLogic = useProfileAvatar(updateProfile, profileValues.name);
-
-  useEffect(() => {
-    if (!appUser) return;
-
-    const org =
-      (appUser as {
-        organization?: {
-          name?: string;
-          email?: string;
-          phoneNumbers?: string[];
-          location?: string;
-          website?: string;
-          registrationNumber?: string;
-          socialMediaLinks?: {
-            platform?: string;
-            url?: string;
-          }[];
-          workingHours?: {
-            [key: string]: {
-              start?: string;
-              end?: string;
-            };
-          };
-        };
-      }).organization ?? {};
-
+  const [profileValues, setProfileValues] = useState(() => {
+    const org = (appUser?.organization ?? {}) as Partial<MongoOrganization>;
     const links = Array.isArray(org.socialMediaLinks)
       ? org.socialMediaLinks
       : [];
+    const workingHours = org.workingHours;
 
-    const workingHours = org.workingHours ?? {};
-
-    setProfileValues({
-      name: org.name ?? appUser.name ?? "",
-      email: org.email ?? appUser.email ?? "",
+    return {
+      name: org.name ?? appUser?.name ?? "",
+      email: org.email ?? appUser?.email ?? "",
       phone: Array.isArray(org.phoneNumbers)
         ? org.phoneNumbers[0] ?? ""
         : "",
@@ -75,47 +36,67 @@ export function useVetProfile() {
       website: org.website ?? "",
       instagram:
         links.find(
-          (link: { platform?: string; url?: string }) =>
-            link.platform?.toLowerCase() === "instagram",
+          (link) => link.platform?.toLowerCase() === "instagram",
         )?.url ?? "",
       facebook:
         links.find(
-          (link: { platform?: string; url?: string }) =>
-            link.platform?.toLowerCase() === "facebook",
+          (link) => link.platform?.toLowerCase() === "facebook",
         )?.url ?? "",
       registrationNumber: org.registrationNumber ?? "",
       workingHours: {
         monday: {
-          start: workingHours.monday?.start ?? "08:00",
-          end: workingHours.monday?.end ?? "20:00",
+          start:
+            workingHours?.monday?.start ?? DEFAULT_WORKING_HOURS.monday.start,
+          end: workingHours?.monday?.end ?? DEFAULT_WORKING_HOURS.monday.end,
         },
         tuesday: {
-          start: workingHours.tuesday?.start ?? "08:00",
-          end: workingHours.tuesday?.end ?? "20:00",
+          start:
+            workingHours?.tuesday?.start ?? DEFAULT_WORKING_HOURS.tuesday.start,
+          end: workingHours?.tuesday?.end ?? DEFAULT_WORKING_HOURS.tuesday.end,
         },
         wednesday: {
-          start: workingHours.wednesday?.start ?? "08:00",
-          end: workingHours.wednesday?.end ?? "20:00",
+          start:
+            workingHours?.wednesday?.start ??
+            DEFAULT_WORKING_HOURS.wednesday.start,
+          end:
+            workingHours?.wednesday?.end ??
+            DEFAULT_WORKING_HOURS.wednesday.end,
         },
         thursday: {
-          start: workingHours.thursday?.start ?? "08:00",
-          end: workingHours.thursday?.end ?? "20:00",
+          start:
+            workingHours?.thursday?.start ??
+            DEFAULT_WORKING_HOURS.thursday.start,
+          end:
+            workingHours?.thursday?.end ??
+            DEFAULT_WORKING_HOURS.thursday.end,
         },
         friday: {
-          start: workingHours.friday?.start ?? "08:00",
-          end: workingHours.friday?.end ?? "20:00",
+          start:
+            workingHours?.friday?.start ?? DEFAULT_WORKING_HOURS.friday.start,
+          end: workingHours?.friday?.end ?? DEFAULT_WORKING_HOURS.friday.end,
         },
         saturday: {
-          start: workingHours.saturday?.start ?? "09:00",
-          end: workingHours.saturday?.end ?? "14:00",
+          start:
+            workingHours?.saturday?.start ??
+            DEFAULT_WORKING_HOURS.saturday.start,
+          end:
+            workingHours?.saturday?.end ??
+            DEFAULT_WORKING_HOURS.saturday.end,
         },
         sunday: {
-          start: workingHours.sunday?.start ?? "09:00",
-          end: workingHours.sunday?.end ?? "14:00",
+          start:
+            workingHours?.sunday?.start ?? DEFAULT_WORKING_HOURS.sunday.start,
+          end: workingHours?.sunday?.end ?? DEFAULT_WORKING_HOURS.sunday.end,
         },
       },
-    });
-  }, [appUser?.id]);
+    };
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const avatarLogic = useProfileAvatar(updateProfile, profileValues.name);
 
   const updateField = (field: string, value: unknown) => {
     setProfileValues((prev) => ({

@@ -1,5 +1,3 @@
-import type { AppUser } from "@/types";
-
 export type MongooseSocialLink = {
   platform: string;
   url: string;

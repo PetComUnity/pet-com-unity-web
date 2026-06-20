@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { updateShelterProfileData } from "@/features/auth/auth.service";
 import { type WorkingHours } from "@/components/shared/WorkingHoursModal";
+import { type MongoOrganization } from "@/components/auth/profile/profile.types";
 import { useProfileAvatar } from "@/hooks/useProfileAvatar";
 
 const DEFAULT_WORKING_HOURS: WorkingHours = {
@@ -19,41 +20,15 @@ const DEFAULT_WORKING_HOURS: WorkingHours = {
 export function useShelterProfile() {
   const { appUser, updateProfile, getCurrentUser: refreshUser } = useAuth();
 
-  const [profileValues, setProfileValues] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    location: "",
-    website: "",
-    instagram: "",
-    facebook: "",
-    workingHours: DEFAULT_WORKING_HOURS,
-    registrationNumber: "",
-  });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-
-  const avatarLogic = useProfileAvatar(updateProfile, profileValues.name);
-
-  useEffect(() => {
-    if (!appUser) return;
-
-    const org =
-      (appUser as {
-        organization?: any;
-      }).organization ?? {};
-
+  const [profileValues, setProfileValues] = useState(() => {
+    const org = (appUser?.organization ?? {}) as Partial<MongoOrganization>;
     const links = Array.isArray(org.socialMediaLinks)
       ? org.socialMediaLinks
       : [];
 
-    const workingHours = org.workingHours ?? DEFAULT_WORKING_HOURS;
-
-    setProfileValues({
-      name: org.name ?? appUser.name ?? "",
-      email: org.email ?? appUser.email ?? "",
+    return {
+      name: org.name ?? appUser?.name ?? "",
+      email: org.email ?? appUser?.email ?? "",
       phone: Array.isArray(org.phoneNumbers)
         ? org.phoneNumbers[0] ?? ""
         : "",
@@ -61,18 +36,22 @@ export function useShelterProfile() {
       website: org.website ?? "",
       instagram:
         links.find(
-          (link: { platform?: string; url?: string }) =>
-            link.platform?.toLowerCase() === "instagram",
+          (link) => link.platform?.toLowerCase() === "instagram",
         )?.url ?? "",
       facebook:
         links.find(
-          (link: { platform?: string; url?: string }) =>
-            link.platform?.toLowerCase() === "facebook",
+          (link) => link.platform?.toLowerCase() === "facebook",
         )?.url ?? "",
-      workingHours,
+      workingHours: org.workingHours ?? DEFAULT_WORKING_HOURS,
       registrationNumber: org.registrationNumber ?? "",
-    });
-  }, [appUser?.id]); // ✅ ONLY CHANGE HERE
+    };
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const avatarLogic = useProfileAvatar(updateProfile, profileValues.name);
 
   const updateField = (field: string, value: unknown) => {
     setProfileValues((prev) => ({

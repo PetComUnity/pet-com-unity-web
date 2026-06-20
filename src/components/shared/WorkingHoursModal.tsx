@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export type DayHours = {
   start: string | null;
@@ -40,21 +40,24 @@ export function WorkingHoursModal({
   onClose,
   onSave,
 }: Props) {
-  const [hours, setHours] = useState<WorkingHours>(value);
-
-  // Sync internal state when the modal receives a new value prop
-  useEffect(() => {
-    if (value !== hours) {
-      setHours(value);
-    }
-  }, [value]);
-
   if (!isOpen) return null;
+
+  return (
+    <WorkingHoursEditor value={value} onClose={onClose} onSave={onSave} />
+  );
+}
+
+function WorkingHoursEditor({
+  value,
+  onClose,
+  onSave,
+}: Omit<Props, "isOpen">) {
+  const [hours, setHours] = useState<WorkingHours>(value);
 
   const updateDay = (
     day: keyof WorkingHours,
     field: "start" | "end",
-    fieldValue: string
+    fieldValue: string,
   ) => {
     setHours((prev) => ({
       ...prev,
@@ -84,18 +87,14 @@ export function WorkingHoursModal({
               <input
                 type="time"
                 value={hours[day]?.start ?? ""}
-                onChange={(e) =>
-                  updateDay(day, "start", e.target.value)
-                }
+                onChange={(e) => updateDay(day, "start", e.target.value)}
                 className="h-10 rounded-xl border px-3"
               />
 
               <input
                 type="time"
                 value={hours[day]?.end ?? ""}
-                onChange={(e) =>
-                  updateDay(day, "end", e.target.value)
-                }
+                onChange={(e) => updateDay(day, "end", e.target.value)}
                 className="h-10 rounded-xl border px-3"
               />
             </div>

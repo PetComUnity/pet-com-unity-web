@@ -7,36 +7,21 @@ import { uploadCurrentUserProfileImage } from "@/features/auth/auth.service";
 export function useOwnerProfile() {
   const { appUser, updateProfile } = useAuth();
 
-  const [profileValues, setProfileValues] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    city: "",
-  });
+  const [profileValues, setProfileValues] = useState(() => ({
+    name: appUser?.name?.trim() ?? "",
+    email: appUser?.email?.trim() ?? "",
+    phone: appUser?.phone?.trim() ?? "",
+    city:
+      (appUser?.address ?? appUser?.city ?? appUser?.location)?.trim() ?? "",
+  }));
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  
+
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
-
-useEffect(() => {
-  if (appUser) {
-    setProfileValues({
-      name: appUser.name?.trim() ?? "",
-      email: appUser.email?.trim() ?? "",
-      phone: appUser.phone?.trim() ?? "",
-      city:
-        (
-          appUser.address ??
-          appUser.city ??
-          (appUser as { location?: string }).location
-        )?.trim() ?? "",
-    });
-  }
-}, [appUser]);
 
   useEffect(() => {
     return () => {
@@ -69,7 +54,7 @@ useEffect(() => {
         city: profileValues.city.trim(),
       });
       setSubmitSuccess(true);
-    } catch (err) {
+    } catch {
       setFieldErrors({ global: "Could not update user profile information." });
     } finally {
       setIsSubmitting(false);
@@ -91,11 +76,19 @@ useEffect(() => {
       const uploaded = await uploadCurrentUserProfileImage(file);
       await updateProfile(
         uploaded.type === "public"
-          ? { avatarUrl: uploaded.url, avatarFileId: null, name: profileValues.name }
-          : { avatarFileId: uploaded.fileId, name: profileValues.name }
+          ? {
+              avatarUrl: uploaded.url,
+              avatarFileId: null,
+              name: profileValues.name,
+            }
+          : { avatarFileId: uploaded.fileId, name: profileValues.name },
       );
     } catch (err) {
-      setAvatarError(err instanceof Error ? err.message : "We could not upload this image right now.");
+      setAvatarError(
+        err instanceof Error
+          ? err.message
+          : "We could not upload this image right now.",
+      );
     } finally {
       setUploadingAvatar(false);
     }

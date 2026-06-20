@@ -170,6 +170,19 @@ export function ShelterProfile() {
             </div>
           </div>
 
+          <div className="col-span-full space-y-2">
+            {submitSuccess && (
+              <p className="text-sm font-semibold text-[#166534]">
+                Shelter profile saved successfully.
+              </p>
+            )}
+            {fieldErrors.global && (
+              <p className="text-sm font-medium text-[#b91c1c]">
+                {fieldErrors.global}
+              </p>
+            )}
+          </div>
+
           <div className="col-span-full flex justify-end pt-4 border-t border-gray-100">
             <button type="submit" disabled={isSubmitting} className="inline-flex h-11 w-full sm:w-[170px] items-center justify-center gap-2 rounded-[14px] border border-[#5fb953] bg-[#8df86e] px-5 text-[0.95rem] font-medium text-[#010101] transition hover:bg-[#7eea60] sm:text-[1rem]">
               {isSubmitting ? <><Spinner className="h-4 w-4 animate-spin" /> Saving...</> : "Save Profile"}
