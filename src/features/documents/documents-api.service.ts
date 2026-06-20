@@ -1,7 +1,7 @@
 import type { PetDocument } from "@/types";
 import { getToken } from "@/features/auth/auth.service";
 
-const DEFAULT_API_BASE_URL = "http://localhost:5001/api";
+const DEFAULT_API_BASE_URL = "http://localhost:5000/api";
 
 function getApiBaseUrl() {
   return (
