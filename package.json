@@ -45,9 +45,6 @@
     "tailwindcss": "^4.3.0",
     "typescript": "^5"
   },
-  "optionalDependencies": {
-    "lightningcss-linux-x64-gnu": "1.32.0"
-  },
   "allowScripts": {
     "sharp@0.34.5": true,
     "@firebase/util@1.15.1": true,
