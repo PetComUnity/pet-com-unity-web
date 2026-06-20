@@ -44,7 +44,9 @@ export function WorkingHoursModal({
 
   // Sync internal state when the modal receives a new value prop
   useEffect(() => {
-    setHours(value);
+    if (value !== hours) {
+      setHours(value);
+    }
   }, [value]);
 
   if (!isOpen) return null;
@@ -67,9 +69,7 @@ export function WorkingHoursModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl">
-        <h3 className="mb-6 text-lg font-semibold">
-          Operating Hours
-        </h3>
+        <h3 className="mb-6 text-lg font-semibold">Operating Hours</h3>
 
         <div className="space-y-3">
           {DAYS.map((day) => (
