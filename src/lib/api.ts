@@ -5,10 +5,12 @@ const API_URL = (
 ).replace(/\/$/, "");
 
 type RequestOptions = {
-  method?: "GET" | "POST" | "PUT" | "DELETE";
+  method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   body?: unknown;
   token?: string;
 };
+
+
 
 type ApiEnvelope<T> = {
   data?: T;

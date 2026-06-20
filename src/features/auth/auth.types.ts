@@ -7,17 +7,13 @@ const requiredText = (label: string, minimum: number, maximum: number) =>
     .min(minimum, `${label} must be at least ${minimum} characters.`)
     .max(maximum, `${label} must be ${maximum} characters or fewer.`);
 
-export const registerSchema = z.object({
-  name: requiredText("Name", 2, 50),
-  email: z.string().trim().email("Enter a valid email address."),
-  password: z
-    .string()
-    .min(6, "Password must be at least 6 characters.")
-    .max(100, "Password must be 100 characters or fewer."),
-  role: z.enum(["owner", "vet", "shelter", "admin"], {
-    error: "Please select a role.",
-  }),
-});
+export const registerSchema = z
+  .object({
+    name: z.string().min(1, "Name is required"),
+    email: z.string().email("Invalid email"),
+    password: z.string().min(6, "Password too short"),
+    role: z.enum(["owner", "vet", "shelter", "admin", ""]),
+  });
 
 export const loginSchema = z.object({
   email: z.string().trim().email("Enter a valid email address."),
