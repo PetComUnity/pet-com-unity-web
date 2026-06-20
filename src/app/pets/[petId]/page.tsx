@@ -42,7 +42,7 @@ const fallbackOwnerAvatarSrc = "/images/placeholder-owner-avatar.png";
 const petDetailsTabs = [
   { id: "details", label: "Pet Details" },
   { id: "documents", label: "Documents" },
-  { id: "vaccinations", label: "Vaccinations" },
+  // { id: "vaccinations", label: "Vaccinations" },
   { id: "calendar", label: "My Calendar" },
 ] as const;
 
