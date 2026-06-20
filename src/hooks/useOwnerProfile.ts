@@ -22,16 +22,21 @@ export function useOwnerProfile() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (appUser) {
-      setProfileValues({
-        name: appUser.name?.trim() ?? "",
-        email: appUser.email?.trim() ?? "",
-        phone: appUser.phone?.trim() ?? "",
-        city: (appUser.address ?? appUser.city ?? (appUser as any).location)?.trim() ?? "",
-      });
-    }
-  }, [appUser]);
+useEffect(() => {
+  if (appUser) {
+    setProfileValues({
+      name: appUser.name?.trim() ?? "",
+      email: appUser.email?.trim() ?? "",
+      phone: appUser.phone?.trim() ?? "",
+      city:
+        (
+          appUser.address ??
+          appUser.city ??
+          (appUser as { location?: string }).location
+        )?.trim() ?? "",
+    });
+  }
+}, [appUser]);
 
   useEffect(() => {
     return () => {

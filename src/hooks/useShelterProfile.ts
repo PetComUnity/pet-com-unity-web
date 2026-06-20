@@ -17,11 +17,7 @@ const DEFAULT_WORKING_HOURS: WorkingHours = {
 };
 
 export function useShelterProfile() {
-  const {
-    appUser,
-    updateProfile,
-    getCurrentUser: refreshUser,
-  } = useAuth();
+  const { appUser, updateProfile, getCurrentUser: refreshUser } = useAuth();
 
   const [profileValues, setProfileValues] = useState({
     name: "",
@@ -39,22 +35,21 @@ export function useShelterProfile() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const avatarLogic = useProfileAvatar(
-    updateProfile,
-    profileValues.name,
-  );
+  const avatarLogic = useProfileAvatar(updateProfile, profileValues.name);
 
   useEffect(() => {
     if (!appUser) return;
 
-    const org = (appUser as any).organization ?? {};
+    const org =
+      (appUser as {
+        organization?: any;
+      }).organization ?? {};
 
     const links = Array.isArray(org.socialMediaLinks)
       ? org.socialMediaLinks
       : [];
 
-    const workingHours =
-      org.workingHours ?? DEFAULT_WORKING_HOURS;
+    const workingHours = org.workingHours ?? DEFAULT_WORKING_HOURS;
 
     setProfileValues({
       name: org.name ?? appUser.name ?? "",
@@ -66,24 +61,20 @@ export function useShelterProfile() {
       website: org.website ?? "",
       instagram:
         links.find(
-          (link: any) =>
+          (link: { platform?: string; url?: string }) =>
             link.platform?.toLowerCase() === "instagram",
         )?.url ?? "",
       facebook:
         links.find(
-          (link: any) =>
+          (link: { platform?: string; url?: string }) =>
             link.platform?.toLowerCase() === "facebook",
         )?.url ?? "",
       workingHours,
-      registrationNumber:
-        org.registrationNumber ?? "",
+      registrationNumber: org.registrationNumber ?? "",
     });
-  }, [appUser]);
+  }, [appUser?.id]); // ✅ ONLY CHANGE HERE
 
-  const updateField = (
-    field: string,
-    value: any,
-  ) => {
+  const updateField = (field: string, value: unknown) => {
     setProfileValues((prev) => ({
       ...prev,
       [field]: value,
@@ -92,9 +83,7 @@ export function useShelterProfile() {
     setSubmitSuccess(false);
   };
 
-  const handleFormSubmit = async (
-    event: FormEvent<HTMLFormElement>,
-  ) => {
+  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     setIsSubmitting(true);
@@ -124,24 +113,20 @@ export function useShelterProfile() {
         socialMediaLinks,
         workingHours: profileValues.workingHours,
         registrationNumber:
-          profileValues.registrationNumber.trim() ||
-          undefined,
+          profileValues.registrationNumber.trim() || undefined,
       };
 
       await updateShelterProfileData(payload);
 
-      /**
-       * Refresh AuthContext state
-       * after successful update.
-       */
       await refreshUser();
 
       setSubmitSuccess(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setFieldErrors({
         global:
-          error?.message ??
-          "Could not update shelter information.",
+          error instanceof Error
+            ? error.message
+            : "Could not update shelter information.",
       });
     } finally {
       setIsSubmitting(false);

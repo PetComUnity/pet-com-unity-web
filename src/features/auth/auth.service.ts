@@ -44,7 +44,19 @@ export function removeToken(): void {
 type AuthResponse = {
   user: AppUser;
   token: string;
-  organization: any;
+  organization: {
+    name?: string;
+    email?: string;
+    phoneNumbers?: string[];
+    location?: string;
+    website?: string;
+    registrationNumber?: string;
+    socialMediaLinks?: {
+      platform?: string;
+      url?: string;
+    }[];
+    workingHours?: unknown;
+  };
 };
 
 type UpdateProfileResponse = AppUser | { user: AppUser };
@@ -168,30 +180,32 @@ export async function uploadCurrentUserProfileImage(
   throw new Error("Upload succeeded but no image reference was returned.");
 }
 
-export async function updateVetClinicProfile(values: any): Promise<any> {
+export async function updateVetClinicProfile(
+  values: Record<string, unknown>,
+): Promise<unknown> {
   const token = getToken();
 
   if (!token) {
     throw new Error("Please sign in to update your clinic profile.");
   }
 
-  // Uses your native apiRequest, passes the token automatically, and hits your Express PATCH route
-  return apiRequest<any>("/clinics", {
+  return apiRequest<unknown>("/clinics", {
     method: "PATCH",
     body: values,
     token,
   });
 }
 
-export async function updateShelterProfileData(values: any): Promise<any> {
+export async function updateShelterProfileData(
+  values: Record<string, unknown>,
+): Promise<unknown> {
   const token = getToken();
 
   if (!token) {
     throw new Error("Please sign in to update your shelter profile.");
   }
 
-  // Uses your native apiRequest, passes the token automatically, and hits your Express PATCH route
-  return apiRequest<any>("/shelters", {
+  return apiRequest<unknown>("/shelters", {
     method: "PATCH",
     body: values,
     token,

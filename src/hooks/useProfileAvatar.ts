@@ -2,7 +2,14 @@
 import { useState, useEffect, type ChangeEvent } from "react";
 import { uploadCurrentUserProfileImage } from "@/features/auth/auth.service";
 
-export function useProfileAvatar(updateProfile: any, currentName: string) {
+export function useProfileAvatar(
+  updateProfile: (values: {
+    avatarUrl?: string;
+    avatarFileId?: string | null;
+    name: string;
+  }) => Promise<unknown>,
+  currentName: string,
+) {
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
@@ -30,15 +37,18 @@ export function useProfileAvatar(updateProfile: any, currentName: string) {
 
     try {
       const uploaded = await uploadCurrentUserProfileImage(file);
-      
-      // Matches your OwnerProfile logic exactly
+
       await updateProfile(
         uploaded.type === "public"
           ? { avatarUrl: uploaded.url, avatarFileId: null, name: currentName }
           : { avatarFileId: uploaded.fileId, name: currentName }
       );
     } catch (err) {
-      setAvatarError(err instanceof Error ? err.message : "We could not upload this image.");
+      setAvatarError(
+        err instanceof Error
+          ? err.message
+          : "We could not upload this image.",
+      );
     } finally {
       setUploadingAvatar(false);
     }

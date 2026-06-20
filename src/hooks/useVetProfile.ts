@@ -6,11 +6,7 @@ import { updateVetClinicProfile } from "@/features/auth/auth.service";
 import { useProfileAvatar } from "@/hooks/useProfileAvatar";
 
 export function useVetProfile() {
-  const {
-    appUser,
-    updateProfile,
-    getCurrentUser: refreshUser,
-  } = useAuth();
+  const { appUser, updateProfile, getCurrentUser: refreshUser } = useAuth();
 
   const [profileValues, setProfileValues] = useState({
     name: "",
@@ -36,15 +32,33 @@ export function useVetProfile() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const avatarLogic = useProfileAvatar(
-    updateProfile,
-    profileValues.name,
-  );
+  const avatarLogic = useProfileAvatar(updateProfile, profileValues.name);
 
   useEffect(() => {
     if (!appUser) return;
 
-    const org = (appUser as any).organization ?? {};
+    const org =
+      (appUser as {
+        organization?: {
+          name?: string;
+          email?: string;
+          phoneNumbers?: string[];
+          location?: string;
+          website?: string;
+          registrationNumber?: string;
+          socialMediaLinks?: {
+            platform?: string;
+            url?: string;
+          }[];
+          workingHours?: {
+            [key: string]: {
+              start?: string;
+              end?: string;
+            };
+          };
+        };
+      }).organization ?? {};
+
     const links = Array.isArray(org.socialMediaLinks)
       ? org.socialMediaLinks
       : [];
@@ -61,12 +75,12 @@ export function useVetProfile() {
       website: org.website ?? "",
       instagram:
         links.find(
-          (link: any) =>
+          (link: { platform?: string; url?: string }) =>
             link.platform?.toLowerCase() === "instagram",
         )?.url ?? "",
       facebook:
         links.find(
-          (link: any) =>
+          (link: { platform?: string; url?: string }) =>
             link.platform?.toLowerCase() === "facebook",
         )?.url ?? "",
       registrationNumber: org.registrationNumber ?? "",
@@ -101,9 +115,9 @@ export function useVetProfile() {
         },
       },
     });
-  }, [appUser]);
+  }, [appUser?.id]);
 
-  const updateField = (field: string, value: any) => {
+  const updateField = (field: string, value: unknown) => {
     setProfileValues((prev) => ({
       ...prev,
       [field]: value,
@@ -112,9 +126,7 @@ export function useVetProfile() {
     setSubmitSuccess(false);
   };
 
-  const handleFormSubmit = async (
-    event: FormEvent<HTMLFormElement>,
-  ) => {
+  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     setIsSubmitting(true);
@@ -149,26 +161,20 @@ export function useVetProfile() {
         socialMediaLinks,
         workingHours: profileValues.workingHours,
         registrationNumber:
-          profileValues.registrationNumber.trim() ||
-          undefined,
+          profileValues.registrationNumber.trim() || undefined,
       };
 
       await updateVetClinicProfile(payload);
 
-      /**
-       * IMPORTANT:
-       * Refresh AuthContext after clinic update.
-       * This updates appUser.organization with fresh data
-       * from /auth/me.
-       */
       await refreshUser();
 
       setSubmitSuccess(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setFieldErrors({
         global:
-          err?.message ??
-          "Could not update clinic information.",
+          err instanceof Error
+            ? err.message
+            : "Could not update clinic information.",
       });
     } finally {
       setIsSubmitting(false);

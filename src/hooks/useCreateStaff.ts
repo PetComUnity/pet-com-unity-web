@@ -15,7 +15,7 @@ export function useCreateStaff() {
       const result = await createStaff(formData);
 
       return result;
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message);
       throw err;
     } finally {

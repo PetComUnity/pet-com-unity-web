@@ -23,7 +23,7 @@ export interface AppUser {
   imageFileId?: string;
   avatarFileId?: string;
   createdAt?: Date | null;
-  organization?: any
+  organization?: Record<string, unknown>;
 }
 
 export type PetOwnerInfo = {
