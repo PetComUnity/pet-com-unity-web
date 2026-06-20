@@ -34,6 +34,7 @@ function mockAuth(appUser: AppUser | null, loading = false) {
     logout: jest.fn(),
     register: jest.fn(),
     updateProfile: jest.fn(),
+    getCurrentUser: jest.fn(),
   });
 }
 

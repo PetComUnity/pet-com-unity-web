@@ -16,7 +16,9 @@ export function useCreateStaff() {
 
       return result;
     } catch (err: unknown) {
-      setError(err.message);
+      setError(
+        err instanceof Error ? err.message : "Could not create staff member.",
+      );
       throw err;
     } finally {
       setLoading(false);
