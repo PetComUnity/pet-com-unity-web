@@ -87,19 +87,20 @@ export interface PetDocument {
   createdAt?: string | null;
 }
 
-export type PublicPet = Pick<
-  Pet,
-  | "id"
-  | "name"
-  | "species"
-  | "breed"
-  | "color"
-  | "description"
-  | "imageUrl"
-  | "isLost"
-  | "verificationStatus"
-  | "publicQrId"
->;
+export type PublicPet = {
+  name: string;
+  species: string;
+  breed?: string;
+  birthDate?: string;
+  color?: string;
+  gender?: string;
+  description?: string;
+  imageUrl?: string;
+  isLost: boolean;
+  isAdoptable: boolean;
+  verificationStatus?: PetVerificationStatus;
+  publicQrId: string;
+};
 
 export interface SocialMediaLink {
   platform: string;

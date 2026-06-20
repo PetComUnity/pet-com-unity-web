@@ -1,4 +1,4 @@
-import type { Pet, PetOwnerInfo, UserRole } from "@/types";
+import type { Pet, PetOwnerInfo, PublicPet, UserRole } from "@/types";
 import { getToken } from "@/features/auth/auth.service";
 import {
   ADOPTION_ANIMAL_OPTIONS,
@@ -6,6 +6,7 @@ import {
   getWeightRangeForPetSize,
   type AdoptionSearchFilters,
 } from "@/features/pets/adoption-search";
+import { createPublicQrId } from "@/features/pets/pet.utils";
 
 type ApiResponse<T, M = undefined> = {
   success: boolean;
@@ -78,6 +79,27 @@ type ApiPetDetailsPayload =
       contact?: ApiPetOwner | null;
     };
 
+type ApiPublicPet = {
+  name?: string | null;
+  species?: string | null;
+  breed?: string | null;
+  birthDate?: string | null;
+  color?: string | null;
+  gender?: string | null;
+  description?: string | null;
+  imageUrl?: string | null;
+  isLost?: boolean | null;
+  isAdoptable?: boolean | null;
+  verificationStatus?: string | null;
+  publicQrId?: string | null;
+};
+
+type ApiPublicPetDetailsPayload =
+  | ApiPublicPet
+  | {
+      pet?: ApiPublicPet | null;
+    };
+
 export type PaginationMeta = {
   page: number;
   limit: number;
@@ -105,6 +127,7 @@ export type CreatePetApiInput = {
   imageUrl?: string;
   imageFileId?: string;
   isAdoptable: boolean;
+  publicQrId?: string;
 };
 
 export type UpdatePetApiInput = Partial<{
@@ -121,6 +144,7 @@ export type UpdatePetApiInput = Partial<{
   imageFileId: string | null;
   isLost: boolean;
   isAdoptable: boolean;
+  publicQrId: string;
 }>;
 
 const DEFAULT_API_BASE_URL = "http://localhost:5000/api";
@@ -188,6 +212,10 @@ function toOptionalRole(value?: string | null): UserRole | undefined {
     : undefined;
 }
 
+function toOptionalVerificationStatus(value?: string | null) {
+  return value === "verified" || value === "unverified" ? value : undefined;
+}
+
 function mapPetOwner(owner?: ApiPetOwner | null): PetOwnerInfo | undefined {
   if (!owner) {
     return undefined;
@@ -242,6 +270,7 @@ function mapPet(pet: ApiPet): Pet {
     imageFileId,
     location: toOptionalText(pet.location ?? pet.city),
     owner: getApiPetOwner(pet),
+    publicQrId: toOptionalText(pet.publicQrId) ?? "",
     weight: toOptionalNumber(pet.weight),
     gender: toOptionalText(pet.gender),
     verifiedAt: toOptionalDate(pet.verifiedAt),
@@ -271,6 +300,46 @@ function mapPetDetailsPayload(payload: ApiPetDetailsPayload) {
   }
 
   return mapPet(payload as ApiPet);
+}
+
+function hasWrappedPublicPetDetailsPayload(
+  payload: ApiPublicPetDetailsPayload,
+): payload is Extract<
+  ApiPublicPetDetailsPayload,
+  { pet?: ApiPublicPet | null }
+> {
+  return "pet" in payload;
+}
+
+function mapPublicPet(
+  pet: ApiPublicPet,
+  requestedPublicQrId: string,
+): PublicPet {
+  return {
+    name: toOptionalText(pet.name) ?? "Unknown pet",
+    species: toOptionalText(pet.species) ?? "Unknown",
+    breed: toOptionalText(pet.breed),
+    birthDate: toOptionalText(pet.birthDate),
+    color: toOptionalText(pet.color),
+    gender: toOptionalText(pet.gender),
+    description: toOptionalText(pet.description),
+    imageUrl: toOptionalText(pet.imageUrl),
+    isLost: Boolean(pet.isLost),
+    isAdoptable: Boolean(pet.isAdoptable),
+    verificationStatus: toOptionalVerificationStatus(pet.verificationStatus),
+    publicQrId: toOptionalText(pet.publicQrId) ?? requestedPublicQrId,
+  };
+}
+
+function mapPublicPetDetailsPayload(
+  payload: ApiPublicPetDetailsPayload,
+  requestedPublicQrId: string,
+) {
+  if (hasWrappedPublicPetDetailsPayload(payload) && payload.pet) {
+    return mapPublicPet(payload.pet, requestedPublicQrId);
+  }
+
+  return mapPublicPet(payload as ApiPublicPet, requestedPublicQrId);
 }
 
 type FetchApiOptions = {
@@ -441,6 +510,38 @@ export async function getPetById(
   return payload.data ? mapPetDetailsPayload(payload.data) : null;
 }
 
+export async function getPetByPublicQrId(
+  publicQrId: string,
+  signal?: AbortSignal,
+): Promise<PublicPet | null> {
+  const encodedPublicQrId = encodeURIComponent(publicQrId);
+  const response = await fetch(
+    `${getApiBaseUrl()}/pets/public/${encodedPublicQrId}`,
+    {
+      cache: "no-store",
+      signal,
+    },
+  );
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  const payload = (await response
+    .json()
+    .catch(() => ({}))) as ApiResponse<ApiPublicPetDetailsPayload>;
+
+  if (!response.ok) {
+    throw new Error(
+      payload.message ?? "We could not load this public pet page.",
+    );
+  }
+
+  return payload.data
+    ? mapPublicPetDetailsPayload(payload.data, publicQrId)
+    : null;
+}
+
 export async function deletePet(petId: string): Promise<void> {
   const token = getToken();
 
@@ -476,7 +577,10 @@ export async function createPet(input: CreatePetApiInput): Promise<Pet | null> {
   }
 
   const payload = await fetchApi<PetMutationPayload>("/pets", {
-    body: input,
+    body: {
+      ...input,
+      publicQrId: input.publicQrId?.trim() || createPublicQrId(input.name),
+    },
     errorMessage: "We could not add your pet right now.",
     method: "POST",
     token,
