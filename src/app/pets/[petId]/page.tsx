@@ -18,6 +18,7 @@ import {
   PawPrint,
   Pencil,
 } from "lucide-react";
+import { toast } from "sonner";
 import { PrivateImage } from "@/components/common/PrivateImage";
 import { DocumentsTab } from "@/components/documents/DocumentsTab";
 import { PetAvatarCarousel } from "@/components/pet/PetAvatarCarousel";
@@ -644,7 +645,6 @@ export default function PetDetailsPage() {
   const [ownerPets, setOwnerPets] = useState<Pet[]>([]);
   const [loadingPet, setLoadingPet] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -667,7 +667,6 @@ export default function PetDetailsPage() {
       try {
         setLoadingPet(true);
         setLoadError(null);
-        setFormError(null);
         setSaveStatus("idle");
         setAvatarPreviewUrl(null);
         setPet(null);
@@ -781,7 +780,6 @@ export default function PetDetailsPage() {
 
     try {
       setSaveStatus("saving");
-      setFormError(null);
       const payload = getPetFieldUpdatePayload(fieldName, nextFormState);
       const updatedPet = await updatePet(pet.id, payload);
       const mergedPet = updatedPet ?? mergePetWithPayload(pet, payload);
@@ -797,7 +795,7 @@ export default function PetDetailsPage() {
       setSaveStatus("saved");
     } catch (error) {
       setSaveStatus("idle");
-      setFormError(
+      toast.error(
         error instanceof Error
           ? error.message
           : "We could not update this pet right now.",
@@ -865,7 +863,6 @@ export default function PetDetailsPage() {
 
     try {
       setUploadingAvatar(true);
-      setFormError(null);
       const uploaded = await uploadPetImage(file, "private");
       const imagePayload: UpdatePetApiInput =
         uploaded.type === "public"
@@ -892,7 +889,7 @@ export default function PetDetailsPage() {
       });
     } catch (error) {
       setAvatarPreviewUrl(null);
-      setFormError(
+      toast.error(
         error instanceof Error
           ? error.message
           : "We could not update the pet avatar right now.",
@@ -911,14 +908,14 @@ export default function PetDetailsPage() {
 
     try {
       setUpdatingLostStatus(true);
-      setFormError(null);
       const updatedPet = await updatePet(pet.id, { isLost: nextIsLost });
       setPet((currentPet) =>
         updatedPet ??
         (currentPet ? { ...currentPet, isLost: nextIsLost } : currentPet),
       );
+      toast.success(`Pet marked as ${nextIsLost ? "lost" : "found"}.`);
     } catch (error) {
-      setFormError(
+      toast.error(
         error instanceof Error
           ? error.message
           : `We could not mark this pet as ${nextIsLost ? "lost" : "found"} right now.`,
@@ -1200,9 +1197,7 @@ export default function PetDetailsPage() {
                   ) : null}
 
                   <div className="min-h-5 text-right text-sm font-medium md:col-start-1 md:col-end-4 md:row-start-10 xl:col-start-2 xl:col-end-5 xl:row-start-6">
-                    {formError ? (
-                      <p className="text-[#b91c1c]">{formError}</p>
-                    ) : saveStatus === "saving" ? (
+                    {saveStatus === "saving" ? (
                       <p className="text-[#4d443d]">Saving...</p>
                     ) : saveStatus === "saved" ? (
                       <p className="text-[#15803d]">Saved</p>

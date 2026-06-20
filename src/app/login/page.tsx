@@ -2,8 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginForm } from "@/components/auth/LoginForm";
@@ -11,12 +9,7 @@ import { SocialLinks } from "@/components/ui/SocialLinks";
 import { Spinner } from "@/components/ui/Spinner";
 
 export default function LoginPage() {
-  const router = useRouter();
   const { loading, appUser } = useAuth();
-
-  useEffect(() => {
-    if (appUser) router.replace(ROUTES.pets);
-  }, [router, appUser]);
 
   if (loading || appUser) {
     return (

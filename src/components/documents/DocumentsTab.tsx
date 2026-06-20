@@ -22,6 +22,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { toast } from "sonner";
 import { PrivateImage } from "@/components/common/PrivateImage";
 import { Spinner } from "@/components/ui/Spinner";
 import {
@@ -433,7 +434,6 @@ export function DocumentsTab({
   const [selectedFileName, setSelectedFileName] = useState("");
   const [dateError, setDateError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -504,7 +504,6 @@ export function DocumentsTab({
 
     try {
       setSubmitting(true);
-      setSubmitError(null);
 
       const { fileId, mimeType, secureUrl } = await uploadDocumentFile(
         form.file!,
@@ -523,9 +522,10 @@ export function DocumentsTab({
       setDocuments((prev) => [newDoc, ...prev]);
       setForm(emptyForm);
       setSelectedFileName("");
+      toast.success("Document uploaded.");
     } catch (error) {
       if (uploadedFileId) void deleteUploadedFile(uploadedFileId);
-      setSubmitError(
+      toast.error(
         error instanceof Error ? error.message : "Could not add document.",
       );
     } finally {
@@ -558,8 +558,9 @@ export function DocumentsTab({
       setDeletingId(docId);
       await deletePetDocument(pet.id, docId);
       setDocuments((prev) => prev.filter((d) => d.id !== docId));
+      toast.success("Document deleted.");
     } catch (error) {
-      setSubmitError(
+      toast.error(
         error instanceof Error ? error.message : "Could not delete document.",
       );
     } finally {
@@ -714,9 +715,6 @@ export function DocumentsTab({
         </div>
 
         <div className="space-y-2 md:col-start-2 md:col-end-4 md:row-start-3">
-          {submitError ? (
-            <p className="text-sm font-medium text-[#b91c1c]">{submitError}</p>
-          ) : null}
           <button
             type="submit"
             disabled={!isFormComplete || submitting}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Montserrat } from "next/font/google";
+import { Toaster } from "sonner";
 import { AuthProvider } from "@/features/auth/AuthProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -44,6 +45,17 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
+          <Toaster
+            position="bottom-right"
+            richColors
+            toastOptions={{
+              style: {
+                fontFamily: "var(--font-sans-stack)",
+                borderRadius: "14px",
+                fontSize: "14px",
+              },
+            }}
+          />
         </AuthProvider>
       </body>
     </html>

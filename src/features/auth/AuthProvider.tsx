@@ -9,7 +9,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
+
 import type { AppUser } from "@/types";
+
 import {
   getCurrentUser,
   getToken,
@@ -19,6 +21,7 @@ import {
   setToken,
   updateCurrentUserProfile,
 } from "@/features/auth/auth.service";
+
 import type {
   LoginFormValues,
   RegisterFormValues,
@@ -28,10 +31,14 @@ import type {
 type AuthContextValue = {
   appUser: AppUser | null;
   loading: boolean;
-  register: (values: RegisterFormValues) => Promise<void>;
-  login: (values: LoginFormValues) => Promise<void>;
+
+  register: (values: RegisterFormValues) => Promise<AppUser>;
+  login: (values: LoginFormValues) => Promise<AppUser>;
   logout: () => Promise<void>;
+
   updateProfile: (values: UpdateProfilePayload) => Promise<AppUser>;
+
+  getCurrentUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -39,6 +46,32 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const refreshUser = useCallback(async () => {
+    try {
+      const response = await getCurrentUser();
+
+      if (response && typeof response === "object" && "user" in response) {
+        const { user: userData, organization } = response as {
+          user: AppUser;
+          organization?: unknown;
+        };
+
+        const mergedUser = {
+          ...userData,
+          ...(organization ? { organization } : {}),
+        } as AppUser;
+
+        setUser(mergedUser);
+        return;
+      }
+
+      setUser(response as AppUser);
+    } catch (error) {
+      console.error("refreshUser failed", error);
+      setUser(null);
+    }
+  }, []);
 
   useEffect(() => {
     async function initAuth() {
@@ -49,30 +82,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      try {
-        const currentUser = await getCurrentUser();
-        setUser(currentUser);
-      } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
+      await refreshUser();
+      setLoading(false);
     }
 
     void initAuth();
-  }, []);
+  }, [refreshUser]);
 
   const register = useCallback(async (values: RegisterFormValues) => {
     const { user: newUser, token } = await registerUser(values);
+
     setToken(token);
     setUser(newUser);
+
+    return newUser;
   }, []);
 
-  const login = useCallback(async (values: LoginFormValues) => {
-    const { user: newUser, token } = await loginUser(values);
-    setToken(token);
-    setUser(newUser);
-  }, []);
+  const login = useCallback(
+    async (values: LoginFormValues) => {
+      const { user: newUser, token } = await loginUser(values);
+
+      setToken(token);
+      setUser(newUser);
+
+      await refreshUser();
+
+      return newUser;
+    },
+    [refreshUser],
+  );
 
   const logout = useCallback(async () => {
     await logoutUser();
@@ -81,13 +119,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = useCallback(async (values: UpdateProfilePayload) => {
     const updatedUser = await updateCurrentUserProfile(values);
+
     setUser(updatedUser);
+
     return updatedUser;
   }, []);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ appUser: user, loading, register, login, logout, updateProfile }),
-    [user, loading, register, login, logout, updateProfile],
+    () => ({
+      appUser: user,
+      loading,
+      register,
+      login,
+      logout,
+      updateProfile,
+      getCurrentUser: refreshUser,
+    }),
+    [user, loading, register, login, logout, updateProfile, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
