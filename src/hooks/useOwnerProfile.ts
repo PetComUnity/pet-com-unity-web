@@ -50,12 +50,17 @@ export function useOwnerProfile() {
     try {
       await updateProfile({
         name: profileValues.name.trim(),
-        phone: profileValues.phone.trim(),
-        city: profileValues.city.trim(),
+        phone: profileValues.phone.trim() || undefined,
+        city: profileValues.city.trim() || undefined,
       });
       setSubmitSuccess(true);
-    } catch {
-      setFieldErrors({ global: "Could not update user profile information." });
+    } catch (err) {
+      setFieldErrors({
+        global:
+          err instanceof Error
+            ? err.message
+            : "Could not update user profile information.",
+      });
     } finally {
       setIsSubmitting(false);
     }

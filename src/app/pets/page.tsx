@@ -28,6 +28,7 @@ export default function MyPetsPage() {
     try {
       setLoadingPets(true);
       setPetsError(null);
+      setPets([]);
       const result = await getMyPets(signal);
       setPets(result);
     } catch (error) {
@@ -53,6 +54,7 @@ export default function MyPetsPage() {
     }
 
     if (!appUser) {
+      setPets([]);
       return undefined;
     }
 

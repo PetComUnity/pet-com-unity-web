@@ -152,7 +152,7 @@ export async function uploadCurrentUserProfileImage(
 
   const formData = new FormData();
   formData.append("image", file);
-  formData.append("type", "private");
+  formData.append("type", "avatar");
 
   const response = await fetch(`${getApiBaseUrl()}/upload/image`, {
     method: "POST",
