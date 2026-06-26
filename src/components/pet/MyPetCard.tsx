@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { PawPrint, Trash2 } from "lucide-react";
 import { getPetDetailsRoute } from "@/constants/routes";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { PrivateImage } from "@/components/common/PrivateImage";
 import { deletePet } from "@/features/pets/pet-api.service";
 import { cn } from "@/lib/utils";
@@ -35,19 +36,10 @@ function DeletePetButton({
   className?: string;
 }) {
   const [deleting, setDeleting] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
-  async function handleDelete() {
-    if (deleting) {
-      return;
-    }
-
-    const shouldDelete = window.confirm(
-      `Are you sure you want to delete ${pet.name}?`,
-    );
-
-    if (!shouldDelete) {
-      return;
-    }
+  async function handleConfirm() {
+    setConfirmOpen(false);
 
     try {
       setDeleting(true);
@@ -58,29 +50,43 @@ function DeletePetButton({
         setDeleting(false);
       }
     } catch (error) {
+      setDeleting(false);
+      // error is shown via the toast in the parent or re-thrown — keep a fallback
       window.alert(
         error instanceof Error
           ? error.message
           : "We could not delete this pet right now.",
       );
-      setDeleting(false);
     }
   }
 
   return (
-    <button
-      type="button"
-      aria-label={`Delete ${pet.name}`}
-      title={deleting ? "Deleting..." : `Delete ${pet.name}`}
-      disabled={deleting}
-      onClick={handleDelete}
-      className={cn(
-        "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#ff2d2d] transition hover:-translate-y-0.5 hover:bg-[#ff2d2d]/10 focus-visible:ring-2 focus-visible:ring-[#ff2d2d]/30 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
-        className,
-      )}
-    >
-      <Trash2 className="h-5 w-5" strokeWidth={1.9} aria-hidden="true" />
-    </button>
+    <>
+      <button
+        type="button"
+        aria-label={`Delete ${pet.name}`}
+        title={deleting ? "Deleting..." : `Delete ${pet.name}`}
+        disabled={deleting}
+        onClick={() => setConfirmOpen(true)}
+        className={cn(
+          "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#ff2d2d] transition hover:-translate-y-0.5 hover:bg-[#ff2d2d]/10 focus-visible:ring-2 focus-visible:ring-[#ff2d2d]/30 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
+          className,
+        )}
+      >
+        <Trash2 className="h-5 w-5" strokeWidth={1.9} aria-hidden="true" />
+      </button>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title={`Delete ${pet.name}?`}
+        description="This action cannot be undone. The pet profile will be permanently removed."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        destructive
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirmOpen(false)}
+      />
+    </>
   );
 }
 

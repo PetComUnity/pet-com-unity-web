@@ -1026,6 +1026,7 @@ export default function PetDetailsPage() {
                           alt={
                             pet.description ?? `${pet.name} pet profile photo`
                           }
+                          allowUnauthenticated
                           className="h-full w-full object-cover object-center"
                         />
                       ) : pet.imageUrl ? (

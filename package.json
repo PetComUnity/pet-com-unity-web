@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@radix-ui/react-alert-dialog": "^1.1.17",
     "clsx": "^2.1.1",
     "firebase": "^12.13.0",
     "lucide-react": "^1.16.0",
@@ -38,9 +39,9 @@
     "autoprefixer": "^10.5.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
-    "postcss": "^8.5.15",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
+    "postcss": "^8.5.15",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "tailwindcss": "^4.3.0",
