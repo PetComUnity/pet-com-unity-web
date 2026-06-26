@@ -54,7 +54,7 @@ export default function MyPetsPage() {
     }
 
     if (!appUser) {
-      setPets([]);
+      void Promise.resolve().then(() => setPets([]));
       return undefined;
     }
 
