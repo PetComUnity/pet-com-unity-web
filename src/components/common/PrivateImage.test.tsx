@@ -13,6 +13,14 @@ let createObjectURLMock: jest.Mock<string, [Blob]>;
 let revokeObjectURLMock: jest.Mock<void, [string]>;
 let objectUrlIndex = 0;
 
+function getExpectedApiBaseUrl() {
+  return (
+    process.env.NEXT_PUBLIC_API_BASE_URL ??
+    process.env.NEXT_PUBLIC_API_URL ??
+    "http://localhost:5000/api"
+  ).replace(/\/$/, "");
+}
+
 function mockImageResponse(blob: Blob) {
   return {
     ok: true,
@@ -50,7 +58,7 @@ describe("PrivateImage", () => {
 
     const image = await screen.findByRole("img", { name: "Milo" });
     expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:5000/api/files/pets--milo.png",
+      `${getExpectedApiBaseUrl()}/files/pets--milo.png`,
       { headers: { Authorization: "Bearer private-token" } },
     );
     expect(createObjectURLMock).toHaveBeenCalledWith(blob);

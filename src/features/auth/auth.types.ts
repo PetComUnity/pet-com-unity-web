@@ -9,9 +9,11 @@ const requiredText = (label: string, minimum: number, maximum: number) =>
 
 export const registerSchema = z
   .object({
-    name: z.string().min(1, "Name is required"),
-    email: z.string().email("Invalid email"),
-    password: z.string().min(6, "Password too short"),
+    name: requiredText("Name", 2, 80),
+    email: z.string().trim().email("Enter a valid email address."),
+    password: z
+      .string()
+      .min(6, "Password must be at least 6 characters."),
     role: z.enum(["owner", "vet", "shelter", "admin", ""]),
   });
 

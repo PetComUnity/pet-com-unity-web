@@ -1,7 +1,11 @@
 export const USER_ROLES = ["owner", "vet", "shelter", "admin"] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
-export type PetVerificationStatus = "unverified" | "verified";
+export type PetVerificationStatus =
+  | "unverified"
+  | "pending"
+  | "verified"
+  | "rejected";
 export type LostReportStatus = "active" | "resolved";
 
 export interface AppUser {
