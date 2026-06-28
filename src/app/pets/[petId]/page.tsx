@@ -864,7 +864,7 @@ export default function PetDetailsPage() {
 
     try {
       setUploadingAvatar(true);
-      const uploaded = await uploadPetImage(file, "private");
+      const uploaded = await uploadPetImage(file, "public");
       const imagePayload: UpdatePetApiInput =
         uploaded.type === "public"
           ? { imageUrl: uploaded.url, imageFileId: null }
