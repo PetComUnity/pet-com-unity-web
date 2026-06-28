@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Spinner } from "@/components/ui/Spinner";
 import { Textarea } from "@/components/ui/Textarea";
+import { PrivateImage } from "@/components/common/PrivateImage";
 import { VerificationStatusBadge } from "@/components/verification/VerificationStatusBadge";
 
 type PetVerificationPanelProps = {
@@ -116,7 +117,13 @@ function PetPreview({ pet }: { pet: VerificationLookupPet }) {
       className="grid gap-5 rounded-lg border border-[#e5d8c7] bg-[#fffaf4] p-4 md:grid-cols-[160px_minmax(0,1fr)]"
     >
       <div className="flex aspect-square min-h-40 items-center justify-center overflow-hidden rounded-lg border border-[#e5d8c7] bg-[#f0ebe4]">
-        {pet.imageUrl ? (
+        {pet.imageFileId ? (
+          <PrivateImage
+            fileId={pet.imageFileId}
+            alt={`${pet.name} pet profile photo`}
+            className="h-full w-full object-cover"
+          />
+        ) : pet.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={pet.imageUrl}

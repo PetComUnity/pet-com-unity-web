@@ -18,6 +18,8 @@ type RawVerificationPet = {
   age?: string | number | null;
   imageUrl?: string | null;
   photoUrl?: string | null;
+  imageFileId?: string | null;
+  imageFieldId?: string | null;
   microchipNumber?: string | null;
   microchipId?: string | null;
   chip?: string | null;
@@ -79,6 +81,10 @@ function getSafeImageUrl(value?: string | null) {
     return undefined;
   }
 
+  if (getImageFileIdFromUrl(imageUrl)) {
+    return undefined;
+  }
+
   if (imageUrl.startsWith("/")) {
     return imageUrl;
   }
@@ -91,6 +97,35 @@ function getSafeImageUrl(value?: string | null) {
   } catch {
     return undefined;
   }
+}
+
+function getImageFileIdFromUrl(value?: string | null) {
+  const imageUrl = toOptionalText(value);
+
+  if (!imageUrl) {
+    return undefined;
+  }
+
+  const apiFilesPrefix = "/api/files/";
+  if (imageUrl.startsWith(apiFilesPrefix)) {
+    return decodeURIComponent(imageUrl.slice(apiFilesPrefix.length));
+  }
+
+  try {
+    const parsedUrl = new URL(imageUrl);
+    const filesPathMarker = "/api/files/";
+    const markerIndex = parsedUrl.pathname.indexOf(filesPathMarker);
+
+    if (markerIndex >= 0) {
+      return decodeURIComponent(
+        parsedUrl.pathname.slice(markerIndex + filesPathMarker.length),
+      );
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
 }
 
 function unwrapLookupPayload(
@@ -139,6 +174,9 @@ export function mapVerificationLookupPet(
     dateOfBirth: toOptionalText(pet.dateOfBirth ?? pet.birthDate),
     age: pet.age ?? undefined,
     imageUrl: getSafeImageUrl(pet.imageUrl ?? pet.photoUrl),
+    imageFileId:
+      toOptionalText(pet.imageFileId ?? pet.imageFieldId) ??
+      getImageFileIdFromUrl(pet.imageUrl ?? pet.photoUrl),
     microchipId: toOptionalText(
       pet.microchipId ?? pet.microchipNumber ?? pet.chip,
     ),

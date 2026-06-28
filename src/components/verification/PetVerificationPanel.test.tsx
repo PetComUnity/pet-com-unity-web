@@ -46,6 +46,17 @@ function mockLookupPet(overrides: Record<string, unknown> = {}) {
   };
 }
 
+jest.mock("@/components/common/PrivateImage", () => ({
+  PrivateImage: ({
+    alt,
+    fileId,
+  }: {
+    alt: string;
+    fileId: string;
+    className?: string;
+  }) => <img alt={alt} data-file-id={fileId} />,
+}));
+
 async function searchForPet(microchipId = "985121") {
   const user = userEvent.setup();
 
@@ -103,6 +114,27 @@ describe("PetVerificationPanel", () => {
     expect(screen.getByText("PASS-42")).toBeInTheDocument();
     expect(screen.queryByText("owner@example.test")).not.toBeInTheDocument();
     expect(screen.queryByText("555-0100")).not.toBeInTheDocument();
+  });
+
+  it("uses private image loading for protected file URLs", async () => {
+    fetchMock.mockResolvedValueOnce(
+      mockJsonResponse(
+        mockLookupPet({
+          imageUrl: "/api/files/pet-avatars--private--abc123",
+        }),
+      ),
+    );
+
+    render(
+      <PetVerificationPanel
+        currentVerifier={{ id: "vet-1", name: "Dr. Taylor" }}
+      />,
+    );
+
+    await searchForPet();
+
+    expect(await screen.findByRole("img", { name: /Milo pet profile photo/i }))
+      .toHaveAttribute("data-file-id", "pet-avatars--private--abc123");
   });
 
   it("keeps Verify pet disabled until all required checks are selected", async () => {
