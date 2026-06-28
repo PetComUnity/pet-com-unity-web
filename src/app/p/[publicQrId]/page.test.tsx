@@ -54,10 +54,33 @@ describe("PublicPetPage", () => {
     expect(screen.getByText("Apr 12, 2022")).toBeInTheDocument();
     expect(screen.getByText("Lost")).toBeInTheDocument();
     expect(screen.getByText("Adoptable")).toBeInTheDocument();
+    expect(screen.getByText("Verified by veterinary clinic")).toBeInTheDocument();
     expect(
       screen.getByText(/Owner contact details remain private/i),
     ).toBeInTheDocument();
     expect(screen.queryByText("owner@example.test")).not.toBeInTheDocument();
+  });
+
+  it("shows only the safe public verification badge when verified", async () => {
+    mockedGetPetByPublicQrId.mockResolvedValue({
+      name: "Milo",
+      species: "Dog",
+      isLost: false,
+      isAdoptable: false,
+      verificationStatus: "pending",
+      publicQrId: "milo-qr",
+    });
+
+    render(<PublicPetPage />);
+
+    expect(
+      await screen.findByRole("heading", { name: "Milo" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Pending verification")).not.toBeInTheDocument();
+    expect(screen.queryByText("Verification rejected")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Verified by veterinary clinic"),
+    ).not.toBeInTheDocument();
   });
 
   it("renders a not found state", async () => {

@@ -7,6 +7,7 @@ import { PawPrint, Trash2 } from "lucide-react";
 import { getPetDetailsRoute } from "@/constants/routes";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { PrivateImage } from "@/components/common/PrivateImage";
+import { VerificationStatusBadge } from "@/components/verification/VerificationStatusBadge";
 import { deletePet } from "@/features/pets/pet-api.service";
 import { cn } from "@/lib/utils";
 import type { Pet } from "@/types";
@@ -118,8 +119,14 @@ export function MyPetCard({ pet, onDeleted }: MyPetCardProps) {
               <PetImagePlaceholder className="h-full w-full" />
             )}
           </span>
-          <span className="font-display text-right text-[1rem] leading-none font-bold text-[#1a1720]">
-            {pet.name}
+          <span className="flex min-w-0 flex-col items-end gap-2 text-right">
+            <span className="font-display text-[1rem] leading-none font-bold text-[#1a1720]">
+              {pet.name}
+            </span>
+            <VerificationStatusBadge
+              status={pet.verificationStatus}
+              className="max-w-full justify-center text-[0.65rem]"
+            />
           </span>
         </Link>
 
@@ -178,6 +185,8 @@ export function MyPetCard({ pet, onDeleted }: MyPetCardProps) {
             </h2>
             <DeletePetButton pet={pet} onDeleted={onDeleted} />
           </div>
+
+          <VerificationStatusBadge status={pet.verificationStatus} />
 
           <Link
             href={detailsHref}

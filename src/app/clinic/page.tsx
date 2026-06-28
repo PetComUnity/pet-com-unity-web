@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
+import { PetVerificationPanel } from "@/components/verification/PetVerificationPanel";
 import NavbarTabs, { TabType } from "@/components/vet/staff/NavbarTabs";
 import { StaffTable } from "@/components/vet/staff";
 import AddStaffSection from "@/components/vet/staff/AddStaffSection";
+import { useAuth } from "@/hooks/useAuth";
 
 
 export default function ClinicPage() {
+  const { appUser } = useAuth();
   const [activeTab, setActiveTab] =
     useState<TabType>("staff");
 
@@ -21,6 +24,19 @@ export default function ClinicPage() {
             activeTab={activeTab}
             onChange={setActiveTab}
           />
+
+          <div className="mb-6">
+            <PetVerificationPanel
+              currentVerifier={
+                appUser
+                  ? {
+                      id: appUser.id,
+                      name: appUser.name,
+                    }
+                  : null
+              }
+            />
+          </div>
 
           {activeTab === "clients" && (
             <div>

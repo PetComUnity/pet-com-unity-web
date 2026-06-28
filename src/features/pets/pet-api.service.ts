@@ -213,7 +213,12 @@ function toOptionalRole(value?: string | null): UserRole | undefined {
 }
 
 function toOptionalVerificationStatus(value?: string | null) {
-  return value === "verified" || value === "unverified" ? value : undefined;
+  return value === "verified" ||
+    value === "unverified" ||
+    value === "pending" ||
+    value === "rejected"
+    ? value
+    : undefined;
 }
 
 function mapPetOwner(owner?: ApiPetOwner | null): PetOwnerInfo | undefined {

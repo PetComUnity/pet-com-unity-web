@@ -8,6 +8,7 @@ type RequestOptions = {
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   body?: unknown;
   token?: string;
+  signal?: AbortSignal;
 };
 
 
@@ -16,6 +17,16 @@ type ApiEnvelope<T> = {
   data?: T;
   message?: string;
 };
+
+export class ApiRequestError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiRequestError";
+    this.status = status;
+  }
+}
 
 function getDefaultErrorMessage(status: number) {
   if (status === 401) {
@@ -33,7 +44,7 @@ export async function apiRequest<T>(
   endpoint: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { method = "GET", body, token } = options;
+  const { method = "GET", body, signal, token } = options;
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -47,12 +58,16 @@ export async function apiRequest<T>(
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
+    signal,
   });
 
   const data = (await response.json().catch(() => ({}))) as ApiEnvelope<T>;
 
   if (!response.ok) {
-    throw new Error(data.message ?? getDefaultErrorMessage(response.status));
+    throw new ApiRequestError(
+      data.message ?? getDefaultErrorMessage(response.status),
+      response.status,
+    );
   }
 
   return data.data as T;

@@ -40,7 +40,16 @@ export function toPetPayload(values: PetFormValues) {
 }
 
 export function getVerificationLabel(status: PetVerificationStatus) {
-  return status === "verified" ? "Verified" : "Unverified";
+  switch (status) {
+    case "pending":
+      return "Pending verification";
+    case "verified":
+      return "Verified by veterinary clinic";
+    case "rejected":
+      return "Verification rejected";
+    case "unverified":
+      return "Not verified";
+  }
 }
 
 export function buildPublicPetPath(publicQrId: string) {

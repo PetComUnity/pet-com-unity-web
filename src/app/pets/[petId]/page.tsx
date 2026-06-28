@@ -24,6 +24,7 @@ import { DocumentsTab } from "@/components/documents/DocumentsTab";
 import { PetAvatarCarousel } from "@/components/pet/PetAvatarCarousel";
 import { PublicQrProfileCard } from "@/components/pet/PublicQrProfileCard";
 import { Spinner } from "@/components/ui/Spinner";
+import { VerificationStatusBadge } from "@/components/verification/VerificationStatusBadge";
 import { ROLE_LABELS } from "@/constants/roles";
 import { getPetDetailsRoute, ROUTES } from "@/constants/routes";
 import {
@@ -863,7 +864,7 @@ export default function PetDetailsPage() {
 
     try {
       setUploadingAvatar(true);
-      const uploaded = await uploadPetImage(file, "private");
+      const uploaded = await uploadPetImage(file, "public");
       const imagePayload: UpdatePetApiInput =
         uploaded.type === "public"
           ? { imageUrl: uploaded.url, imageFileId: null }
@@ -938,6 +939,11 @@ export default function PetDetailsPage() {
         ) : null}
 
         <section className="relative min-h-[390px] w-full overflow-hidden rounded-[18px] bg-white p-5 shadow-[0_4px_4px_rgba(0,0,0,0.25)] focus-within:ring-2 focus-within:ring-[#d68532]/40 focus-within:ring-offset-4 focus-within:ring-offset-[#fcf5eb] sm:p-8 md:px-7">
+            {pet ? (
+              <div className="mb-4 flex justify-end">
+                <VerificationStatusBadge status={pet.verificationStatus} />
+              </div>
+            ) : null}
             <div className="grid grid-cols-1 gap-x-8 md:grid-cols-[180px_minmax(0,1fr)] xl:grid-cols-[176px_minmax(0,1fr)]">
               <div className="min-w-0 overflow-x-auto pb-7 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:col-span-2 md:col-start-2 md:ml-4">
                 <div

@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
+import { VerificationStatusBadge } from "@/components/verification/VerificationStatusBadge";
 
 function getRouteParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : (value ?? "");
@@ -148,6 +149,9 @@ export default function PublicPetPage() {
                     Adoptable
                   </span>
                 ) : null}
+                {pet.verificationStatus === "verified" ? (
+                  <VerificationStatusBadge status="verified" />
+                ) : null}
               </div>
               <CardTitle className="text-3xl">{pet.name}</CardTitle>
               <CardDescription>Public pet profile for QR scans</CardDescription>
@@ -173,14 +177,6 @@ export default function PublicPetPage() {
                 <div>
                   <dt className="text-foreground font-medium">Color</dt>
                   <dd>{getPublicText(pet.color)}</dd>
-                </div>
-                <div>
-                  <dt className="text-foreground font-medium">Verification</dt>
-                  <dd>
-                    {pet.verificationStatus === "verified"
-                      ? "Verified"
-                      : "Not verified"}
-                  </dd>
                 </div>
               </dl>
 

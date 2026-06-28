@@ -6,6 +6,14 @@ type FetchInitWithHeaders = RequestInit & {
 
 let fetchMock: jest.MockedFunction<typeof fetch>;
 
+function getExpectedApiBaseUrl() {
+  return (
+    process.env.NEXT_PUBLIC_API_BASE_URL ??
+    process.env.NEXT_PUBLIC_API_URL ??
+    "http://localhost:5000/api"
+  ).replace(/\/$/, "");
+}
+
 function mockJsonResponse(
   payload: unknown,
   options: { ok?: boolean; status?: number } = {},
@@ -64,7 +72,7 @@ describe("getPetByPublicQrId", () => {
     const result = await getPetByPublicQrId("milo-qr");
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:5000/api/pets/public/milo-qr",
+      `${getExpectedApiBaseUrl()}/pets/public/milo-qr`,
       expect.objectContaining({ cache: "no-store" }),
     );
     expect(getLastFetchInit().headers).toBeUndefined();

@@ -145,7 +145,7 @@ export function AddPetModal({ onClose, onCreated }: AddPetModalProps) {
       const payload = getPetPayload(new FormData(event.currentTarget));
 
       if (selectedFile) {
-        const uploaded = await uploadPetImage(selectedFile, "private");
+        const uploaded = await uploadPetImage(selectedFile, "public");
         if (uploaded.type === "public") {
           payload.imageUrl = uploaded.url;
         } else {
