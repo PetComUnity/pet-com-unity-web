@@ -34,7 +34,7 @@ export function ProfileAvatarPanel({
   }
 
   return (
-    <div className="flex h-full flex-col items-center gap-3 md:max-lg:items-start lg:items-start lg:justify-between">
+    <div className="flex flex-col items-center gap-3 md:max-lg:items-start lg:items-start">
       <label className="group relative block h-[100px] w-[100px] cursor-pointer overflow-hidden rounded-[18px] border border-[#c8c8c8] bg-white focus-within:ring-2 focus-within:ring-[#1a202c]/20 md:max-lg:h-20">
         <span className="sr-only">
           {isLogo ? "Upload organization logo" : "Upload profile avatar"}

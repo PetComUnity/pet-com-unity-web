@@ -317,21 +317,23 @@ function tabClassName(isActive: boolean) {
   );
 }
 
-function getOwnerText(value?: string) {
+function getOwnerText(value: string | undefined, fallback: string) {
   const trimmed = value?.trim();
-  return trimmed ? trimmed : "Not added";
+  return trimmed ? trimmed : fallback;
 }
 
 type OwnerInfoFieldProps = {
   value: string;
+  isEmpty?: boolean;
   className?: string;
 };
 
-function OwnerInfoField({ value, className }: OwnerInfoFieldProps) {
+function OwnerInfoField({ value, isEmpty, className }: OwnerInfoFieldProps) {
   return (
     <div
       className={cn(
-        "flex h-11 min-w-0 items-center rounded-[14px] border border-[#c8c8c8] bg-white px-4 text-[0.98rem] font-medium text-[#1a202c]",
+        "flex h-11 min-w-0 items-center rounded-[14px] border border-[#c8c8c8] bg-white px-4 text-[0.98rem] font-medium",
+        isEmpty ? "text-[#a0a0a0]" : "text-[#1a202c]",
         className,
       )}
     >
@@ -383,8 +385,12 @@ function PetImagePlaceholder({ className }: { className?: string }) {
 }
 
 function OwnerInfoCard({ owner }: { owner: PetOwnerInfo }) {
-  const ownerLocation = getOwnerText(owner.city);
   const ownerRoleLabel = owner.role ? ROLE_LABELS[owner.role] : "Owner";
+
+  const nameValue = getOwnerText(owner.name, "Name not added");
+  const emailValue = getOwnerText(owner.email, "Email not added");
+  const phoneValue = getOwnerText(owner.phone, "Phone not added");
+  const cityValue = getOwnerText(owner.city, "City not added");
 
   return (
     <section className="rounded-[18px] bg-white p-5 shadow-[0_4px_4px_rgba(0,0,0,0.25)] sm:p-6 lg:px-7 lg:py-6">
@@ -395,15 +401,12 @@ function OwnerInfoCard({ owner }: { owner: PetOwnerInfo }) {
           </div>
         </div>
 
-        <OwnerInfoField value={getOwnerText(owner.name)} />
-        <OwnerInfoField value={getOwnerText(owner.email)} />
+        <OwnerInfoField value={nameValue} isEmpty={!owner.name?.trim()} />
+        <OwnerInfoField value={emailValue} isEmpty={!owner.email?.trim()} />
         <div className="hidden lg:block" aria-hidden="true" />
 
-        <OwnerInfoField value={getOwnerText(owner.phone)} />
-        <OwnerInfoField
-          value={ownerLocation}
-          className="lg:col-span-1"
-        />
+        <OwnerInfoField value={phoneValue} isEmpty={!owner.phone?.trim()} />
+        <OwnerInfoField value={cityValue} isEmpty={!owner.city?.trim()} className="lg:col-span-1" />
         <div className="flex h-11 items-center justify-center rounded-[14px] border border-[#65c84f] bg-[#97ff7b] px-6 text-[0.98rem] font-medium text-[#1a202c] md:col-start-2 md:col-end-4 lg:col-start-4 lg:col-end-5">
           {ownerRoleLabel}
         </div>

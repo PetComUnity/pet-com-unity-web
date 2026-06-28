@@ -32,7 +32,7 @@ export function OwnerProfile() {
       <form onSubmit={handleFormSubmit} className="grid gap-6 lg:grid-cols-[112px_minmax(0,1fr)] lg:gap-12">
         
         {/* EXACT ORIGINAL AVATAR PANEL COMPONENT */}
-        <div className="flex h-full flex-col items-center gap-3 md:max-lg:items-start lg:items-start lg:justify-between">
+        <div className="flex flex-col items-center gap-3 md:max-lg:items-start lg:items-start">
           <label className="group relative block h-[100px] w-[100px] cursor-pointer overflow-hidden rounded-[18px] border border-[#c8c8c8] bg-white focus-within:ring-2 focus-within:ring-[#1a202c]/20 md:max-lg:h-20">
             <span className="sr-only">Upload profile avatar</span>
             <Image
