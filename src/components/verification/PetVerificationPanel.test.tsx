@@ -46,6 +46,17 @@ function mockLookupPet(overrides: Record<string, unknown> = {}) {
   };
 }
 
+jest.mock("@/components/common/PrivateImage", () => ({
+  PrivateImage: ({
+    alt,
+    fileId,
+  }: {
+    alt: string;
+    fileId: string;
+    className?: string;
+  }) => <img alt={alt} data-file-id={fileId} />,
+}));
+
 async function searchForPet(microchipId = "985121") {
   const user = userEvent.setup();
 
@@ -105,6 +116,27 @@ describe("PetVerificationPanel", () => {
     expect(screen.queryByText("555-0100")).not.toBeInTheDocument();
   });
 
+  it("uses private image loading for protected file URLs", async () => {
+    fetchMock.mockResolvedValueOnce(
+      mockJsonResponse(
+        mockLookupPet({
+          imageUrl: "/api/files/pet-avatars--private--abc123",
+        }),
+      ),
+    );
+
+    render(
+      <PetVerificationPanel
+        currentVerifier={{ id: "vet-1", name: "Dr. Taylor" }}
+      />,
+    );
+
+    await searchForPet();
+
+    expect(await screen.findByRole("img", { name: /Milo pet profile photo/i }))
+      .toHaveAttribute("data-file-id", "pet-avatars--private--abc123");
+  });
+
   it("keeps Verify pet disabled until all required checks are selected", async () => {
     fetchMock.mockResolvedValueOnce(mockJsonResponse(mockLookupPet()));
 
@@ -159,6 +191,48 @@ describe("PetVerificationPanel", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Verified by veterinary clinic")).toBeInTheDocument();
     expect(screen.getByText("Unity Vet Clinic")).toBeInTheDocument();
+  });
+
+  it("shows only the reject decision for an already verified pet", async () => {
+    fetchMock.mockResolvedValueOnce(
+      mockJsonResponse(
+        mockLookupPet({
+          verificationStatus: "verified",
+          verifiedAt: "2026-06-27T10:00:00.000Z",
+          verifiedClinicName: "Unity Vet Clinic",
+        }),
+      ),
+    );
+
+    render(
+      <PetVerificationPanel
+        currentVerifier={{ id: "vet-1", name: "Dr. Taylor" }}
+      />,
+    );
+
+    await searchForPet();
+
+    expect(
+      await screen.findByText("Verified by veterinary clinic"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Verify pet" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Mark as pending" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Microchip matches the profile"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Passport/document data matches"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Visual check passed"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Reject verification" }),
+    ).toBeInTheDocument();
   });
 
   it("shows a user-friendly API error", async () => {

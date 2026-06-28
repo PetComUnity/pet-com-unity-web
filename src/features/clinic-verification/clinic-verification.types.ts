@@ -13,6 +13,7 @@ export type VerificationLookupPet = {
   dateOfBirth?: string;
   age?: string | number;
   imageUrl?: string;
+  imageFileId?: string;
   microchipId?: string;
   passportNumber?: string;
   verificationStatus: VerificationStatus;

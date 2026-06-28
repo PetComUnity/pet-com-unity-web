@@ -96,12 +96,12 @@ export function MyPetCard({ pet, onDeleted }: MyPetCardProps) {
 
   return (
     <>
-      <article className="relative sm:hidden">
+      <article className="relative w-full max-w-[360px] sm:hidden">
         <Link
           href={detailsHref}
           className="relative flex min-h-[122px] w-full items-end justify-between gap-5 rounded-[14px] bg-white px-6 py-5 pr-14 shadow-[0_4px_4px_rgba(0,0,0,0.25)] transition hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#1a202c]/25 focus-visible:ring-offset-2 focus-visible:outline-none sm:border sm:border-[#d0d0d0]"
         >
-        <span className="relative shrink-0">
+          <span className="relative h-[82px] w-[82px] shrink-0 overflow-hidden rounded-[12px] bg-[#f0ebe4]">
             {pet.imageFileId ? (
               <PrivateImage
                 fileId={pet.imageFileId}
