@@ -222,6 +222,7 @@ export function PetVerificationPanel({
   const allChecksPassed = watchedChecks.every(Boolean);
   const hasDoctors = doctors.length > 0;
   const isSubmitting = submittingDecision !== null;
+  const isAlreadyVerified = pet?.verificationStatus === "verified";
 
   const verifierById = useMemo(
     () => new Map(doctors.map((doctor) => [doctor.id, doctor])),
@@ -406,33 +407,35 @@ export function PetVerificationPanel({
                 </div>
               ) : null}
 
-              <fieldset className="grid gap-3 sm:grid-cols-3">
-                <legend className="sr-only">Verification checks</legend>
-                <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-[#e5d8c7] bg-white px-4 py-3 text-sm font-medium text-[#1a202c]">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 accent-[#02b75b]"
-                    {...verificationForm.register("microchipMatched")}
-                  />
-                  <span>Microchip matches the profile</span>
-                </label>
-                <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-[#e5d8c7] bg-white px-4 py-3 text-sm font-medium text-[#1a202c]">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 accent-[#02b75b]"
-                    {...verificationForm.register("passportMatched")}
-                  />
-                  <span>Passport/document data matches</span>
-                </label>
-                <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-[#e5d8c7] bg-white px-4 py-3 text-sm font-medium text-[#1a202c]">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 accent-[#02b75b]"
-                    {...verificationForm.register("visualCheckPassed")}
-                  />
-                  <span>Visual check passed</span>
-                </label>
-              </fieldset>
+              {!isAlreadyVerified ? (
+                <fieldset className="grid gap-3 sm:grid-cols-3">
+                  <legend className="sr-only">Verification checks</legend>
+                  <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-[#e5d8c7] bg-white px-4 py-3 text-sm font-medium text-[#1a202c]">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 accent-[#02b75b]"
+                      {...verificationForm.register("microchipMatched")}
+                    />
+                    <span>Microchip matches the profile</span>
+                  </label>
+                  <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-[#e5d8c7] bg-white px-4 py-3 text-sm font-medium text-[#1a202c]">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 accent-[#02b75b]"
+                      {...verificationForm.register("passportMatched")}
+                    />
+                    <span>Passport/document data matches</span>
+                  </label>
+                  <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-[#e5d8c7] bg-white px-4 py-3 text-sm font-medium text-[#1a202c]">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 accent-[#02b75b]"
+                      {...verificationForm.register("visualCheckPassed")}
+                    />
+                    <span>Visual check passed</span>
+                  </label>
+                </fieldset>
+              ) : null}
 
               <Textarea
                 label="Note"
@@ -443,25 +446,29 @@ export function PetVerificationPanel({
               />
 
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                <Button
-                  type="button"
-                  disabled={!allChecksPassed || isSubmitting}
-                  onClick={() => void handleDecision("verified")}
-                >
-                  {submittingDecision === "verified"
-                    ? "Verifying..."
-                    : "Verify pet"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={isSubmitting}
-                  onClick={() => void handleDecision("pending")}
-                >
-                  {submittingDecision === "pending"
-                    ? "Saving..."
-                    : "Mark as pending"}
-                </Button>
+                {!isAlreadyVerified ? (
+                  <>
+                    <Button
+                      type="button"
+                      disabled={!allChecksPassed || isSubmitting}
+                      onClick={() => void handleDecision("verified")}
+                    >
+                      {submittingDecision === "verified"
+                        ? "Verifying..."
+                        : "Verify pet"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={isSubmitting}
+                      onClick={() => void handleDecision("pending")}
+                    >
+                      {submittingDecision === "pending"
+                        ? "Saving..."
+                        : "Mark as pending"}
+                    </Button>
+                  </>
+                ) : null}
                 <Button
                   type="button"
                   variant="destructive"

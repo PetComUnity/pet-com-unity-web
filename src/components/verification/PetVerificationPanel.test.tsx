@@ -193,6 +193,48 @@ describe("PetVerificationPanel", () => {
     expect(screen.getByText("Unity Vet Clinic")).toBeInTheDocument();
   });
 
+  it("shows only the reject decision for an already verified pet", async () => {
+    fetchMock.mockResolvedValueOnce(
+      mockJsonResponse(
+        mockLookupPet({
+          verificationStatus: "verified",
+          verifiedAt: "2026-06-27T10:00:00.000Z",
+          verifiedClinicName: "Unity Vet Clinic",
+        }),
+      ),
+    );
+
+    render(
+      <PetVerificationPanel
+        currentVerifier={{ id: "vet-1", name: "Dr. Taylor" }}
+      />,
+    );
+
+    await searchForPet();
+
+    expect(
+      await screen.findByText("Verified by veterinary clinic"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Verify pet" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Mark as pending" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Microchip matches the profile"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Passport/document data matches"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Visual check passed"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Reject verification" }),
+    ).toBeInTheDocument();
+  });
+
   it("shows a user-friendly API error", async () => {
     fetchMock.mockResolvedValueOnce(
       mockJsonResponse(
